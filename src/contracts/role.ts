@@ -41,6 +41,7 @@ export type TAssignPermissionRequest = z.infer<typeof assignPermissionSchema>;
 export const roleSchema = z.object({
 	id: z.string(),
 	name: z.string(),
+	is_default: z.boolean(),
 	created_at: z.string(),
 	updated_at: z.string(),
 	created_by: z.string().nullable().optional(),
