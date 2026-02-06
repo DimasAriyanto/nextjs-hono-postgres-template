@@ -1,7 +1,8 @@
 import { Context } from 'hono';
-import { HTTPException } from 'hono/http-exception';
 import { setSignedCookie, deleteCookie } from 'hono/cookie';
 import { authService } from '@/server/services';
+import { AuthError, ValidationError } from '@/server/errors';
+import { response } from '@/server/http/response';
 
 export const authController = {
 	/**
@@ -16,7 +17,7 @@ export const authController = {
 		const cookieConfig = authService.getCookieConfig();
 		await setSignedCookie(c, cookieConfig.name, result.token, cookieConfig.secret, cookieConfig.options);
 
-		return c.json({ message: 'OK', data: result }, 200);
+		return response.ok(c, result, 'Login successful');
 	},
 
 	/**
@@ -31,7 +32,7 @@ export const authController = {
 		const cookieConfig = authService.getCookieConfig();
 		await setSignedCookie(c, cookieConfig.name, result.token, cookieConfig.secret, cookieConfig.options);
 
-		return c.json({ message: 'Registration successful', data: result }, 201);
+		return response.created(c, result, 'Registration successful');
 	},
 
 	/**
@@ -42,12 +43,12 @@ export const authController = {
 		const payload = c.get('user') as { auid: string };
 
 		if (!payload?.auid) {
-			throw new HTTPException(401, { message: 'Unauthorized' });
+			throw AuthError.unauthorized();
 		}
 
 		const user = await authService.getProfile(payload.auid);
 
-		return c.json({ message: 'OK', data: user }, 200);
+		return response.ok(c, user);
 	},
 
 	/**
@@ -58,7 +59,7 @@ export const authController = {
 		const token = c.req.query('token');
 
 		if (!token) {
-			throw new HTTPException(400, { message: 'Verification token is required' });
+			throw new ValidationError('Verification token is required', { token: ['Token is required'] });
 		}
 
 		await authService.verifyEmail(token);
@@ -76,12 +77,12 @@ export const authController = {
 		const payload = c.get('user') as { auid: string };
 
 		if (!payload?.auid) {
-			throw new HTTPException(401, { message: 'Unauthorized' });
+			throw AuthError.unauthorized();
 		}
 
-		const result = await authService.resendVerificationEmail(payload.auid);
+		await authService.resendVerificationEmail(payload.auid);
 
-		return c.json({ message: result.message }, 200);
+		return response.success(c, 'Verification email sent successfully');
 	},
 
 	/**
@@ -92,6 +93,6 @@ export const authController = {
 		const cookieConfig = authService.getCookieConfig();
 		deleteCookie(c, cookieConfig.name);
 
-		return c.json({ message: 'OK' }, 200);
+		return response.success(c, 'Logged out successfully');
 	},
 };

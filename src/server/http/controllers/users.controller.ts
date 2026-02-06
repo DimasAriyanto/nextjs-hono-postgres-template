@@ -1,5 +1,7 @@
 import { Context } from 'hono';
 import { userService } from '@/server/services';
+import { ValidationError } from '@/server/errors';
+import { response, getPaginationParams } from '@/server/http/response';
 
 export const usersController = {
 	/**
@@ -7,32 +9,28 @@ export const usersController = {
 	 * Get all users with pagination
 	 */
 	async index(c: Context) {
-		try {
-			const page = Number(c.req.query('page')) || 1;
-			const limit = Number(c.req.query('limit')) || 10;
-			const search = c.req.query('search') || undefined;
+		const { page, limit, search } = getPaginationParams(c);
 
-			const result = await userService.getAllUsers({ page, limit, search });
+		const result = await userService.getAllUsers({ page, limit, search });
 
-			return c.json(result, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to fetch users' }, error.status || 500);
-		}
+		return response.paginated(c, result.data, {
+			page: result.meta.page,
+			limit: result.meta.limit,
+			total: result.meta.total,
+			totalPages: result.meta.pages,
+		}, 'OK');
 	},
+
 
 	/**
 	 * GET /users/:id
 	 * Get user by ID
 	 */
 	async show(c: Context) {
-		try {
-			const id = c.req.param('id');
-			const user = await userService.getUserById(id);
+		const id = c.req.param('id');
+		const user = await userService.getUserById(id);
 
-			return c.json({ data: user }, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to fetch user' }, error.status || 500);
-		}
+		return response.ok(c, user);
 	},
 
 	/**
@@ -40,14 +38,10 @@ export const usersController = {
 	 * Get user with roles
 	 */
 	async showWithRoles(c: Context) {
-		try {
-			const id = c.req.param('id');
-			const user = await userService.getUserWithRoles(id);
+		const id = c.req.param('id');
+		const user = await userService.getUserWithRoles(id);
 
-			return c.json({ data: user }, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to fetch user with roles' }, error.status || 500);
-		}
+		return response.ok(c, user);
 	},
 
 	/**
@@ -55,25 +49,24 @@ export const usersController = {
 	 * Create new user
 	 */
 	async create(c: Context) {
-		try {
-			const body = await c.req.json();
-			const { email, password, title } = body;
+		const body = await c.req.json();
+		const { email, password, title } = body;
 
-			if (!email || !password) {
-				return c.json({ message: 'Email and password are required' }, 400);
-			}
-
-			const user = await userService.createUser({
-				email,
-				password,
-				title,
-				created_by: 'system', // TODO: Get from authenticated user
+		if (!email || !password) {
+			throw new ValidationError('Validation failed', {
+				...((!email) && { email: ['Email is required'] }),
+				...((!password) && { password: ['Password is required'] }),
 			});
-
-			return c.json({ data: user, message: 'User created successfully' }, 201);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to create user' }, error.status || 500);
 		}
+
+		const user = await userService.createUser({
+			email,
+			password,
+			title,
+			created_by: 'system', // TODO: Get from authenticated user
+		});
+
+		return response.created(c, user, 'User created successfully');
 	},
 
 	/**
@@ -81,22 +74,18 @@ export const usersController = {
 	 * Update user
 	 */
 	async update(c: Context) {
-		try {
-			const id = c.req.param('id');
-			const body = await c.req.json();
-			const { email, title, password } = body;
+		const id = c.req.param('id');
+		const body = await c.req.json();
+		const { email, title, password } = body;
 
-			const user = await userService.updateUser(id, {
-				email,
-				title,
-				password,
-				updated_by: 'system', // TODO: Get from authenticated user
-			});
+		const user = await userService.updateUser(id, {
+			email,
+			title,
+			password,
+			updated_by: 'system', // TODO: Get from authenticated user
+		});
 
-			return c.json({ data: user, message: 'User updated successfully' }, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to update user' }, error.status || 500);
-		}
+		return response.ok(c, user, 'User updated successfully');
 	},
 
 	/**
@@ -104,14 +93,10 @@ export const usersController = {
 	 * Delete user
 	 */
 	async delete(c: Context) {
-		try {
-			const id = c.req.param('id');
-			const result = await userService.deleteUser(id);
+		const id = c.req.param('id');
+		await userService.deleteUser(id);
 
-			return c.json(result, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to delete user' }, error.status || 500);
-		}
+		return response.success(c, 'User deleted successfully');
 	},
 
 	/**
@@ -119,21 +104,17 @@ export const usersController = {
 	 * Assign role to user
 	 */
 	async assignRole(c: Context) {
-		try {
-			const userId = c.req.param('id');
-			const body = await c.req.json();
-			const { role_id } = body;
+		const userId = c.req.param('id');
+		const body = await c.req.json();
+		const { role_id } = body;
 
-			if (!role_id) {
-				return c.json({ message: 'role_id is required' }, 400);
-			}
-
-			const result = await userService.assignRoleToUser(userId, role_id);
-
-			return c.json(result, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to assign role' }, error.status || 500);
+		if (!role_id) {
+			throw new ValidationError('Validation failed', { role_id: ['Role ID is required'] });
 		}
+
+		await userService.assignRoleToUser(userId, role_id);
+
+		return response.success(c, 'Role assigned successfully');
 	},
 
 	/**
@@ -141,15 +122,12 @@ export const usersController = {
 	 * Remove role from user
 	 */
 	async removeRole(c: Context) {
-		try {
-			const userId = c.req.param('id');
-			const roleId = c.req.param('roleId');
+		const userId = c.req.param('id');
+		const roleId = c.req.param('roleId');
 
-			const result = await userService.removeRoleFromUser(userId, roleId);
+		await userService.removeRoleFromUser(userId, roleId);
 
-			return c.json(result, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to remove role' }, error.status || 500);
-		}
+		return response.success(c, 'Role removed successfully');
 	},
 };
+

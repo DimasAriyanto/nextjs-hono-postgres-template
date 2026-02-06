@@ -1,8 +1,7 @@
 import { createMiddleware } from 'hono/factory';
 import { getSignedCookie, deleteCookie } from 'hono/cookie';
-import { HTTPException } from 'hono/http-exception';
 import { verify } from 'hono/jwt';
-// import type { TTokenDecoded } from '@/types/auth';
+import { AuthError } from '@/server/errors';
 
 export const auth = createMiddleware(async (c, next) => {
 	try {
@@ -15,7 +14,9 @@ export const auth = createMiddleware(async (c, next) => {
 			token = await getSignedCookie(c, process.env.APP_COOKIE_KEY as string, '__x');
 		}
 
-		if (!token) throw new HTTPException(401, { message: `An invalid credentials error occurred` });
+		if (!token) {
+			throw AuthError.unauthorized();
+		}
 
 		const decoded = await verify(token as string, process.env.APP_KEY as string);
 
@@ -23,8 +24,12 @@ export const auth = createMiddleware(async (c, next) => {
 		c.set('role', decoded.aurl);
 		c.set('token', token);
 		await next();
-	} catch {
+	} catch (err) {
 		deleteCookie(c, '__x');
-		throw new HTTPException(403, { message: `An forbidden access error occurred` });
+		// Re-throw if it's already an AuthError
+		if (err instanceof AuthError) {
+			throw err;
+		}
+		throw AuthError.forbidden();
 	}
 });

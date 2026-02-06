@@ -1,4 +1,4 @@
-import { HTTPException } from 'hono/http-exception';
+import { NotFoundError, ConflictError, InternalError } from '@/server/errors';
 import { roleRepository } from '@/server/repositories';
 import type { TInsertRole } from '@/server/databases/schemas/users';
 
@@ -30,7 +30,7 @@ export class RoleService {
 		const role = await roleRepository.findById(id);
 
 		if (!role) {
-			throw new HTTPException(404, { message: 'Role not found' });
+			throw new NotFoundError('Role');
 		}
 
 		return role;
@@ -43,7 +43,7 @@ export class RoleService {
 		const role = await roleRepository.findByIdWithUsers(id);
 
 		if (!role) {
-			throw new HTTPException(404, { message: 'Role not found' });
+			throw new NotFoundError('Role');
 		}
 
 		return {
@@ -59,7 +59,7 @@ export class RoleService {
 		const role = await roleRepository.findByIdWithPermissions(id);
 
 		if (!role) {
-			throw new HTTPException(404, { message: 'Role not found' });
+			throw new NotFoundError('Role');
 		}
 
 		return {
@@ -75,7 +75,7 @@ export class RoleService {
 		// Check if title already exists
 		const existingRole = await roleRepository.findByTitle(data.title);
 		if (existingRole) {
-			throw new HTTPException(400, { message: 'Role title already exists' });
+			throw new ConflictError('Role title already exists');
 		}
 
 		const roleData: TInsertRole = {
@@ -94,14 +94,14 @@ export class RoleService {
 	async updateRole(id: string, data: { title?: string; updated_by?: string }) {
 		const existingRole = await roleRepository.findById(id);
 		if (!existingRole) {
-			throw new HTTPException(404, { message: 'Role not found' });
+			throw new NotFoundError('Role');
 		}
 
 		// Check title uniqueness if title is being updated
 		if (data.title && data.title !== existingRole.title) {
 			const titleExists = await roleRepository.findByTitle(data.title);
 			if (titleExists) {
-				throw new HTTPException(400, { message: 'Role title already exists' });
+				throw new ConflictError('Role title already exists');
 			}
 		}
 
@@ -113,7 +113,7 @@ export class RoleService {
 		const role = await roleRepository.update(id, updateData);
 
 		if (!role) {
-			throw new HTTPException(500, { message: 'Failed to update role' });
+			throw new InternalError('Failed to update role');
 		}
 
 		return role;
@@ -125,13 +125,13 @@ export class RoleService {
 	async deleteRole(id: string) {
 		const existingRole = await roleRepository.findById(id);
 		if (!existingRole) {
-			throw new HTTPException(404, { message: 'Role not found' });
+			throw new NotFoundError('Role');
 		}
 
 		const deleted = await roleRepository.delete(id);
 
 		if (!deleted) {
-			throw new HTTPException(500, { message: 'Failed to delete role' });
+			throw new InternalError('Failed to delete role');
 		}
 
 		return { message: 'Role deleted successfully' };
@@ -143,7 +143,7 @@ export class RoleService {
 	async assignPermissionToRole(roleId: string, permissionId: string) {
 		const role = await roleRepository.findById(roleId);
 		if (!role) {
-			throw new HTTPException(404, { message: 'Role not found' });
+			throw new NotFoundError('Role');
 		}
 
 		await roleRepository.assignPermission(roleId, permissionId);
@@ -157,7 +157,7 @@ export class RoleService {
 	async removePermissionFromRole(roleId: string, permissionId: string) {
 		const role = await roleRepository.findById(roleId);
 		if (!role) {
-			throw new HTTPException(404, { message: 'Role not found' });
+			throw new NotFoundError('Role');
 		}
 
 		await roleRepository.removePermission(roleId, permissionId);

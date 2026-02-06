@@ -1,6 +1,6 @@
-import bcrypt from 'bcrypt';
-import { HTTPException } from 'hono/http-exception';
+import { NotFoundError, ConflictError, InternalError } from '@/server/errors';
 import { userRepository } from '@/server/repositories';
+import { hashPassword, comparePassword } from '@/server/utils';
 import type { TInsertUser, TSelectUser } from '@/server/databases/schemas/users';
 
 export class UserService {
@@ -31,7 +31,7 @@ export class UserService {
 		const user = await userRepository.findById(id);
 
 		if (!user) {
-			throw new HTTPException(404, { message: 'User not found' });
+			throw new NotFoundError('User');
 		}
 
 		return this.sanitizeUser(user);
@@ -44,7 +44,7 @@ export class UserService {
 		const user = await userRepository.findByIdWithRoles(id);
 
 		if (!user) {
-			throw new HTTPException(404, { message: 'User not found' });
+			throw new NotFoundError('User');
 		}
 
 		return {
@@ -60,11 +60,11 @@ export class UserService {
 		// Check if email already exists
 		const existingUser = await userRepository.findByEmail(data.email);
 		if (existingUser) {
-			throw new HTTPException(400, { message: 'Email already exists' });
+			throw new ConflictError('Email already exists');
 		}
 
 		// Hash password
-		const hashedPassword = await bcrypt.hash(data.password, 10);
+		const hashedPassword = await hashPassword(data.password);
 
 		const userData: TInsertUser = {
 			email: data.email,
@@ -92,14 +92,14 @@ export class UserService {
 	) {
 		const existingUser = await userRepository.findById(id);
 		if (!existingUser) {
-			throw new HTTPException(404, { message: 'User not found' });
+			throw new NotFoundError('User');
 		}
 
 		// Check email uniqueness if email is being updated
 		if (data.email && data.email !== existingUser.email) {
 			const emailExists = await userRepository.findByEmail(data.email);
 			if (emailExists) {
-				throw new HTTPException(400, { message: 'Email already exists' });
+				throw new ConflictError('Email already exists');
 			}
 		}
 
@@ -111,13 +111,13 @@ export class UserService {
 
 		// Hash password if provided
 		if (data.password) {
-			updateData.password = await bcrypt.hash(data.password, 10);
+			updateData.password = await hashPassword(data.password);
 		}
 
 		const user = await userRepository.update(id, updateData);
 
 		if (!user) {
-			throw new HTTPException(500, { message: 'Failed to update user' });
+			throw new InternalError('Failed to update user');
 		}
 
 		return this.sanitizeUser(user);
@@ -129,13 +129,13 @@ export class UserService {
 	async deleteUser(id: string) {
 		const existingUser = await userRepository.findById(id);
 		if (!existingUser) {
-			throw new HTTPException(404, { message: 'User not found' });
+			throw new NotFoundError('User');
 		}
 
 		const deleted = await userRepository.delete(id);
 
 		if (!deleted) {
-			throw new HTTPException(500, { message: 'Failed to delete user' });
+			throw new InternalError('Failed to delete user');
 		}
 
 		return { message: 'User deleted successfully' };
@@ -147,7 +147,7 @@ export class UserService {
 	async assignRoleToUser(userId: string, roleId: string) {
 		const user = await userRepository.findById(userId);
 		if (!user) {
-			throw new HTTPException(404, { message: 'User not found' });
+			throw new NotFoundError('User');
 		}
 
 		await userRepository.assignRole(userId, roleId);
@@ -161,7 +161,7 @@ export class UserService {
 	async removeRoleFromUser(userId: string, roleId: string) {
 		const user = await userRepository.findById(userId);
 		if (!user) {
-			throw new HTTPException(404, { message: 'User not found' });
+			throw new NotFoundError('User');
 		}
 
 		await userRepository.removeRole(userId, roleId);
@@ -178,7 +178,7 @@ export class UserService {
 			return false;
 		}
 
-		return bcrypt.compare(password, user.password);
+		return comparePassword(password, user.password);
 	}
 
 	/**

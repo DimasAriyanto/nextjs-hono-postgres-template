@@ -2,8 +2,8 @@ import { loadEnvConfig } from '@next/env';
 import * as schema from './schemas';
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
-import bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
+import { hashPasswordSync } from '@/server/utils';
 
 loadEnvConfig(process.cwd());
 
@@ -40,7 +40,7 @@ export async function seed() {
 
 	const roles = await db
 		.insert(schema.RolesTable)
-		.values([{ title: 'admin' }, { title: 'customer-service' }])
+		.values([{ title: 'admin' }, { title: 'customer' }])
 		.onConflictDoNothing()
 		.returning();
 
@@ -50,8 +50,8 @@ export async function seed() {
 		const [user] = await tx
 			.insert(schema.UsersTable)
 			.values({
-				email: 'gundala@gmail.com',
-				password: bcrypt.hashSync('password', 10),
+				email: 'admin@gmail.com',
+				password: hashPasswordSync('password'),
 			})
 			.onConflictDoNothing()
 			.returning();

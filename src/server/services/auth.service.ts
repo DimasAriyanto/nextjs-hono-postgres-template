@@ -1,10 +1,9 @@
 import { sign } from 'hono/jwt';
-import bcrypt from 'bcrypt';
 import dayjs from 'dayjs';
-import { HTTPException } from 'hono/http-exception';
+import { AuthError, NotFoundError, ConflictError, InternalError } from '@/server/errors';
 import { userRepository } from '@/server/repositories';
 import { emailService } from './email.service';
-import { generateVerificationToken, generateTokenExpiration, isTokenExpired } from '@/server/utils';
+import { generateVerificationToken, generateTokenExpiration, isTokenExpired, hashPassword, comparePassword } from '@/server/utils';
 import type { TInsertUser } from '@/server/databases/schemas/users';
 
 export class AuthService {
@@ -15,13 +14,13 @@ export class AuthService {
 		const user = await userRepository.findByEmail(data.email);
 
 		if (!user) {
-			throw new HTTPException(401, { message: 'An invalid credentials error occurred' });
+			throw AuthError.invalidCredentials();
 		}
 
-		const matchPassword = await bcrypt.compare(data.password, user.password);
+		const matchPassword = await comparePassword(data.password, user.password);
 
 		if (!matchPassword) {
-			throw new HTTPException(401, { message: 'An invalid credentials error occurred' });
+			throw AuthError.invalidCredentials();
 		}
 
 		const payload = {
@@ -49,7 +48,7 @@ export class AuthService {
 		// Check if email already exists
 		const existingUser = await userRepository.findByEmail(data.email);
 		if (existingUser) {
-			throw new HTTPException(400, { message: 'Email already registered' });
+			throw new ConflictError('Email already registered');
 		}
 
 		// Generate verification token
@@ -57,7 +56,7 @@ export class AuthService {
 		const tokenExpiration = generateTokenExpiration(24); // 24 hours
 
 		// Hash password
-		const hashedPassword = await bcrypt.hash(data.password, 10);
+		const hashedPassword = await hashPassword(data.password);
 
 		const userData: TInsertUser = {
 			email: data.email,
@@ -105,17 +104,17 @@ export class AuthService {
 		const user = await userRepository.findByVerificationToken(token);
 
 		if (!user) {
-			throw new HTTPException(400, { message: 'Invalid verification token' });
+			throw AuthError.tokenInvalid();
 		}
 
 		// Check if token is expired
 		if (user.verification_token_expires_at && isTokenExpired(user.verification_token_expires_at)) {
-			throw new HTTPException(400, { message: 'Verification token has expired. Please request a new one.' });
+			throw AuthError.tokenExpired();
 		}
 
 		// Check if already verified
 		if (user.email_verified_at) {
-			throw new HTTPException(400, { message: 'Email is already verified' });
+			throw AuthError.emailAlreadyVerified();
 		}
 
 		// Mark email as verified
@@ -134,11 +133,11 @@ export class AuthService {
 		const user = await userRepository.findById(userId);
 
 		if (!user) {
-			throw new HTTPException(404, { message: 'User not found' });
+			throw new NotFoundError('User');
 		}
 
 		if (user.email_verified_at) {
-			throw new HTTPException(400, { message: 'Email is already verified' });
+			throw AuthError.emailAlreadyVerified();
 		}
 
 		// Generate new verification token
@@ -160,7 +159,7 @@ export class AuthService {
 		});
 
 		if (!sent) {
-			throw new HTTPException(500, { message: 'Failed to send verification email' });
+			throw new InternalError('Failed to send verification email');
 		}
 
 		return {
@@ -175,7 +174,7 @@ export class AuthService {
 		const user = await userRepository.findByIdWithRoles(userId);
 
 		if (!user) {
-			throw new HTTPException(404, { message: 'User not found' });
+			throw new NotFoundError('User');
 		}
 
 		return {
@@ -205,7 +204,7 @@ export class AuthService {
 	/**
 	 * Remove sensitive data from user object
 	 */
-	private sanitizeUser(user: { id: string; email: string; created_at: string; updated_at: string; [key: string]: unknown }) {
+	private sanitizeUser(user: { id: string; email: string; created_at: string; updated_at: string;[key: string]: unknown }) {
 		return {
 			id: user.id,
 			email: user.email,

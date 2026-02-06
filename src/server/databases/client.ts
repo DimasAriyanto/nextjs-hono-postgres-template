@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import { HTTPException } from 'hono/http-exception';
 import { sql, SQL } from 'drizzle-orm';
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { PgSelect } from 'drizzle-orm/pg-core';
-// import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import * as schemas from './schemas';
 
 /**
@@ -27,7 +25,7 @@ const getDatabaseUrl = (): string => {
 
 	if (!DB_HOST || !DB_PORT || !DB_DATABASE || !DB_USERNAME || !DB_PASSWORD) {
 		throw new Error(
-			'Missing required database environment variables. Please check: DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD'
+			'Missing required database environment variables. Please check: DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD',
 		);
 	}
 

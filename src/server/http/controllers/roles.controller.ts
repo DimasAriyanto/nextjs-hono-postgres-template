@@ -1,5 +1,7 @@
 import { Context } from 'hono';
 import { roleService } from '@/server/services';
+import { ValidationError } from '@/server/errors';
+import { response, getPaginationParams } from '@/server/http/response';
 
 export const rolesController = {
 	/**
@@ -7,32 +9,28 @@ export const rolesController = {
 	 * Get all roles with pagination
 	 */
 	async index(c: Context) {
-		try {
-			const page = Number(c.req.query('page')) || 1;
-			const limit = Number(c.req.query('limit')) || 10;
-			const search = c.req.query('search') || undefined;
+		const { page, limit, search } = getPaginationParams(c);
 
-			const result = await roleService.getAllRoles({ page, limit, search });
+		const result = await roleService.getAllRoles({ page, limit, search });
 
-			return c.json(result, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to fetch roles' }, error.status || 500);
-		}
+		return response.paginated(c, result.data, {
+			page: result.meta.page,
+			limit: result.meta.limit,
+			total: result.meta.total,
+			totalPages: result.meta.pages,
+		}, 'OK');
 	},
+
 
 	/**
 	 * GET /roles/:id
 	 * Get role by ID
 	 */
 	async show(c: Context) {
-		try {
-			const id = c.req.param('id');
-			const role = await roleService.getRoleById(id);
+		const id = c.req.param('id');
+		const role = await roleService.getRoleById(id);
 
-			return c.json({ data: role }, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to fetch role' }, error.status || 500);
-		}
+		return response.ok(c, role);
 	},
 
 	/**
@@ -40,14 +38,10 @@ export const rolesController = {
 	 * Get role with users
 	 */
 	async showWithUsers(c: Context) {
-		try {
-			const id = c.req.param('id');
-			const role = await roleService.getRoleWithUsers(id);
+		const id = c.req.param('id');
+		const role = await roleService.getRoleWithUsers(id);
 
-			return c.json({ data: role }, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to fetch role with users' }, error.status || 500);
-		}
+		return response.ok(c, role);
 	},
 
 	/**
@@ -55,14 +49,10 @@ export const rolesController = {
 	 * Get role with permissions
 	 */
 	async showWithPermissions(c: Context) {
-		try {
-			const id = c.req.param('id');
-			const role = await roleService.getRoleWithPermissions(id);
+		const id = c.req.param('id');
+		const role = await roleService.getRoleWithPermissions(id);
 
-			return c.json({ data: role }, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to fetch role with permissions' }, error.status || 500);
-		}
+		return response.ok(c, role);
 	},
 
 	/**
@@ -70,23 +60,19 @@ export const rolesController = {
 	 * Create new role
 	 */
 	async create(c: Context) {
-		try {
-			const body = await c.req.json();
-			const { title } = body;
+		const body = await c.req.json();
+		const { title } = body;
 
-			if (!title) {
-				return c.json({ message: 'Title is required' }, 400);
-			}
-
-			const role = await roleService.createRole({
-				title,
-				created_by: 'system', // TODO: Get from authenticated user
-			});
-
-			return c.json({ data: role, message: 'Role created successfully' }, 201);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to create role' }, error.status || 500);
+		if (!title) {
+			throw new ValidationError('Validation failed', { title: ['Title is required'] });
 		}
+
+		const role = await roleService.createRole({
+			title,
+			created_by: 'system', // TODO: Get from authenticated user
+		});
+
+		return response.created(c, role, 'Role created successfully');
 	},
 
 	/**
@@ -94,20 +80,16 @@ export const rolesController = {
 	 * Update role
 	 */
 	async update(c: Context) {
-		try {
-			const id = c.req.param('id');
-			const body = await c.req.json();
-			const { title } = body;
+		const id = c.req.param('id');
+		const body = await c.req.json();
+		const { title } = body;
 
-			const role = await roleService.updateRole(id, {
-				title,
-				updated_by: 'system', // TODO: Get from authenticated user
-			});
+		const role = await roleService.updateRole(id, {
+			title,
+			updated_by: 'system', // TODO: Get from authenticated user
+		});
 
-			return c.json({ data: role, message: 'Role updated successfully' }, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to update role' }, error.status || 500);
-		}
+		return response.ok(c, role, 'Role updated successfully');
 	},
 
 	/**
@@ -115,14 +97,10 @@ export const rolesController = {
 	 * Delete role
 	 */
 	async delete(c: Context) {
-		try {
-			const id = c.req.param('id');
-			const result = await roleService.deleteRole(id);
+		const id = c.req.param('id');
+		await roleService.deleteRole(id);
 
-			return c.json(result, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to delete role' }, error.status || 500);
-		}
+		return response.success(c, 'Role deleted successfully');
 	},
 
 	/**
@@ -130,21 +108,17 @@ export const rolesController = {
 	 * Assign permission to role
 	 */
 	async assignPermission(c: Context) {
-		try {
-			const roleId = c.req.param('id');
-			const body = await c.req.json();
-			const { permission_id } = body;
+		const roleId = c.req.param('id');
+		const body = await c.req.json();
+		const { permission_id } = body;
 
-			if (!permission_id) {
-				return c.json({ message: 'permission_id is required' }, 400);
-			}
-
-			const result = await roleService.assignPermissionToRole(roleId, permission_id);
-
-			return c.json(result, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to assign permission' }, error.status || 500);
+		if (!permission_id) {
+			throw new ValidationError('Validation failed', { permission_id: ['Permission ID is required'] });
 		}
+
+		await roleService.assignPermissionToRole(roleId, permission_id);
+
+		return response.success(c, 'Permission assigned successfully');
 	},
 
 	/**
@@ -152,15 +126,12 @@ export const rolesController = {
 	 * Remove permission from role
 	 */
 	async removePermission(c: Context) {
-		try {
-			const roleId = c.req.param('id');
-			const permissionId = c.req.param('permissionId');
+		const roleId = c.req.param('id');
+		const permissionId = c.req.param('permissionId');
 
-			const result = await roleService.removePermissionFromRole(roleId, permissionId);
+		await roleService.removePermissionFromRole(roleId, permissionId);
 
-			return c.json(result, 200);
-		} catch (error: any) {
-			return c.json({ message: error.message || 'Failed to remove permission' }, error.status || 500);
-		}
+		return response.success(c, 'Permission removed successfully');
 	},
 };
+

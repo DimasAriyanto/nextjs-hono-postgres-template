@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { HTTPException } from 'hono/http-exception';
 import { handle } from 'hono/vercel';
+import { errorHandler } from '@/server/errors';
 import { authRoutes, usersRoutes, rolesRoutes } from '@/server/http/routes';
 
 const app = new Hono()
@@ -13,34 +13,7 @@ const app = new Hono()
 			credentials: true,
 		}),
 	)
-	.onError((err, c) => {
-		console.error('[ERR]: ', err);
-		if (err instanceof HTTPException) {
-			return c.json(
-				{
-					message: err.message,
-					data: null,
-					errors: {
-						name: 'Request Error',
-						type: 'HTTPException',
-					},
-				},
-				err.status,
-			);
-		} else {
-			return c.json(
-				{
-					message: 'An unexpected error occurred.',
-					data: null,
-					errors: {
-						name: 'Server Error',
-						type: 'UnknownError',
-					},
-				},
-				500,
-			);
-		}
-	});
+	.onError(errorHandler);
 
 // Main Routes v1.0
 const appRouter = app
