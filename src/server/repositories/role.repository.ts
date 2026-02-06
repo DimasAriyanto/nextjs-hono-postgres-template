@@ -35,6 +35,15 @@ export class RoleRepository {
 	}
 
 	/**
+	 * Find default role (is_default = true)
+	 */
+	async findDefault(): Promise<TSelectRole | undefined> {
+		const [role] = await db.select().from(RolesTable).where(eq(RolesTable.is_default, true)).limit(1);
+
+		return role;
+	}
+
+	/**
 	 * Find role by name
 	 */
 	async findByName(name: string): Promise<TSelectRole | undefined> {

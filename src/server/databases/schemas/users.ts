@@ -5,6 +5,7 @@ import * as t from 'drizzle-orm/pg-core';
 export const RolesTable = pgTable('roles', {
 	id: t.uuid('id').defaultRandom().primaryKey(),
 	name: t.varchar('name', { length: 255 }).unique().notNull(),
+	is_default: t.boolean('is_default').notNull().default(false),
 	created_at: t.timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
 	created_by: t.varchar('created_by'),
 	updated_at: t.timestamp('updated_at', { mode: 'string' }).notNull().defaultNow(),

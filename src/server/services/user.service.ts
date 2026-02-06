@@ -56,7 +56,7 @@ export class UserService {
 	/**
 	 * Create new user
 	 */
-	async createUser(data: { email: string; password: string; name?: string; created_by?: string }) {
+	async createUser(data: { email: string; password: string; name?: string; role_id?: string; created_by?: string }) {
 		// Check if email already exists
 		const existingUser = await userRepository.findByEmail(data.email);
 		if (existingUser) {
@@ -75,6 +75,11 @@ export class UserService {
 
 		const user = await userRepository.create(userData);
 
+		// Assign role if provided
+		if (data.role_id) {
+			await userRepository.assignRole(user.id, data.role_id);
+		}
+
 		return this.sanitizeUser(user);
 	}
 
@@ -87,6 +92,7 @@ export class UserService {
 			email?: string;
 			name?: string;
 			password?: string;
+			role_id?: string;
 			updated_by?: string;
 		}
 	) {
@@ -118,6 +124,15 @@ export class UserService {
 
 		if (!user) {
 			throw new InternalError('Failed to update user');
+		}
+
+		// Update role if provided: remove existing roles, then assign new one
+		if (data.role_id) {
+			const existingRoles = await userRepository.getUserRoles(id);
+			for (const existingRole of existingRoles) {
+				await userRepository.removeRole(id, existingRole.role_id);
+			}
+			await userRepository.assignRole(id, data.role_id);
 		}
 
 		return this.sanitizeUser(user);

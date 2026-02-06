@@ -40,7 +40,7 @@ export async function seed() {
 
 	const roles = await db
 		.insert(schema.RolesTable)
-		.values([{ name: 'admin' }, { name: 'customer' }])
+		.values([{ name: 'admin' }, { name: 'customer', is_default: true }])
 		.onConflictDoNothing()
 		.returning();
 

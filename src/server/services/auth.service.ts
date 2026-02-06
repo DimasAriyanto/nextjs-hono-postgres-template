@@ -1,7 +1,7 @@
 import { sign } from 'hono/jwt';
 import dayjs from 'dayjs';
 import { AuthError, NotFoundError, ConflictError, InternalError } from '@/server/errors';
-import { userRepository } from '@/server/repositories';
+import { userRepository, roleRepository } from '@/server/repositories';
 import { emailService } from './email.service';
 import { generateVerificationToken, generateTokenExpiration, isTokenExpired, hashPassword, comparePassword } from '@/server/utils';
 import type { TInsertUser } from '@/server/databases/schemas/users';
@@ -67,6 +67,12 @@ export class AuthService {
 		};
 
 		const user = await userRepository.create(userData);
+
+		// Assign default role to user
+		const defaultRole = await roleRepository.findDefault();
+		if (defaultRole) {
+			await userRepository.assignRole(user.id, defaultRole.id);
+		}
 
 		// Send verification email (non-blocking)
 		emailService.sendVerificationEmail({

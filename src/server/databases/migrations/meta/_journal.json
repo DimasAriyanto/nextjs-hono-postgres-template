@@ -15,6 +15,20 @@
       "when": 1770342083207,
       "tag": "0001_faulty_dragon_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770394676996,
+      "tag": "0002_cheerful_daredevil",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770395298855,
+      "tag": "0003_broad_robbie_robertson",
+      "breakpoints": true
     }
   ]
 }

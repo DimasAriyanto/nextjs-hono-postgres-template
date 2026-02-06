@@ -50,7 +50,7 @@ export const usersController = {
 	 */
 	async create(c: Context) {
 		const body = await c.req.json();
-		const { email, password, name } = body;
+		const { email, password, name, role_id } = body;
 
 		if (!email || !password) {
 			throw new ValidationError('Validation failed', {
@@ -59,11 +59,14 @@ export const usersController = {
 			});
 		}
 
+		const payload = c.get('user') as { auid: string };
+
 		const user = await userService.createUser({
 			email,
 			password,
 			name,
-			created_by: 'system', // TODO: Get from authenticated user
+			role_id,
+			created_by: payload.auid,
 		});
 
 		return response.created(c, user, 'User created successfully');
@@ -76,13 +79,16 @@ export const usersController = {
 	async update(c: Context) {
 		const id = c.req.param('id');
 		const body = await c.req.json();
-		const { email, name, password } = body;
+		const { email, name, password, role_id } = body;
+
+		const payload = c.get('user') as { auid: string };
 
 		const user = await userService.updateUser(id, {
 			email,
 			name,
 			password,
-			updated_by: 'system', // TODO: Get from authenticated user
+			role_id,
+			updated_by: payload.auid,
 		});
 
 		return response.ok(c, user, 'User updated successfully');

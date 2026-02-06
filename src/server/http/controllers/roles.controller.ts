@@ -67,9 +67,11 @@ export const rolesController = {
 			throw new ValidationError('Validation failed', { name: ['Name is required'] });
 		}
 
+		const payload = c.get('user') as { auid: string };
+
 		const role = await roleService.createRole({
 			name,
-			created_by: 'system', // TODO: Get from authenticated user
+			created_by: payload.auid,
 		});
 
 		return response.created(c, role, 'Role created successfully');
@@ -84,9 +86,11 @@ export const rolesController = {
 		const body = await c.req.json();
 		const { name } = body;
 
+		const payload = c.get('user') as { auid: string };
+
 		const role = await roleService.updateRole(id, {
 			name,
-			updated_by: 'system', // TODO: Get from authenticated user
+			updated_by: payload.auid,
 		});
 
 		return response.ok(c, role, 'Role updated successfully');
