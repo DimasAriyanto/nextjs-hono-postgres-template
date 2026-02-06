@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { parseAsInteger, useQueryState } from 'nuqs';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { DataTable } from '@/components/data-table';
 import { createRoleColumns } from './role-columns';
 import { RoleFormModal } from './role-form-modal';
+import { PageHeader } from '@/components/page-header';
 import { useRoles, useDeleteRole } from '@/features/role/hooks/use-role';
 import {
 	AlertDialog,
@@ -24,9 +26,17 @@ export function RoleListWrapper() {
 	const [editingRole, setEditingRole] = useState<TRole | null>(null);
 	const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 	const [deleteId, setDeleteId] = useState<string | null>(null);
+	const [keywords] = useQueryState('keywords');
+	const [page] = useQueryState('page', parseAsInteger.withDefault(1));
+	const [limit] = useQueryState('limit', parseAsInteger.withDefault(10));
 
-	const { data: rolesData, isLoading, isError } = useRoles({ limit: 100 });
+	const { data: rolesData, isLoading, isError } = useRoles({
+		page,
+		limit,
+		search: keywords ?? undefined,
+	});
 	const roles = rolesData?.data || [];
+	const total = rolesData?.meta?.pagination?.total ?? 0;
 
 	const deleteMutation = useDeleteRole({
 		onSuccess: () => setDeleteId(null),
@@ -68,15 +78,20 @@ export function RoleListWrapper() {
 
 	return (
 		<>
-			<div className="mb-6">
-				<h1 className="text-2xl font-bold">Roles</h1>
-				<p className="text-sm text-muted-foreground mt-1">Manage roles and permissions for your application.</p>
-			</div>
+			<PageHeader
+				breadcrumbs={[
+					{ label: 'Dashboard', href: '/gundala-admin/d' },
+					{ label: 'User Management' },
+					{ label: 'Role' },
+				]}
+				title="Roles"
+				description="Manage roles and permissions for your application."
+			/>
 
 			<DataTable
 				columns={columns}
 				data={roles}
-				meta={{ limit: 10, total: roles.length }}
+				meta={{ limit, total }}
 				CreateComp={CreateButton}
 				isError={isError}
 				isLoading={isLoading}

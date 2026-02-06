@@ -1,8 +1,14 @@
 'use client';
 
+import { PageHeader } from '@/components/page-header';
+
 export const DashboardWrapper = () => {
 	return (
 		<>
+			<PageHeader
+				breadcrumbs={[{ label: 'Dashboard' }]}
+				title="Dashboard"
+			/>
 			<div className="grid auto-rows-min gap-4 md:grid-cols-3">
 				<div className="bg-muted/50 aspect-video rounded-xl" />
 				<div className="bg-muted/50 aspect-video rounded-xl" />
