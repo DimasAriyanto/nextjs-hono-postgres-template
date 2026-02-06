@@ -4,6 +4,7 @@ import * as React from "react"
 import {
   LayoutDashboard,
   Package,
+  Settings,
   Shield,
   ShoppingCart,
   Tags,
@@ -68,6 +69,26 @@ const menuGroups: MenuGroup[] = [
         title: "Order",
         url: "/gundala-admin/d/order",
         icon: ShoppingCart,
+      },
+    ],
+  },
+  {
+    label: "Settings",
+    items: [
+      {
+        title: "Settings",
+        url: "#",
+        icon: Settings,
+        items: [
+          {
+            title: "General",
+            url: "/gundala-admin/d/settings/general",
+          },
+          {
+            title: "Appearance",
+            url: "/gundala-admin/d/settings/appearance",
+          },
+        ],
       },
     ],
   },
