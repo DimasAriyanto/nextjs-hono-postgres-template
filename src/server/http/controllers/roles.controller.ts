@@ -61,14 +61,14 @@ export const rolesController = {
 	 */
 	async create(c: Context) {
 		const body = await c.req.json();
-		const { title } = body;
+		const { name } = body;
 
-		if (!title) {
-			throw new ValidationError('Validation failed', { title: ['Title is required'] });
+		if (!name) {
+			throw new ValidationError('Validation failed', { name: ['Name is required'] });
 		}
 
 		const role = await roleService.createRole({
-			title,
+			name,
 			created_by: 'system', // TODO: Get from authenticated user
 		});
 
@@ -82,10 +82,10 @@ export const rolesController = {
 	async update(c: Context) {
 		const id = c.req.param('id');
 		const body = await c.req.json();
-		const { title } = body;
+		const { name } = body;
 
 		const role = await roleService.updateRole(id, {
-			title,
+			name,
 			updated_by: 'system', // TODO: Get from authenticated user
 		});
 

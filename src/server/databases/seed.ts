@@ -40,7 +40,7 @@ export async function seed() {
 
 	const roles = await db
 		.insert(schema.RolesTable)
-		.values([{ title: 'admin' }, { title: 'customer' }])
+		.values([{ name: 'admin' }, { name: 'customer' }])
 		.onConflictDoNothing()
 		.returning();
 
@@ -56,7 +56,7 @@ export async function seed() {
 			.onConflictDoNothing()
 			.returning();
 
-		const [role] = await tx.select().from(schema.RolesTable).where(eq(schema.RolesTable.title, 'admin')).limit(1);
+		const [role] = await tx.select().from(schema.RolesTable).where(eq(schema.RolesTable.name, 'admin')).limit(1);
 
 		await tx
 			.insert(schema.RoleUserTable)

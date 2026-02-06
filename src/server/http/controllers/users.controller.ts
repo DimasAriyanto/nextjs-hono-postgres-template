@@ -50,7 +50,7 @@ export const usersController = {
 	 */
 	async create(c: Context) {
 		const body = await c.req.json();
-		const { email, password, title } = body;
+		const { email, password, name } = body;
 
 		if (!email || !password) {
 			throw new ValidationError('Validation failed', {
@@ -62,7 +62,7 @@ export const usersController = {
 		const user = await userService.createUser({
 			email,
 			password,
-			title,
+			name,
 			created_by: 'system', // TODO: Get from authenticated user
 		});
 
@@ -76,11 +76,11 @@ export const usersController = {
 	async update(c: Context) {
 		const id = c.req.param('id');
 		const body = await c.req.json();
-		const { email, title, password } = body;
+		const { email, name, password } = body;
 
 		const user = await userService.updateUser(id, {
 			email,
-			title,
+			name,
 			password,
 			updated_by: 'system', // TODO: Get from authenticated user
 		});

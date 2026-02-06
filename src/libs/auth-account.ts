@@ -1,7 +1,6 @@
 import { cookies } from 'next/headers';
 import { client } from './hono-client';
-// import { decoded } from '@/libs/utils';
-import { TTokenDecoded } from '@/types/auth';
+import type { TTokenPayload } from '@/contracts';
 
 export const getAccount = async () => {
 	const cookieStore = await cookies();
@@ -17,7 +16,7 @@ export const getAccount = async () => {
 		},
 	);
 
-	const data: { message: string; data: TTokenDecoded } | null = response.ok ? await response.json() : null;
+	const data: { message: string; data: TTokenPayload } | null = response.ok ? await response.json() : null;
 
 	// const permissions: string[] = response.status === 200 && perms ? JSON.parse(decoded(perms?.value)) : [];
 

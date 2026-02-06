@@ -6,11 +6,10 @@ import { ErrorBoundaries } from '@/providers/error-provider';
 export const AuthLayout = ({ children, ...props }: { children: React.ReactNode }) => {
 	return (
 		<ErrorBoundaries ErrorContent={ErrorScreen}>
-			<div {...props}>
-				<p>Auth Layout</p>
-
+			<div className="min-h-screen bg-background" {...props}>
 				{children}
 			</div>
+
 		</ErrorBoundaries>
 	);
 };

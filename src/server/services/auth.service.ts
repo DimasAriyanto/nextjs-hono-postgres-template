@@ -44,7 +44,7 @@ export class AuthService {
 	/**
 	 * Register new user
 	 */
-	async register(data: { email: string; password: string; title?: string }) {
+	async register(data: { email: string; password: string; name?: string }) {
 		// Check if email already exists
 		const existingUser = await userRepository.findByEmail(data.email);
 		if (existingUser) {
@@ -61,7 +61,7 @@ export class AuthService {
 		const userData: TInsertUser = {
 			email: data.email,
 			password: hashedPassword,
-			title: data.title,
+			name: data.name,
 			verification_token: verificationToken,
 			verification_token_expires_at: tokenExpiration.toISOString(),
 		};
@@ -72,7 +72,7 @@ export class AuthService {
 		emailService.sendVerificationEmail({
 			to: user.email,
 			token: verificationToken,
-			userName: user.title || undefined,
+			userName: user.name || undefined,
 		}).catch((err) => {
 			console.error('Failed to send verification email:', err);
 		});
@@ -155,7 +155,7 @@ export class AuthService {
 		const sent = await emailService.sendVerificationEmail({
 			to: user.email,
 			token: verificationToken,
-			userName: user.title || undefined,
+			userName: user.name || undefined,
 		});
 
 		if (!sent) {

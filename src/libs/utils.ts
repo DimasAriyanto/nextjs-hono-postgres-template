@@ -1,4 +1,6 @@
 import { Buffer } from 'buffer';
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from 'tailwind-merge';
 
 export const encoded = (value: string) => {
 	return Buffer.from(value).toString('base64');
@@ -11,8 +13,8 @@ export const decoded = (value: string) => {
 export const formatFieldErrors = (
 	fieldErrors:
 		| {
-				[key: string]: string[] | undefined;
-		  }
+			[key: string]: string[] | undefined;
+		}
 		| undefined,
 ) => {
 	return Object.entries(fieldErrors || {}).reduce((acc, [field, error]) => {
@@ -34,3 +36,7 @@ export const parseIntervalToSeconds = (interval: string) => {
 export const isUUID = (str: string): boolean => {
 	return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 };
+
+export function cn(...inputs: ClassValue[]) {
+	return twMerge(clsx(inputs))
+}

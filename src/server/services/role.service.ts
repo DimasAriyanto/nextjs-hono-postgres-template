@@ -71,15 +71,15 @@ export class RoleService {
 	/**
 	 * Create new role
 	 */
-	async createRole(data: { title: string; created_by?: string }) {
-		// Check if title already exists
-		const existingRole = await roleRepository.findByTitle(data.title);
+	async createRole(data: { name: string; created_by?: string }) {
+		// Check if name already exists
+		const existingRole = await roleRepository.findByName(data.name);
 		if (existingRole) {
-			throw new ConflictError('Role title already exists');
+			throw new ConflictError('Role name already exists');
 		}
 
 		const roleData: TInsertRole = {
-			title: data.title,
+			name: data.name,
 			created_by: data.created_by,
 		};
 
@@ -91,22 +91,22 @@ export class RoleService {
 	/**
 	 * Update role
 	 */
-	async updateRole(id: string, data: { title?: string; updated_by?: string }) {
+	async updateRole(id: string, data: { name?: string; updated_by?: string }) {
 		const existingRole = await roleRepository.findById(id);
 		if (!existingRole) {
 			throw new NotFoundError('Role');
 		}
 
-		// Check title uniqueness if title is being updated
-		if (data.title && data.title !== existingRole.title) {
-			const titleExists = await roleRepository.findByTitle(data.title);
-			if (titleExists) {
-				throw new ConflictError('Role title already exists');
+		// Check name uniqueness if name is being updated
+		if (data.name && data.name !== existingRole.name) {
+			const nameExists = await roleRepository.findByName(data.name);
+			if (nameExists) {
+				throw new ConflictError('Role name already exists');
 			}
 		}
 
 		const updateData: Partial<TInsertRole> = {
-			title: data.title,
+			name: data.name,
 			updated_by: data.updated_by,
 		};
 

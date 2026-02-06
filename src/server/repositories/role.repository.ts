@@ -17,7 +17,7 @@ export class RoleRepository {
 		let query = db.select().from(RolesTable).$dynamic();
 
 		if (search) {
-			query = query.where(ilike(RolesTable.title, `%${search}%`));
+			query = query.where(ilike(RolesTable.name, `%${search}%`));
 		}
 
 		const results = await query.limit(limit).offset((page - 1) * limit);
@@ -35,10 +35,10 @@ export class RoleRepository {
 	}
 
 	/**
-	 * Find role by title
+	 * Find role by name
 	 */
-	async findByTitle(title: string): Promise<TSelectRole | undefined> {
-		const [role] = await db.select().from(RolesTable).where(eq(RolesTable.title, title)).limit(1);
+	async findByName(name: string): Promise<TSelectRole | undefined> {
+		const [role] = await db.select().from(RolesTable).where(eq(RolesTable.name, name)).limit(1);
 
 		return role;
 	}
@@ -142,7 +142,7 @@ export class RoleRepository {
 		let query = db.select().from(RolesTable).$dynamic();
 
 		if (search) {
-			query = query.where(ilike(RolesTable.title, `%${search}%`));
+			query = query.where(ilike(RolesTable.name, `%${search}%`));
 		}
 
 		const result = await query;

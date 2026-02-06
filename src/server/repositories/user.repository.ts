@@ -12,7 +12,7 @@ export class UserRepository {
 		let query = db.select().from(UsersTable).$dynamic();
 
 		if (search) {
-			query = query.where(or(ilike(UsersTable.email, `%${search}%`), ilike(UsersTable.title, `%${search}%`)));
+			query = query.where(or(ilike(UsersTable.email, `%${search}%`), ilike(UsersTable.name, `%${search}%`)));
 		}
 
 		const results = await query.limit(limit).offset((page - 1) * limit);
@@ -120,7 +120,7 @@ export class UserRepository {
 		let query = db.select().from(UsersTable).$dynamic();
 
 		if (search) {
-			query = query.where(or(ilike(UsersTable.email, `%${search}%`), ilike(UsersTable.title, `%${search}%`)));
+			query = query.where(or(ilike(UsersTable.email, `%${search}%`), ilike(UsersTable.name, `%${search}%`)));
 		}
 
 		const result = await query;

@@ -1,10 +1,10 @@
 'use client';
 
 import { createContext } from 'react';
-import type { TTokenDecoded } from '@/types/auth';
+import type { TTokenPayload } from '@/contracts';
 
 export interface TAuthContextValue {
-	user?: TTokenDecoded;
+	user?: TTokenPayload;
 	role?: string;
 	permissions?: string[];
 	// setPermissions?: (permissions: string[]) => void;

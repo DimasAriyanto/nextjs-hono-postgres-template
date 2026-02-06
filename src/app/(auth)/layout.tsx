@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import '../globals.css';
 
 // layout component
-import { Toaster } from '@/components/sonner';
+import { Toaster } from '@/components/ui/sonner';
 import { Providers } from '@/providers';
 import { AuthLayout } from '@/layouts/auth-layout';
 
@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+			<body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
 				<Providers>
 					<AuthLayout>{children}</AuthLayout>
 				</Providers>

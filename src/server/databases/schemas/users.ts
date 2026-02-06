@@ -4,7 +4,7 @@ import * as t from 'drizzle-orm/pg-core';
 
 export const RolesTable = pgTable('roles', {
 	id: t.uuid('id').defaultRandom().primaryKey(),
-	title: t.varchar('title', { length: 255 }).unique().notNull(),
+	name: t.varchar('name', { length: 255 }).unique().notNull(),
 	created_at: t.timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
 	created_by: t.varchar('created_by'),
 	updated_at: t.timestamp('updated_at', { mode: 'string' }).notNull().defaultNow(),
@@ -15,7 +15,7 @@ export const UsersTable = pgTable('users', {
 	id: t.uuid('id').defaultRandom().primaryKey(),
 	email: t.varchar('email', { length: 255 }).unique().notNull(),
 	password: t.varchar('password', { length: 255 }).notNull(),
-	title: t.varchar('title', { length: 255 }),
+	name: t.varchar('name', { length: 255 }),
 	token_device: t.varchar('token_device', { length: 255 }),
 	token_forgot_password: t.varchar('token_forgot_password', { length: 255 }),
 	// Email verification fields
@@ -45,7 +45,7 @@ export const RoleUserTable = pgTable(
 
 export const PermissionsTable = pgTable('permissions', {
 	id: t.uuid('id').defaultRandom().primaryKey(),
-	title: t.varchar('title', { length: 100 }).unique().notNull(),
+	name: t.varchar('name', { length: 100 }).unique().notNull(),
 	created_at: t.timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
 	created_by: t.varchar('created_by'),
 	updated_at: t.timestamp('updated_at', { mode: 'string' }).notNull().defaultNow(),

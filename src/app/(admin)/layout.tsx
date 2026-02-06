@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import '../globals.css';
 
 // layout component
-import { Toaster } from '@/components/sonner';
+import { Toaster } from '@/components/ui/sonner';
 import { Providers } from '@/providers';
 import { AdminLayout } from '@/layouts/admin-layout';
 
