@@ -5,10 +5,11 @@ import { parseAsInteger, useQueryState } from 'nuqs';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { DataTable } from '@/components/data-table';
-import { createRoleColumns } from './role-columns';
-import { RoleFormModal } from './role-form-modal';
+import { createUserColumns } from './user-columns';
+import { UserFormModal } from './user-form-modal';
 import { PageHeader } from '@/components/page-header';
-import { useRoles, useDeleteRole } from '@/features/role/hooks/use-role';
+import { useUsers, useDeleteUser } from '@/features/user/hooks/use-user';
+import { toast } from 'sonner';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -19,58 +20,57 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
-import type { TRole } from '@/contracts';
+import type { TUser } from '@/contracts';
 
-export function RoleListWrapper() {
+export function UserListWrapper() {
 	const [showModal, setShowModal] = useState(false);
-	const [editingRole, setEditingRole] = useState<TRole | null>(null);
+	const [editingUser, setEditingUser] = useState<TUser | null>(null);
 	const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 	const [deleteId, setDeleteId] = useState<string | null>(null);
 	const [keywords] = useQueryState('keywords');
 	const [page] = useQueryState('page', parseAsInteger.withDefault(1));
 	const [limit] = useQueryState('limit', parseAsInteger.withDefault(10));
 
-	const { data: rolesData, isLoading, isError } = useRoles({
+	const { data: usersData, isLoading, isError } = useUsers({
 		page,
 		limit,
 		search: keywords ?? undefined,
 	});
-	const roles = rolesData?.data || [];
-	const total = rolesData?.meta?.pagination?.total ?? 0;
+	const users = usersData?.data || [];
+	const total = usersData?.meta?.pagination?.total ?? 0;
 
-	const deleteMutation = useDeleteRole({
+	const deleteMutation = useDeleteUser({
 		onSuccess: () => setDeleteId(null),
 	});
 
-	const handleEdit = (role: TRole) => {
-		setEditingRole(role);
+	const handleEdit = (user: TUser) => {
+		setEditingUser(user);
 		setModalMode('edit');
 		setShowModal(true);
 	};
 
 	const handleCreate = () => {
-		setEditingRole(null);
+		setEditingUser(null);
 		setModalMode('create');
 		setShowModal(true);
 	};
 
 	const handleCloseModal = () => {
 		setShowModal(false);
-		setEditingRole(null);
+		setEditingUser(null);
 	};
 
 	const handleDeleteConfirm = async () => {
 		if (!deleteId) return;
 		try {
 			await deleteMutation.mutateAsync(deleteId);
-			toast.success('Role deleted successfully');
+			toast.success('User deleted successfully');
 		} catch {
-			toast.error('Failed to delete role');
+			toast.error('Failed to delete user');
 		}
 	};
 
-	const columns = createRoleColumns({
+	const columns = createUserColumns({
 		onEdit: handleEdit,
 		onDelete: (id) => setDeleteId(id),
 	});
@@ -78,7 +78,7 @@ export function RoleListWrapper() {
 	const CreateButton = () => (
 		<Button onClick={handleCreate} size="sm">
 			<Plus className="w-4 h-4 mr-2" />
-			Add Role
+			Add User
 		</Button>
 	);
 
@@ -88,29 +88,29 @@ export function RoleListWrapper() {
 				breadcrumbs={[
 					{ label: 'Dashboard', href: '/gundala-admin/d' },
 					{ label: 'User Management' },
-					{ label: 'Role' },
+					{ label: 'User' },
 				]}
-				title="Roles"
-				description="Manage roles and permissions for your application."
+				title="Users"
+				description="Manage users for your application."
 			/>
 
 			<DataTable
 				columns={columns}
-				data={roles}
+				data={users}
 				meta={{ limit, total }}
 				CreateComp={CreateButton}
 				isError={isError}
 				isLoading={isLoading}
 			/>
 
-			<RoleFormModal isOpen={showModal} onClose={handleCloseModal} role={editingRole} mode={modalMode} />
+			<UserFormModal isOpen={showModal} onClose={handleCloseModal} user={editingUser} mode={modalMode} />
 
 			<AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Delete Role</AlertDialogTitle>
+						<AlertDialogTitle>Delete User</AlertDialogTitle>
 						<AlertDialogDescription>
-							Are you sure you want to delete this role? This action cannot be undone.
+							Are you sure you want to delete this user? This action cannot be undone.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>

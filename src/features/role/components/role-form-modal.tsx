@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { useCreateRole, useUpdateRole } from '@/features/role/hooks/use-role';
 import { ApiError } from '@/libs/api';
+import { toast } from 'sonner';
 import type { TRole } from '@/contracts';
 
 interface RoleFormModalProps {
@@ -55,14 +56,18 @@ export function RoleFormModal({ isOpen, onClose, role, mode }: RoleFormModalProp
 		try {
 			if (mode === 'create') {
 				await createMutation.mutateAsync({ name: name.trim() });
+				toast.success('Role created successfully');
 			} else if (role) {
 				await updateMutation.mutateAsync({ id: role.id, data: { name: name.trim() } });
+				toast.success('Role updated successfully');
 			}
 		} catch (err) {
 			if (err instanceof ApiError) {
 				setError(err.message);
+				toast.error('Failed', { description: err.message });
 			} else {
 				setError('An error occurred');
+				toast.error('An error occurred');
 			}
 		}
 	};
