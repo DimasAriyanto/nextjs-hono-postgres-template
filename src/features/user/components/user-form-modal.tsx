@@ -12,15 +12,23 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import { useCreateUser, useUpdateUser } from '@/features/user/hooks/use-user';
+import { useRoles } from '@/features/role/hooks/use-role';
 import { ApiError } from '@/libs/api';
 import { toast } from 'sonner';
-import type { TUser } from '@/contracts';
+import type { TUserWithRoles } from '@/contracts';
 
 interface UserFormModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	user?: TUser | null;
+	user?: TUserWithRoles | null;
 	mode: 'create' | 'edit';
 }
 
@@ -28,7 +36,11 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [name, setName] = useState('');
+	const [roleId, setRoleId] = useState('');
 	const [error, setError] = useState('');
+
+	const { data: rolesData } = useRoles({ limit: 100 });
+	const roles = rolesData?.data || [];
 
 	const createMutation = useCreateUser({
 		onSuccess: () => onClose(),
@@ -43,10 +55,14 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 			setEmail(user.email);
 			setName(user.name || '');
 			setPassword('');
+
+			const userRoles = user.roles as { id: string }[] | undefined;
+			setRoleId(userRoles?.[0]?.id ?? '');
 		} else {
 			setEmail('');
 			setPassword('');
 			setName('');
+			setRoleId('');
 		}
 		setError('');
 	}, [user, mode, isOpen]);
@@ -70,6 +86,7 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 					email: email.trim(),
 					password: password.trim(),
 					name: name.trim() || undefined,
+					role_id: roleId || undefined,
 				});
 				toast.success('User created successfully');
 			} else if (user) {
@@ -79,6 +96,7 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 						email: email.trim(),
 						...(password.trim() && { password: password.trim() }),
 						name: name.trim() || undefined,
+						role_id: roleId || undefined,
 					},
 				});
 				toast.success('User updated successfully');
@@ -149,6 +167,28 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 								placeholder="Enter name (optional)"
 								disabled={isLoading}
 							/>
+						</div>
+						<div className="grid gap-2">
+							<Label htmlFor="role">Role</Label>
+							<Select
+								value={roleId}
+								onValueChange={(value) => {
+									setRoleId(value);
+									if (error) setError('');
+								}}
+								disabled={isLoading}
+							>
+								<SelectTrigger>
+									<SelectValue placeholder="Select role (optional)" />
+								</SelectTrigger>
+								<SelectContent>
+									{roles.map((role) => (
+										<SelectItem key={role.id} value={role.id}>
+											{role.name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 						{error && <p className="text-sm text-red-500">{error}</p>}
 					</div>

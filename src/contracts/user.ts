@@ -11,6 +11,7 @@ export const createUserSchema = z.object({
 	email: z.string().min(1, 'Email is required').email('Invalid email format'),
 	password: z.string().min(6, 'Password must be at least 6 characters'),
 	name: z.string().optional(),
+	role_id: z.string().uuid('Invalid role ID').optional(),
 });
 
 export type TCreateUserRequest = z.infer<typeof createUserSchema>;
@@ -22,6 +23,7 @@ export const updateUserSchema = z.object({
 	email: z.string().email('Invalid email format').optional(),
 	password: z.string().min(6, 'Password must be at least 6 characters').optional(),
 	name: z.string().optional(),
+	role_id: z.string().uuid('Invalid role ID').optional(),
 });
 
 export type TUpdateUserRequest = z.infer<typeof updateUserSchema>;

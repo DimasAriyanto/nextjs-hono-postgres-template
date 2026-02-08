@@ -16,8 +16,8 @@ import type { ApiSuccessResponse } from '@/types/api-response';
  * GET /api/v1/users
  * Get all users with pagination
  */
-export async function getUsers(params?: { page?: number; limit?: number; search?: string }): Promise<ApiSuccessResponse<TUser[]>> {
-	return handleResponse<TUser[]>(
+export async function getUsers(params?: { page?: number; limit?: number; search?: string }): Promise<ApiSuccessResponse<TUserWithRoles[]>> {
+	return handleResponse<TUserWithRoles[]>(
 		client.api.v1.users.$get({ query: params as Record<string, string> })
 	);
 }

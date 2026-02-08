@@ -14,7 +14,10 @@ export class UserService {
 		const total = await userRepository.count(search);
 
 		return {
-			data: users.map((user) => this.sanitizeUser(user)),
+			data: users.map((user) => ({
+				...this.sanitizeUser(user),
+				roles: user.roles.map((r) => r.role),
+			})),
 			meta: {
 				page,
 				limit,

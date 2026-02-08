@@ -5,14 +5,14 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2 } from 'lucide-react';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
-import type { TUser } from '@/contracts';
+import type { TUserWithRoles } from '@/contracts';
 
 interface UserColumnsProps {
-	onEdit: (user: TUser) => void;
+	onEdit: (user: TUserWithRoles) => void;
 	onDelete: (userId: string) => void;
 }
 
-export const createUserColumns = ({ onEdit, onDelete }: UserColumnsProps): ColumnDef<TUser>[] => [
+export const createUserColumns = ({ onEdit, onDelete }: UserColumnsProps): ColumnDef<TUserWithRoles>[] => [
 	{
 		accessorKey: 'email',
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
@@ -40,6 +40,24 @@ export const createUserColumns = ({ onEdit, onDelete }: UserColumnsProps): Colum
 				</Badge>
 			);
 		},
+	},
+	{
+		id: 'roles',
+		header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
+		cell: ({ row }) => {
+			const roles = row.original.roles as { id: string; name: string }[];
+			if (!roles || roles.length === 0) return <span className="text-sm text-muted-foreground">-</span>;
+			return (
+				<div className="flex items-center gap-1">
+					{roles.map((role) => (
+						<Badge key={role.id} variant="outline" className="text-xs">
+							{role.name}
+						</Badge>
+					))}
+				</div>
+			);
+		},
+		enableSorting: false,
 	},
 	{
 		accessorKey: 'created_at',

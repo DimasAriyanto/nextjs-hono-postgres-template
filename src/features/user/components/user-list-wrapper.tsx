@@ -20,11 +20,11 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import type { TUser } from '@/contracts';
+import type { TUserWithRoles } from '@/contracts';
 
 export function UserListWrapper() {
 	const [showModal, setShowModal] = useState(false);
-	const [editingUser, setEditingUser] = useState<TUser | null>(null);
+	const [editingUser, setEditingUser] = useState<TUserWithRoles | null>(null);
 	const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 	const [deleteId, setDeleteId] = useState<string | null>(null);
 	const [keywords] = useQueryState('keywords');
@@ -43,7 +43,7 @@ export function UserListWrapper() {
 		onSuccess: () => setDeleteId(null),
 	});
 
-	const handleEdit = (user: TUser) => {
+	const handleEdit = (user: TUserWithRoles) => {
 		setEditingUser(user);
 		setModalMode('edit');
 		setShowModal(true);

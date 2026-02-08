@@ -9,13 +9,20 @@ export class UserRepository {
 	async findAll(options?: { page?: number; limit?: number; search?: string }) {
 		const { page = 1, limit = 10, search } = options || {};
 
-		let query = db.select().from(UsersTable).$dynamic();
-
-		if (search) {
-			query = query.where(or(ilike(UsersTable.email, `%${search}%`), ilike(UsersTable.name, `%${search}%`)));
-		}
-
-		const results = await query.limit(limit).offset((page - 1) * limit);
+		const results = await db.query.UsersTable.findMany({
+			where: search
+				? or(ilike(UsersTable.email, `%${search}%`), ilike(UsersTable.name, `%${search}%`))
+				: undefined,
+			with: {
+				roles: {
+					with: {
+						role: true,
+					},
+				},
+			},
+			limit,
+			offset: (page - 1) * limit,
+		});
 
 		return results;
 	}
