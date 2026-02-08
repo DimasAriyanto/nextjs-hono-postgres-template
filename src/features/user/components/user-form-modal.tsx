@@ -138,15 +138,15 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 							/>
 						</div>
 						<div className="grid gap-2">
-							<Label htmlFor="title">Title</Label>
+							<Label htmlFor="name">Name</Label>
 							<Input
-								id="title"
+								id="name"
 								value={name}
 								onChange={(e) => {
 									setName(e.target.value);
 									if (error) setError('');
 								}}
-								placeholder="Enter title (optional)"
+								placeholder="Enter name (optional)"
 								disabled={isLoading}
 							/>
 						</div>
