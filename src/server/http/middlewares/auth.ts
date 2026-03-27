@@ -18,7 +18,7 @@ export const auth = createMiddleware(async (c, next) => {
 			throw AuthError.unauthorized();
 		}
 
-		const decoded = await verify(token as string, process.env.APP_KEY as string);
+		const decoded = await verify(token as string, process.env.APP_KEY as string, 'HS256');
 
 		c.set('user', decoded);
 		c.set('role', decoded.aurl);

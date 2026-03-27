@@ -5,7 +5,7 @@ import {
 	RolePermissionTable,
 	type TSelectRole,
 	type TInsertRole,
-} from '@/server/databases/schemas/users';
+} from '@/server/databases/schemas/users.schema';
 
 export class RoleRepository {
 	/**

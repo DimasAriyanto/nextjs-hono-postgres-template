@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1770308229129,
-      "tag": "0000_absent_red_hulk",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1770342083207,
-      "tag": "0001_faulty_dragon_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1770394676996,
-      "tag": "0002_cheerful_daredevil",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1770395298855,
-      "tag": "0003_broad_robbie_robertson",
+      "when": 1774601609584,
+      "tag": "0000_needy_tana_nile",
       "breakpoints": true
     }
   ]

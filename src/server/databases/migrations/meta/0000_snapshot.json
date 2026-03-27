@@ -1,5 +1,5 @@
 {
-  "id": "57411435-1ae7-487b-9abd-ce1a0507d235",
+  "id": "54322aff-1b06-4c76-8fec-8e5926734334",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -15,8 +15,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "title": {
-          "name": "title",
+        "name": {
+          "name": "name",
           "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
@@ -52,11 +52,11 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "permissions_title_unique": {
-          "name": "permissions_title_unique",
+        "permissions_name_unique": {
+          "name": "permissions_name_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "title"
+            "name"
           ]
         }
       },
@@ -195,11 +195,18 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "title": {
-          "name": "title",
+        "name": {
+          "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
+        },
+        "is_default": {
+          "name": "is_default",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "created_at": {
           "name": "created_at",
@@ -232,11 +239,11 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "roles_title_unique": {
-          "name": "roles_title_unique",
+        "roles_name_unique": {
+          "name": "roles_name_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "title"
+            "name"
           ]
         }
       },
@@ -267,8 +274,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "title": {
-          "name": "title",
+        "name": {
+          "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
@@ -282,6 +289,24 @@
         "token_forgot_password": {
           "name": "token_forgot_password",
           "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email_verified_at": {
+          "name": "email_verified_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verification_token": {
+          "name": "verification_token",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verification_token_expires_at": {
+          "name": "verification_token_expires_at",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },

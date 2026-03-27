@@ -1,7 +1,7 @@
 import { NotFoundError, ConflictError, InternalError } from '@/server/errors';
 import { userRepository } from '@/server/repositories';
 import { hashPassword, comparePassword } from '@/server/utils';
-import type { TInsertUser, TSelectUser } from '@/server/databases/schemas/users';
+import type { TInsertUser, TSelectUser } from '@/server/databases/schemas/users.schema';
 
 export class UserService {
 	/**

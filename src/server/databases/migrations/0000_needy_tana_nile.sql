@@ -1,11 +1,11 @@
 CREATE TABLE "permissions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"title" varchar(100) NOT NULL,
+	"name" varchar(100) NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"created_by" varchar,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"updated_by" varchar,
-	CONSTRAINT "permissions_title_unique" UNIQUE("title")
+	CONSTRAINT "permissions_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE "permission_role_links" (
@@ -22,21 +22,25 @@ CREATE TABLE "user_role_links" (
 --> statement-breakpoint
 CREATE TABLE "roles" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"title" varchar(255) NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"is_default" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"created_by" varchar,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"updated_by" varchar,
-	CONSTRAINT "roles_title_unique" UNIQUE("title")
+	CONSTRAINT "roles_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"password" varchar(255) NOT NULL,
-	"title" varchar(255),
+	"name" varchar(255),
 	"token_device" varchar(255),
 	"token_forgot_password" varchar(255),
+	"email_verified_at" timestamp,
+	"verification_token" varchar(255),
+	"verification_token_expires_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"created_by" varchar,
 	"updated_at" timestamp DEFAULT now() NOT NULL,

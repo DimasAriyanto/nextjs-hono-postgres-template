@@ -1,31 +1,34 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { TTokenDecoded } from './types/auth';
+import { verify } from 'hono/jwt';
 
-// middleware token verification
-async function verifyToken(token: string | undefined) {
-	if (!token) return { isValid: false, decoded: null };
+// Signed cookie format from Hono: jwt.hmacSignature
+// Extract the JWT part (everything before the last dot)
+function extractJwtFromSignedCookie(cookieValue: string): string | null {
+	const lastDot = cookieValue.lastIndexOf('.');
+	if (lastDot === -1) return null;
+	return cookieValue.slice(0, lastDot);
+}
 
-	const res = await fetch(`${process.env.APP_URL}/api/v1/auths/profile`, {
-		method: 'GET',
-		headers: {
-			cookie: `__x=${token}`,
-		},
-		cache: 'no-store', // middleware runs at Edge -> use `next: { revalidate: 0 }` to force dynamic call
-	});
+async function verifyToken(request: NextRequest): Promise<boolean> {
+	const cookieValue = request.cookies.get('__x')?.value;
+	if (!cookieValue) return false;
 
-	const data: { message: string; data: TTokenDecoded } | null = await res.json();
+	const jwt = extractJwtFromSignedCookie(cookieValue);
+	if (!jwt) return false;
 
-	return { isValid: res.ok, decoded: data?.data };
+	try {
+		await verify(jwt, process.env.APP_KEY as string, 'HS256');
+		return true;
+	} catch {
+		return false;
+	}
 }
 
 export async function middleware(request: NextRequest) {
-	// const host = (request.headers.get('host') || '').replace(/:\d+$/, '');
 	const pathname = request.nextUrl.pathname;
 
-	const token = request.cookies.get('__x')?.value;
-
-	const { isValid } = await verifyToken(token);
+	const isValid = await verifyToken(request);
 
 	const isAuthPage = pathname === '/login' || pathname === '/forgot-password';
 	const isProtected = pathname.startsWith('/gundala-admin') && !isAuthPage;

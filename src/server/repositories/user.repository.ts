@@ -1,6 +1,6 @@
 import { eq, and, ilike, or } from 'drizzle-orm';
 import { db } from '@/server/databases/client';
-import { UsersTable, RoleUserTable, type TSelectUser, type TInsertUser } from '@/server/databases/schemas/users';
+import { UsersTable, RoleUserTable, type TSelectUser, type TInsertUser } from '@/server/databases/schemas/users.schema';
 
 export class UserRepository {
 	/**

@@ -4,7 +4,7 @@ import { AuthError, NotFoundError, ConflictError, InternalError } from '@/server
 import { userRepository, roleRepository } from '@/server/repositories';
 import { emailService } from './email.service';
 import { generateVerificationToken, generateTokenExpiration, isTokenExpired, hashPassword, comparePassword } from '@/server/utils';
-import type { TInsertUser } from '@/server/databases/schemas/users';
+import type { TInsertUser } from '@/server/databases/schemas/users.schema';
 
 export class AuthService {
 	/**

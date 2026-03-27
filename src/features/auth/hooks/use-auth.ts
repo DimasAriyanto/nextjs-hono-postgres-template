@@ -34,7 +34,7 @@ export function useLogin(options?: { onError?: (error: Error) => void }) {
 		mutationFn: (data: TLoginRequest) => authApi.login(data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: authKeys.all });
-			router.push('/dashboard');
+			router.push('/gundala-admin/d');
 		},
 		onError: options?.onError,
 	});

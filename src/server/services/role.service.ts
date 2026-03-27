@@ -1,6 +1,6 @@
 import { NotFoundError, ConflictError, InternalError } from '@/server/errors';
 import { roleRepository } from '@/server/repositories';
-import type { TInsertRole } from '@/server/databases/schemas/users';
+import type { TInsertRole } from '@/server/databases/schemas/users.schema';
 
 export class RoleService {
 	/**
