@@ -1,6 +1,6 @@
 'use client';
 
-import { AppSidebar } from '@/layouts/admin-layout-components/app-sidebar';
+import { AppSidebar } from '@/layouts/admin-layout-components/admin-sidebar';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { ErrorBoundaries } from '@/providers/error-provider';
 import { ErrorContent } from '@/components/error-content';

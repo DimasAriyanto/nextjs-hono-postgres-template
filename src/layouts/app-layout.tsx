@@ -1,7 +1,7 @@
 'use client';
 
-import { AppHeader } from '@/layouts/app-layout-components/header';
-import { AppFooter } from '@/layouts/app-layout-components/footer';
+import { AppHeader } from '@/layouts/app-layout-components/app-header';
+import { AppFooter } from '@/layouts/app-layout-components/app-footer';
 import { ErrorScreen } from '@/components/error-screen';
 import { ErrorContent } from '@/components/error-content';
 import { ErrorBoundaries } from '@/providers/error-provider';

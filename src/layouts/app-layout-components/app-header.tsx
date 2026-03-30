@@ -178,7 +178,6 @@ export const AppHeader = () => {
 						<div
 							className={`fixed inset-y-0 right-0 w-full max-w-sm bg-background shadow-2xl pointer-events-auto transition-transform duration-300 ${menuAnimating ? 'translate-x-0' : 'translate-x-full'}`}
 						>
-							{/* Panel header */}
 							<div className="flex items-center justify-between px-6 py-5 border-b border-border">
 								<span className="font-bold text-lg">App</span>
 								<Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)}>
@@ -186,42 +185,39 @@ export const AppHeader = () => {
 								</Button>
 							</div>
 
-							{/* Panel content */}
-							<div className="flex flex-col h-[calc(100vh-73px)] overflow-y-auto">
-								<div className="px-6 py-6 border-t border-border mt-auto space-y-3">
-									{user ? (
-										<>
-											{isAdmin && (
-												<Button variant="outline" asChild className="w-full justify-start h-11">
-													<Link href="/gundala-admin/d" onClick={() => setMobileOpen(false)}>
-														<LayoutDashboard className="size-4 mr-2" />
-														Dashboard
-													</Link>
-												</Button>
-											)}
-											<Button
-												variant="destructive"
-												className="w-full h-11"
-												onClick={() => {
-													setMobileOpen(false);
-													logout();
-												}}
-											>
-												<LogOut className="size-4 mr-2" />
-												Logout
+							<div className="px-6 py-6 space-y-3">
+								{user ? (
+									<>
+										{isAdmin && (
+											<Button variant="outline" asChild className="w-full justify-start h-11">
+												<Link href="/gundala-admin/d" onClick={() => setMobileOpen(false)}>
+													<LayoutDashboard className="size-4 mr-2" />
+													Dashboard
+												</Link>
 											</Button>
-										</>
-									) : (
-										<>
-											<Button variant="outline" asChild className="w-full h-11">
-												<Link href="/login" onClick={() => setMobileOpen(false)}>Login</Link>
-											</Button>
-											<Button asChild className="w-full h-11">
-												<Link href="/register" onClick={() => setMobileOpen(false)}>Register</Link>
-											</Button>
-										</>
-									)}
-								</div>
+										)}
+										<Button
+											variant="destructive"
+											className="w-full h-11"
+											onClick={() => {
+												setMobileOpen(false);
+												logout();
+											}}
+										>
+											<LogOut className="size-4 mr-2" />
+											Logout
+										</Button>
+									</>
+								) : (
+									<>
+										<Button variant="outline" asChild className="w-full h-11">
+											<Link href="/login" onClick={() => setMobileOpen(false)}>Login</Link>
+										</Button>
+										<Button asChild className="w-full h-11">
+											<Link href="/register" onClick={() => setMobileOpen(false)}>Register</Link>
+										</Button>
+									</>
+								)}
 							</div>
 						</div>
 					</div>

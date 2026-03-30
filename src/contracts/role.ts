@@ -9,6 +9,8 @@ import { z } from 'zod';
  */
 export const createRoleSchema = z.object({
 	name: z.string().min(1, 'Name is required'),
+	is_admin: z.boolean().optional().default(false),
+	is_default: z.boolean().optional().default(false),
 });
 
 export type TCreateRoleRequest = z.infer<typeof createRoleSchema>;
@@ -18,6 +20,8 @@ export type TCreateRoleRequest = z.infer<typeof createRoleSchema>;
  */
 export const updateRoleSchema = z.object({
 	name: z.string().min(1, 'Name is required').optional(),
+	is_admin: z.boolean().optional(),
+	is_default: z.boolean().optional(),
 });
 
 export type TUpdateRoleRequest = z.infer<typeof updateRoleSchema>;
@@ -42,6 +46,7 @@ export const roleSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	is_default: z.boolean(),
+	is_admin: z.boolean(),
 	created_at: z.string(),
 	updated_at: z.string(),
 	created_by: z.string().nullable().optional(),

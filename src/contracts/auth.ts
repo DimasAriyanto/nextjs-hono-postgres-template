@@ -108,7 +108,7 @@ export type TRegisterResponse = z.infer<typeof registerResponseSchema>;
  * Profile response
  */
 export const profileResponseSchema = authUserSchema.extend({
-	roles: z.array(z.unknown()).optional(),
+	roles: z.array(z.object({ id: z.string(), name: z.string(), is_admin: z.boolean(), is_default: z.boolean() })).optional(),
 	email_verified: z.boolean(),
 });
 

@@ -34,6 +34,7 @@ export function useLogin(options?: { onError?: (error: Error) => void }) {
 	return useMutation({
 		mutationFn: (data: TLoginRequest) => authApi.login(data),
 		onSuccess: (result) => {
+			toast.success('Login successful', { description: 'Welcome back!' });
 			queryClient.invalidateQueries({ queryKey: authKeys.all });
 			router.push(result.data.is_admin ? '/gundala-admin/d' : '/');
 		},
@@ -69,8 +70,12 @@ export function useLogout() {
 	return useMutation({
 		mutationFn: authApi.logout,
 		onSuccess: () => {
+			toast.success('Logged out', { description: 'You have been successfully logged out.' });
 			queryClient.clear();
 			router.push('/login');
+		},
+		onError: () => {
+			toast.error('Logout failed', { description: 'An error occurred. Please try again.' });
 		},
 	});
 }

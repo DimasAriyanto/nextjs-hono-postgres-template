@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
 	Dialog,
 	DialogContent,
@@ -26,6 +27,8 @@ interface RoleFormModalProps {
 
 export function RoleFormModal({ isOpen, onClose, role, mode }: RoleFormModalProps) {
 	const [name, setName] = useState('');
+	const [isAdmin, setIsAdmin] = useState(false);
+	const [isDefault, setIsDefault] = useState(false);
 	const [error, setError] = useState('');
 
 	const createMutation = useCreateRole({
@@ -39,8 +42,12 @@ export function RoleFormModal({ isOpen, onClose, role, mode }: RoleFormModalProp
 	useEffect(() => {
 		if (role && mode === 'edit') {
 			setName(role.name);
+			setIsAdmin(role.is_admin ?? false);
+			setIsDefault(role.is_default ?? false);
 		} else {
 			setName('');
+			setIsAdmin(false);
+			setIsDefault(false);
 		}
 		setError('');
 	}, [role, mode, isOpen]);
@@ -55,10 +62,10 @@ export function RoleFormModal({ isOpen, onClose, role, mode }: RoleFormModalProp
 
 		try {
 			if (mode === 'create') {
-				await createMutation.mutateAsync({ name: name.trim() });
+				await createMutation.mutateAsync({ name: name.trim(), is_admin: isAdmin, is_default: isDefault });
 				toast.success('Role created successfully');
 			} else if (role) {
-				await updateMutation.mutateAsync({ id: role.id, data: { name: name.trim() } });
+				await updateMutation.mutateAsync({ id: role.id, data: { name: name.trim(), is_admin: isAdmin, is_default: isDefault } });
 				toast.success('Role updated successfully');
 			}
 		} catch (err) {
@@ -80,7 +87,7 @@ export function RoleFormModal({ isOpen, onClose, role, mode }: RoleFormModalProp
 				<DialogHeader>
 					<DialogTitle>{mode === 'create' ? 'Create Role' : 'Edit Role'}</DialogTitle>
 					<DialogDescription>
-						{mode === 'create' ? 'Add a new role to the system.' : 'Update the role name.'}
+						{mode === 'create' ? 'Add a new role to the system.' : 'Update the role details.'}
 					</DialogDescription>
 				</DialogHeader>
 				<form onSubmit={handleSubmit}>
@@ -99,13 +106,43 @@ export function RoleFormModal({ isOpen, onClose, role, mode }: RoleFormModalProp
 							/>
 							{error && <p className="text-sm text-red-500">{error}</p>}
 						</div>
+
+						<div className="flex flex-col gap-3">
+							<div className="flex items-center gap-3">
+								<Checkbox
+									id="is_admin"
+									checked={isAdmin}
+									onCheckedChange={(checked) => setIsAdmin(checked === true)}
+									disabled={isLoading}
+								/>
+								<div className="grid gap-0.5">
+									<Label htmlFor="is_admin" className="cursor-pointer">Admin role</Label>
+									<p className="text-xs text-muted-foreground">Users with this role can access the admin dashboard.</p>
+								</div>
+							</div>
+
+							<div className="flex items-center gap-3">
+								<Checkbox
+									id="is_default"
+									checked={isDefault}
+									onCheckedChange={(checked) => setIsDefault(checked === true)}
+									disabled={isLoading}
+								/>
+								<div className="grid gap-0.5">
+									<Label htmlFor="is_default" className="cursor-pointer">Default role</Label>
+									<p className="text-xs text-muted-foreground">Automatically assigned to new registered users.</p>
+								</div>
+							</div>
+						</div>
 					</div>
 					<DialogFooter>
 						<Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
 							Cancel
 						</Button>
 						<Button type="submit" disabled={isLoading}>
-							{isLoading ? (mode === 'create' ? 'Creating...' : 'Updating...') : mode === 'create' ? 'Create' : 'Update'}
+							{isLoading
+								? mode === 'create' ? 'Creating...' : 'Updating...'
+								: mode === 'create' ? 'Create' : 'Update'}
 						</Button>
 					</DialogFooter>
 				</form>

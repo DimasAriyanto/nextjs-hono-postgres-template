@@ -1,4 +1,4 @@
-import { eq, ilike, and } from 'drizzle-orm';
+import { eq, ilike, and, ne } from 'drizzle-orm';
 import { db } from '@/server/databases/client';
 import {
 	RolesTable,
@@ -86,6 +86,17 @@ export class RoleRepository {
 		});
 
 		return role;
+	}
+
+	/**
+	 * Unset is_default from all roles except the given ID
+	 */
+	async clearDefault(exceptId?: string): Promise<void> {
+		const condition = exceptId
+			? and(eq(RolesTable.is_default, true), ne(RolesTable.id, exceptId))
+			: eq(RolesTable.is_default, true);
+
+		await db.update(RolesTable).set({ is_default: false }).where(condition);
 	}
 
 	/**

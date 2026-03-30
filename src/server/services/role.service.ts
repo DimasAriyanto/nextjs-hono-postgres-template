@@ -71,27 +71,32 @@ export class RoleService {
 	/**
 	 * Create new role
 	 */
-	async createRole(data: { name: string; created_by?: string }) {
+	async createRole(data: { name: string; is_admin?: boolean; is_default?: boolean; created_by?: string }) {
 		// Check if name already exists
 		const existingRole = await roleRepository.findByName(data.name);
 		if (existingRole) {
 			throw new ConflictError('Role name already exists');
 		}
 
+		// Enforce single default: unset current default before setting new one
+		if (data.is_default) {
+			await roleRepository.clearDefault();
+		}
+
 		const roleData: TInsertRole = {
 			name: data.name,
+			is_admin: data.is_admin ?? false,
+			is_default: data.is_default ?? false,
 			created_by: data.created_by,
 		};
 
-		const role = await roleRepository.create(roleData);
-
-		return role;
+		return roleRepository.create(roleData);
 	}
 
 	/**
 	 * Update role
 	 */
-	async updateRole(id: string, data: { name?: string; updated_by?: string }) {
+	async updateRole(id: string, data: { name?: string; is_admin?: boolean; is_default?: boolean; updated_by?: string }) {
 		const existingRole = await roleRepository.findById(id);
 		if (!existingRole) {
 			throw new NotFoundError('Role');
@@ -105,8 +110,15 @@ export class RoleService {
 			}
 		}
 
+		// Enforce single default: unset other roles before setting this one as default
+		if (data.is_default) {
+			await roleRepository.clearDefault(id);
+		}
+
 		const updateData: Partial<TInsertRole> = {
 			name: data.name,
+			is_admin: data.is_admin,
+			is_default: data.is_default,
 			updated_by: data.updated_by,
 		};
 
