@@ -12,9 +12,10 @@ interface DataTableToolbarProps<TData> {
 	table: Table<TData>;
 	FilterComp?: React.ElementType<{ table: Table<TData> }>;
 	CreateComp?: React.ElementType;
+	ExportComp?: React.ElementType;
 }
 
-export const DataTableToolbar = <TData,>({ table, FilterComp, CreateComp }: DataTableToolbarProps<TData>) => {
+export const DataTableToolbar = <TData,>({ table, FilterComp, CreateComp, ExportComp }: DataTableToolbarProps<TData>) => {
 	const [searchInput, setSearchInput] = useState('');
 	const [keywords, setKeywords] = useQueryState('keywords', { shallow: false });
 
@@ -60,6 +61,7 @@ export const DataTableToolbar = <TData,>({ table, FilterComp, CreateComp }: Data
 			<div className="flex items-center space-x-2">
 				<DataTableViewOptions table={table} />
 
+				{ExportComp && <ExportComp />}
 				{CreateComp && <CreateComp />}
 			</div>
 		</div>

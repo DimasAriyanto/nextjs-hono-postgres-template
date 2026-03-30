@@ -31,6 +31,7 @@ interface DataTableProps<TData, TValue> {
 	meta: { limit: number; total: number };
 	FilterComp?: React.ElementType<{ table: TTable<TData> }>;
 	CreateComp?: React.ElementType;
+	ExportComp?: React.ElementType;
 	TabsComp?: React.ElementType<{ table: TTable<TData> }>;
 	isError: boolean;
 	isLoading: boolean;
@@ -42,6 +43,7 @@ export const DataTable = <TData, TValue>({
 	meta = { limit: 10, total: 0 },
 	FilterComp,
 	CreateComp,
+	ExportComp,
 	TabsComp,
 	isError = false,
 	isLoading = true,
@@ -121,7 +123,7 @@ export const DataTable = <TData, TValue>({
 		<div className="space-y-4">
 			{TabsComp && <TabsComp table={table} />}
 
-			<DataTableToolbar table={table} FilterComp={FilterComp} CreateComp={CreateComp} />
+			<DataTableToolbar table={table} FilterComp={FilterComp} CreateComp={CreateComp} ExportComp={ExportComp} />
 
 			<div className="rounded-md border overflow-hidden">
 				<Table>

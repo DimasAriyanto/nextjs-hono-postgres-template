@@ -5,11 +5,14 @@ import { parseAsInteger, useQueryState } from 'nuqs';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { DataTable } from '@/components/data-table';
+import { ExportButton } from '@/components/export-button';
 import { createUserColumns } from './user-columns';
 import { UserFormModal } from './user-form-modal';
 import { PageHeader } from '@/components/page-header';
 import { useUsers, useDeleteUser } from '@/features/user/hooks/use-user';
+import { getUsers } from '@/features/user/apis/user.api';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -82,6 +85,23 @@ export function UserListWrapper() {
 		</Button>
 	);
 
+	const UserExportButton = () => (
+		<ExportButton
+			filename={`users-${format(new Date(), 'yyyy-MM-dd')}`}
+			title="User List"
+			onFetchData={async () => {
+				const res = await getUsers({ page: 1, limit: 10000, search: keywords ?? undefined });
+				return (res.data ?? []).map((u) => ({
+					'Name': u.name ?? '-',
+					'Email': u.email,
+					'Roles': (u.roles as { name: string }[] | undefined)?.map((r) => r.name).join(', ') || '-',
+					'Verified': (u as { email_verified_at?: string | null }).email_verified_at ? 'Yes' : 'No',
+					'Created At': u.created_at,
+				}));
+			}}
+		/>
+	);
+
 	return (
 		<>
 			<PageHeader
@@ -99,6 +119,7 @@ export function UserListWrapper() {
 				data={users}
 				meta={{ limit, total }}
 				CreateComp={CreateButton}
+				ExportComp={UserExportButton}
 				isError={isError}
 				isLoading={isLoading}
 			/>
