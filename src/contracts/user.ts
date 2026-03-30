@@ -11,6 +11,7 @@ export const createUserSchema = z.object({
 	email: z.string().min(1, 'Email is required').email('Invalid email format'),
 	password: z.string().min(6, 'Password must be at least 6 characters'),
 	name: z.string().optional(),
+	avatar_url: z.string().optional(),
 	role_id: z.string().uuid('Invalid role ID').optional(),
 });
 
@@ -23,6 +24,7 @@ export const updateUserSchema = z.object({
 	email: z.string().email('Invalid email format').optional(),
 	password: z.string().min(6, 'Password must be at least 6 characters').optional(),
 	name: z.string().optional(),
+	avatar_url: z.string().optional(),
 	role_id: z.string().uuid('Invalid role ID').optional(),
 });
 
@@ -48,6 +50,7 @@ export const userSchema = z.object({
 	id: z.string(),
 	email: z.string(),
 	name: z.string().nullable().optional(),
+	avatar_url: z.string().nullable().optional(),
 	email_verified_at: z.string().nullable().optional(),
 	created_at: z.string(),
 	updated_at: z.string(),

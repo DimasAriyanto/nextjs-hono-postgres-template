@@ -59,7 +59,7 @@ export class UserService {
 	/**
 	 * Create new user
 	 */
-	async createUser(data: { email: string; password: string; name?: string; role_id?: string; created_by?: string }) {
+	async createUser(data: { email: string; password: string; name?: string; avatar_url?: string; role_id?: string; created_by?: string }) {
 		// Check if email already exists
 		const existingUser = await userRepository.findByEmail(data.email);
 		if (existingUser) {
@@ -73,6 +73,7 @@ export class UserService {
 			email: data.email,
 			password: hashedPassword,
 			name: data.name,
+			avatar_url: data.avatar_url,
 			created_by: data.created_by,
 		};
 
@@ -94,6 +95,7 @@ export class UserService {
 		data: {
 			email?: string;
 			name?: string;
+			avatar_url?: string;
 			password?: string;
 			role_id?: string;
 			updated_by?: string;
@@ -115,6 +117,7 @@ export class UserService {
 		const updateData: Partial<TInsertUser> = {
 			email: data.email,
 			name: data.name,
+			avatar_url: data.avatar_url,
 			updated_by: data.updated_by,
 		};
 

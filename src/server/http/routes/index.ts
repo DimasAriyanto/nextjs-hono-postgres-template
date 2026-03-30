@@ -3,6 +3,7 @@ import { authRoutes } from './auth.routes';
 import { usersRoutes } from './users.routes';
 import { rolesRoutes } from './roles.routes';
 import { notificationRoutes } from './notification.routes';
+import { uploadRoutes } from './upload.routes';
 
 export const apiRoutes = new Hono();
 
@@ -11,5 +12,6 @@ apiRoutes.route('/auths', authRoutes);
 apiRoutes.route('/users', usersRoutes);
 apiRoutes.route('/roles', rolesRoutes);
 apiRoutes.route('/notifications', notificationRoutes);
+apiRoutes.route('/uploads', uploadRoutes);
 
-export { authRoutes, usersRoutes, rolesRoutes, notificationRoutes };
+export { authRoutes, usersRoutes, rolesRoutes, notificationRoutes, uploadRoutes };

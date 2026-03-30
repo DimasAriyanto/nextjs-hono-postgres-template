@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
-	User, Mail, Shield, Key, Pencil, Check, X, BadgeCheck,
+	User, Mail, Shield, Key, Pencil, Check, X, BadgeCheck, Camera, Loader2,
 } from 'lucide-react';
+import Image from 'next/image';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +28,21 @@ const profileEditSchema = z.object({
 
 type TProfileEdit = z.infer<typeof profileEditSchema>;
 type TChangePassword = z.infer<typeof changePasswordSchema>;
+
+// ─── Upload helper ─────────────────────────────────────────────────────────────
+
+async function uploadAvatar(file: File): Promise<string> {
+	const fd = new FormData();
+	fd.append('file', file);
+	fd.append('folder', 'avatars');
+	const res = await fetch('/api/v1/uploads/image', { method: 'POST', body: fd });
+	if (!res.ok) {
+		const json = await res.json() as { message?: string };
+		throw new Error(json.message ?? 'Failed to upload avatar');
+	}
+	const json = await res.json() as { data: { url: string } };
+	return json.data.url;
+}
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
@@ -69,6 +86,12 @@ export function AccountSettingWrapper() {
 	const [editingProfile, setEditingProfile] = useState(false);
 	const [editingPassword, setEditingPassword] = useState(false);
 
+	// Avatar state — file queued until Save is clicked
+	const [avatarFile, setAvatarFile] = useState<File | null>(null);
+	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+	const avatarInputRef = useRef<HTMLInputElement>(null);
+
 	const { data: profileRes, isLoading } = useProfile();
 	const user = profileRes?.data;
 
@@ -78,7 +101,7 @@ export function AccountSettingWrapper() {
 	const profileForm = useForm<TProfileEdit>({
 		resolver: zodResolver(profileEditSchema),
 		values: {
-			name: (user as { name?: string })?.name ?? '',
+			name: user?.name ?? '',
 		},
 	});
 
@@ -91,10 +114,51 @@ export function AccountSettingWrapper() {
 		},
 	});
 
-	const onSubmitProfile = (values: TProfileEdit) => {
-		updateProfile(values, {
-			onSuccess: () => setEditingProfile(false),
-		});
+	const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		if (!file.type.startsWith('image/')) {
+			toast.error('Invalid file', { description: 'Please select an image file' });
+			return;
+		}
+		if (file.size > 5 * 1024 * 1024) {
+			toast.error('File too large', { description: 'Image must be less than 5 MB' });
+			return;
+		}
+
+		setAvatarFile(file);
+		const reader = new FileReader();
+		reader.onloadend = () => setAvatarPreview(reader.result as string);
+		reader.readAsDataURL(file);
+
+		e.target.value = '';
+	};
+
+	const onSubmitProfile = async (values: TProfileEdit) => {
+		let avatarUrl: string | undefined;
+
+		if (avatarFile) {
+			setIsUploadingAvatar(true);
+			try {
+				avatarUrl = await uploadAvatar(avatarFile);
+			} catch (err) {
+				toast.error('Upload failed', { description: err instanceof Error ? err.message : 'Failed to upload avatar' });
+				setIsUploadingAvatar(false);
+				return;
+			}
+			setIsUploadingAvatar(false);
+		}
+
+		updateProfile(
+			{ name: values.name, ...(avatarUrl ? { avatar_url: avatarUrl } : {}) },
+			{
+				onSuccess: () => {
+					setEditingProfile(false);
+					setAvatarFile(null);
+				},
+			},
+		);
 	};
 
 	const onSubmitPassword = (values: TChangePassword) => {
@@ -106,21 +170,20 @@ export function AccountSettingWrapper() {
 		});
 	};
 
-	const initials = ((user as { name?: string })?.name ?? '')
+	const initials = (user?.name ?? '')
 		.split(' ')
 		.slice(0, 2)
 		.map((w: string) => w[0]?.toUpperCase() ?? '')
 		.join('');
 
+	const currentAvatar = avatarPreview ?? user?.avatar_url ?? null;
 	const adminRole = user?.roles?.find((r) => r.is_admin);
+	const isSavingProfile = updatingProfile || isUploadingAvatar;
 
 	if (isLoading) return (
 		<>
 			<PageHeader
-				breadcrumbs={[
-					{ label: 'Dashboard', href: '/gundala-admin/d' },
-					{ label: 'Profile' },
-				]}
+				breadcrumbs={[{ label: 'Dashboard', href: '/gundala-admin/d' }, { label: 'Profile' }]}
 				title="My Profile"
 			/>
 			<ProfileSkeleton />
@@ -130,10 +193,7 @@ export function AccountSettingWrapper() {
 	return (
 		<>
 			<PageHeader
-				breadcrumbs={[
-					{ label: 'Dashboard', href: '/gundala-admin/d' },
-					{ label: 'Profile' },
-				]}
+				breadcrumbs={[{ label: 'Dashboard', href: '/gundala-admin/d' }, { label: 'Profile' }]}
 				title="My Profile"
 				description="Manage your account information and security settings."
 			/>
@@ -141,15 +201,37 @@ export function AccountSettingWrapper() {
 			<div className="space-y-6">
 				{/* Avatar + identity */}
 				<div className="flex items-center gap-4">
-					<div className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background text-lg font-bold shrink-0">
-						{initials || <User className="size-5" />}
+					<div className="relative shrink-0">
+						<div className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background text-lg font-bold overflow-hidden">
+							{currentAvatar ? (
+								<Image src={currentAvatar} alt="Avatar" fill className="object-cover rounded-full" />
+							) : (
+								initials || <User className="size-5" />
+							)}
+						</div>
+						{editingProfile && (
+							<button
+								type="button"
+								onClick={() => avatarInputRef.current?.click()}
+								disabled={isSavingProfile}
+								className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-background hover:bg-foreground/80 transition-colors disabled:opacity-50"
+							>
+								{isUploadingAvatar ? <Loader2 className="size-3 animate-spin" /> : <Camera className="size-3" />}
+							</button>
+						)}
+						<input
+							ref={avatarInputRef}
+							type="file"
+							accept="image/*"
+							className="sr-only"
+							onChange={handleAvatarChange}
+						/>
 					</div>
+
 					<div>
 						<div className="flex items-center gap-2 flex-wrap">
-							<h2 className="text-lg font-bold">{(user as { name?: string })?.name || user?.email}</h2>
-							{adminRole && (
-								<Badge variant="default">Admin</Badge>
-							)}
+							<h2 className="text-lg font-bold">{user?.name || user?.email}</h2>
+							{adminRole && <Badge variant="default">Admin</Badge>}
 							{user?.email_verified && (
 								<Badge variant="secondary" className="flex items-center gap-1">
 									<BadgeCheck className="size-3" />
@@ -158,6 +240,9 @@ export function AccountSettingWrapper() {
 							)}
 						</div>
 						<p className="text-sm text-muted-foreground">{user?.email}</p>
+						{avatarFile && !isUploadingAvatar && (
+							<p className="text-xs text-muted-foreground mt-0.5">New photo selected — will be uploaded on Save</p>
+						)}
 					</div>
 				</div>
 
@@ -196,19 +281,32 @@ export function AccountSettingWrapper() {
 										</FormItem>
 									</div>
 									<div className="flex justify-end gap-3 pt-2">
-										<Button type="button" variant="outline" size="sm" onClick={() => { profileForm.reset(); setEditingProfile(false); }} disabled={updatingProfile}>
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
+											onClick={() => {
+												profileForm.reset();
+												setEditingProfile(false);
+												setAvatarFile(null);
+												setAvatarPreview(null);
+											}}
+											disabled={isSavingProfile}
+										>
 											<X className="size-3.5 mr-1.5" /> Cancel
 										</Button>
-										<Button type="submit" size="sm" disabled={updatingProfile}>
-											<Check className="size-3.5 mr-1.5" />
-											{updatingProfile ? 'Saving...' : 'Save'}
+										<Button type="submit" size="sm" disabled={isSavingProfile}>
+											{isSavingProfile
+												? <><Loader2 className="size-3.5 mr-1.5 animate-spin" />Saving...</>
+												: <><Check className="size-3.5 mr-1.5" />Save</>
+											}
 										</Button>
 									</div>
 								</form>
 							</Form>
 						) : (
 							<div className="grid grid-cols-2 gap-4">
-								<InfoRow label="Name" value={(user as { name?: string })?.name} />
+								<InfoRow label="Name" value={user?.name} />
 								<InfoRow label="Email" value={user?.email} />
 								<InfoRow label="Email Verified" value={user?.email_verified ? 'Verified' : 'Not verified'} />
 								<InfoRow label="Roles" value={user?.roles?.map((r) => r.name).join(', ') || '—'} />
@@ -263,8 +361,10 @@ export function AccountSettingWrapper() {
 											<X className="size-3.5 mr-1.5" /> Cancel
 										</Button>
 										<Button type="submit" size="sm" disabled={changingPassword}>
-											<Check className="size-3.5 mr-1.5" />
-											{changingPassword ? 'Saving...' : 'Save Password'}
+											{changingPassword
+												? <><Loader2 className="size-3.5 mr-1.5 animate-spin" />Saving...</>
+												: <><Check className="size-3.5 mr-1.5" />Save Password</>
+											}
 										</Button>
 									</div>
 								</form>

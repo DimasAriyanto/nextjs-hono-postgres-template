@@ -382,6 +382,8 @@ export class AuthService {
 		return {
 			id: user.id,
 			email: user.email,
+			name: user.name as string | null | undefined,
+			avatar_url: user.avatar_url as string | null | undefined,
 			created_at: user.created_at,
 			updated_at: user.updated_at,
 		};

@@ -101,6 +101,8 @@ export type TResetPasswordRequest = z.infer<typeof resetPasswordSchema>;
 export const authUserSchema = z.object({
 	id: z.string(),
 	email: z.string(),
+	name: z.string().nullable().optional(),
+	avatar_url: z.string().nullable().optional(),
 	title: z.string().nullable().optional(),
 	created_at: z.string(),
 	updated_at: z.string(),
