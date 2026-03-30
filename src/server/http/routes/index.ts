@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { authRoutes } from './auth.routes';
 import { usersRoutes } from './users.routes';
 import { rolesRoutes } from './roles.routes';
+import { notificationRoutes } from './notification.routes';
 
 export const apiRoutes = new Hono();
 
@@ -9,5 +10,6 @@ export const apiRoutes = new Hono();
 apiRoutes.route('/auths', authRoutes);
 apiRoutes.route('/users', usersRoutes);
 apiRoutes.route('/roles', rolesRoutes);
+apiRoutes.route('/notifications', notificationRoutes);
 
-export { authRoutes, usersRoutes, rolesRoutes };
+export { authRoutes, usersRoutes, rolesRoutes, notificationRoutes };

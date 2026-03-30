@@ -9,3 +9,6 @@ export * from './user';
 
 // Role
 export * from './role';
+
+// Notification
+export * from './notification';
