@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import * as authApi from '@/features/auth/apis/auth.api';
-import type { TLoginRequest, TRegisterRequest } from '@/contracts';
+import type { TForgotPasswordRequest, TLoginRequest, TRegisterRequest, TResetPasswordRequest } from '@/contracts';
 
 /**
  * Query keys for auth
@@ -80,5 +80,32 @@ export function useLogout() {
 export function useResendVerification() {
 	return useMutation({
 		mutationFn: authApi.resendVerification,
+	});
+}
+
+/**
+ * Hook for forgot password mutation
+ */
+export function useForgotPassword(options?: { onSuccess?: () => void; onError?: (error: Error) => void }) {
+	return useMutation({
+		mutationFn: (data: TForgotPasswordRequest) => authApi.forgotPassword(data),
+		onSuccess: options?.onSuccess,
+		onError: options?.onError,
+	});
+}
+
+/**
+ * Hook for reset password mutation
+ */
+export function useResetPassword(options?: { onSuccess?: () => void; onError?: (error: Error) => void }) {
+	const router = useRouter();
+
+	return useMutation({
+		mutationFn: (data: TResetPasswordRequest) => authApi.resetPassword(data),
+		onSuccess: () => {
+			options?.onSuccess?.();
+			router.push('/login');
+		},
+		onError: options?.onError,
 	});
 }

@@ -4,6 +4,8 @@ import type {
 	TRegisterRequest,
 	TLoginResponse,
 	TProfileResponse,
+	TForgotPasswordRequest,
+	TResetPasswordRequest,
 } from '@/contracts';
 import type { ApiSuccessResponse } from '@/types/api-response';
 
@@ -58,6 +60,26 @@ export async function logout(): Promise<ApiSuccessResponse<null>> {
 export async function resendVerification(): Promise<ApiSuccessResponse<null>> {
 	return handleResponse<null>(
 		client.api.v1.auths['resend-verification'].$post()
+	);
+}
+
+/**
+ * POST /api/v1/auths/forgot-password
+ * Request password reset
+ */
+export async function forgotPassword(request: TForgotPasswordRequest): Promise<ApiSuccessResponse<null>> {
+	return handleResponse<null>(
+		client.api.v1.auths['forgot-password'].$post({ json: request })
+	);
+}
+
+/**
+ * POST /api/v1/auths/reset-password
+ * Reset password with token
+ */
+export async function resetPassword(request: TResetPasswordRequest): Promise<ApiSuccessResponse<null>> {
+	return handleResponse<null>(
+		client.api.v1.auths['reset-password'].$post({ json: request })
 	);
 }
 

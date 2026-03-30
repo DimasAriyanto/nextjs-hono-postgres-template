@@ -31,6 +31,31 @@ export const registerSchema = z
 
 export type TRegisterRequest = z.infer<typeof registerSchema>;
 
+/**
+ * Forgot password request schema
+ */
+export const forgotPasswordSchema = z.object({
+	email: z.string().min(1, 'Email wajib diisi').email('Format email tidak valid'),
+});
+
+export type TForgotPasswordRequest = z.infer<typeof forgotPasswordSchema>;
+
+/**
+ * Reset password request schema
+ */
+export const resetPasswordSchema = z
+	.object({
+		token: z.string().min(1, 'Token tidak valid'),
+		password: z.string().min(6, 'Password minimal 6 karakter'),
+		password_confirmation: z.string().min(1, 'Konfirmasi password wajib diisi'),
+	})
+	.refine((data) => data.password === data.password_confirmation, {
+		message: 'Password tidak cocok',
+		path: ['password_confirmation'],
+	});
+
+export type TResetPasswordRequest = z.infer<typeof resetPasswordSchema>;
+
 // ============================================
 // RESPONSE SCHEMAS
 // ============================================

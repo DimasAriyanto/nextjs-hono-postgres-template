@@ -1,5 +1,10 @@
 import nodemailer from 'nodemailer';
-import { verificationEmailTemplate, verificationEmailText } from '@/server/utils/templates/email';
+import {
+	verificationEmailTemplate,
+	verificationEmailText,
+	resetPasswordEmailTemplate,
+	resetPasswordEmailText,
+} from '@/server/utils/templates/email';
 
 interface SendEmailOptions {
 	to: string;
@@ -52,25 +57,11 @@ export class EmailService {
 
 		const verificationUrl = `${appUrl}/api/v1/auths/verify-email?token=${token}`;
 
-		const html = verificationEmailTemplate({
-			appName,
-			verificationUrl,
-			userName,
-			expirationHours: 24,
-		});
-
-		const text = verificationEmailText({
-			appName,
-			verificationUrl,
-			userName,
-			expirationHours: 24,
-		});
-
 		return this.send({
 			to,
 			subject: `Verify your email - ${appName}`,
-			html,
-			text,
+			html: verificationEmailTemplate({ appName, verificationUrl, userName, expirationHours: 24 }),
+			text: verificationEmailText({ appName, verificationUrl, userName, expirationHours: 24 }),
 		});
 	}
 
@@ -84,19 +75,11 @@ export class EmailService {
 
 		const resetUrl = `${appUrl}/reset-password?token=${token}`;
 
-		const html = `
-			<h1>Reset Your Password</h1>
-			<p>Hi${userName ? ` ${userName}` : ''},</p>
-			<p>You requested to reset your password. Click the link below:</p>
-			<a href="${resetUrl}">Reset Password</a>
-			<p>This link will expire in 1 hour.</p>
-			<p>If you didn't request this, please ignore this email.</p>
-		`;
-
 		return this.send({
 			to,
 			subject: `Reset your password - ${appName}`,
-			html,
+			html: resetPasswordEmailTemplate({ appName, resetUrl, userName, expirationHours: 1 }),
+			text: resetPasswordEmailText({ appName, resetUrl, userName, expirationHours: 1 }),
 		});
 	}
 }

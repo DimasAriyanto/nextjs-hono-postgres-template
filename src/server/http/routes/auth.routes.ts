@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { authController } from '../controllers';
-import { loginRequest, registerRequest } from '@/server/http/validators/auths.validator';
+import { loginRequest, registerRequest, forgotPasswordRequest, resetPasswordRequest } from '@/server/http/validators/auths.validator';
 import { auth } from '@/server/http/middlewares/auth';
 
 export const authRoutes = new Hono()
@@ -9,4 +9,6 @@ export const authRoutes = new Hono()
 	.get('/profile', auth, authController.profile)
 	.get('/signout', authController.signout)
 	.get('/verify-email', authController.verifyEmail)
+	.post('/forgot-password', forgotPasswordRequest, authController.forgotPassword)
+	.post('/reset-password', resetPasswordRequest, authController.resetPassword)
 	.post('/resend-verification', auth, authController.resendVerification);

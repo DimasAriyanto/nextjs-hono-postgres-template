@@ -86,6 +86,28 @@ export const authController = {
 	},
 
 	/**
+	 * POST /auths/forgot-password
+	 * Send password reset email
+	 */
+	async forgotPassword(c: Context) {
+		const body = await c.req.json();
+		const result = await authService.forgotPassword(body);
+
+		return response.success(c, result.message);
+	},
+
+	/**
+	 * POST /auths/reset-password
+	 * Reset password with token
+	 */
+	async resetPassword(c: Context) {
+		const body = await c.req.json();
+		const result = await authService.resetPassword(body);
+
+		return response.success(c, result.message);
+	},
+
+	/**
 	 * GET /auths/signout
 	 * Sign out user
 	 */

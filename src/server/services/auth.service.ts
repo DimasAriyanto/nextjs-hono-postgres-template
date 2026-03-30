@@ -191,6 +191,55 @@ export class AuthService {
 	}
 
 	/**
+	 * Send password reset email (forgot password)
+	 */
+	async forgotPassword(data: { email: string }) {
+		const user = await userRepository.findByEmail(data.email);
+
+		// Return generic message regardless of whether user exists (security)
+		if (!user) {
+			return { message: 'If that email is registered, a reset link has been sent.' };
+		}
+
+		const token = generateVerificationToken();
+		const expiresAt = generateTokenExpiration(1); // 1 hour
+
+		await userRepository.updateForgotPasswordToken(user.id, token, expiresAt.toISOString());
+
+		emailService.sendPasswordResetEmail({
+			to: user.email,
+			token,
+			userName: user.name || undefined,
+		}).catch((err) => {
+			console.error('Failed to send password reset email:', err);
+		});
+
+		return { message: 'If that email is registered, a reset link has been sent.' };
+	}
+
+	/**
+	 * Reset password with token
+	 */
+	async resetPassword(data: { token: string; password: string }) {
+		const user = await userRepository.findByForgotPasswordToken(data.token);
+
+		if (!user) {
+			throw AuthError.tokenInvalid();
+		}
+
+		if (!user.token_forgot_password_expires_at || isTokenExpired(user.token_forgot_password_expires_at)) {
+			throw AuthError.tokenExpired();
+		}
+
+		const hashedPassword = await hashPassword(data.password);
+
+		await userRepository.update(user.id, { password: hashedPassword });
+		await userRepository.updateForgotPasswordToken(user.id, null, null);
+
+		return { message: 'Password has been reset successfully' };
+	}
+
+	/**
 	 * Get cookie configuration
 	 */
 	getCookieConfig() {

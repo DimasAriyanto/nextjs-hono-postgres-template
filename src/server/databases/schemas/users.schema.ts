@@ -19,6 +19,7 @@ export const UsersTable = pgTable('users', {
 	name: t.varchar('name', { length: 255 }),
 	token_device: t.varchar('token_device', { length: 255 }),
 	token_forgot_password: t.varchar('token_forgot_password', { length: 255 }),
+	token_forgot_password_expires_at: t.timestamp('token_forgot_password_expires_at', { mode: 'string' }),
 	// Email verification fields
 	email_verified_at: t.timestamp('email_verified_at', { mode: 'string' }),
 	verification_token: t.varchar('verification_token', { length: 255 }),

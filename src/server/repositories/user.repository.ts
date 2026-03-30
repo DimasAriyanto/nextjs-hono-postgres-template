@@ -193,6 +193,40 @@ export class UserRepository {
 		const user = await this.findById(userId);
 		return user?.email_verified_at !== null;
 	}
+
+	/**
+	 * Find user by forgot password token
+	 */
+	async findByForgotPasswordToken(token: string): Promise<TSelectUser | undefined> {
+		const [user] = await db
+			.select()
+			.from(UsersTable)
+			.where(eq(UsersTable.token_forgot_password, token))
+			.limit(1);
+
+		return user;
+	}
+
+	/**
+	 * Update forgot password token
+	 */
+	async updateForgotPasswordToken(
+		userId: string,
+		token: string | null,
+		expiresAt: string | null
+	): Promise<TSelectUser | undefined> {
+		const [user] = await db
+			.update(UsersTable)
+			.set({
+				token_forgot_password: token,
+				token_forgot_password_expires_at: expiresAt,
+				updated_at: new Date().toISOString(),
+			})
+			.where(eq(UsersTable.id, userId))
+			.returning();
+
+		return user;
+	}
 }
 
 export const userRepository = new UserRepository();
