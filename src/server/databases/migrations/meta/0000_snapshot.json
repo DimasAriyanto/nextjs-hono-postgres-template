@@ -1,5 +1,5 @@
 {
-  "id": "54322aff-1b06-4c76-8fec-8e5926734334",
+  "id": "ce1d049c-3da2-4ef7-bd86-eae566ab2423",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -208,6 +208,13 @@
           "notNull": true,
           "default": false
         },
+        "is_admin": {
+          "name": "is_admin",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -272,10 +279,28 @@
           "name": "password",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "name": {
           "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "avatar_url": {
+          "name": "avatar_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provider": {
+          "name": "provider",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provider_id": {
+          "name": "provider_id",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
@@ -289,6 +314,12 @@
         "token_forgot_password": {
           "name": "token_forgot_password",
           "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "token_forgot_password_expires_at": {
+          "name": "token_forgot_password_expires_at",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },

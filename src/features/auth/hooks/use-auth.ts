@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import * as authApi from '@/features/auth/apis/auth.api';
 import type { TForgotPasswordRequest, TLoginRequest, TRegisterRequest, TResetPasswordRequest } from '@/contracts';
+import { toast } from 'sonner';
 
 /**
  * Query keys for auth
@@ -32,9 +33,9 @@ export function useLogin(options?: { onError?: (error: Error) => void }) {
 
 	return useMutation({
 		mutationFn: (data: TLoginRequest) => authApi.login(data),
-		onSuccess: () => {
+		onSuccess: (result) => {
 			queryClient.invalidateQueries({ queryKey: authKeys.all });
-			router.push('/gundala-admin/d');
+			router.push(result.data.is_admin ? '/gundala-admin/d' : '/');
 		},
 		onError: options?.onError,
 	});
@@ -107,5 +108,24 @@ export function useResetPassword(options?: { onSuccess?: () => void; onError?: (
 			router.push('/login');
 		},
 		onError: options?.onError,
+	});
+}
+
+/**
+ * Hook for Google authentication
+ */
+export function useGoogleAuth() {
+	const queryClient = useQueryClient();
+	const router = useRouter();
+
+	return useMutation({
+		mutationFn: (data: { token: string }) => authApi.googleAuth(data),
+		onSuccess: (result) => {
+			queryClient.invalidateQueries({ queryKey: authKeys.all });
+			router.push(result.data.is_admin ? '/gundala-admin/d' : '/');
+		},
+		onError: (error: Error) => {
+			toast.error('Google Authentication Failed', { description: error.message });
+		},
 	});
 }

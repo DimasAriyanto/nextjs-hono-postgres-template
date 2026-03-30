@@ -17,17 +17,26 @@ export class AuthService {
 			throw AuthError.invalidCredentials();
 		}
 
+		// OAuth-only users have no password
+		if (!user.password) {
+			throw AuthError.invalidCredentials();
+		}
+
 		const matchPassword = await comparePassword(data.password, user.password);
 
 		if (!matchPassword) {
 			throw AuthError.invalidCredentials();
 		}
 
+		// Resolve user roles to determine admin status
+		const userWithRoles = await userRepository.findByIdWithRoles(user.id);
+		const isAdmin = userWithRoles?.roles.some((r) => r.role.is_admin) ?? false;
+
 		const payload = {
 			exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // expired in 24 hours
 			iat: dayjs().unix(), // issued at
 			auid: user.id,
-			aurl: 'admin',
+			aurl: isAdmin ? 'admin' : 'user',
 			uenv: 'central',
 		};
 
@@ -38,6 +47,7 @@ export class AuthService {
 			token,
 			permissions: null,
 			email_verified: user.email_verified_at !== null,
+			is_admin: isAdmin,
 		};
 	}
 
@@ -187,6 +197,68 @@ export class AuthService {
 			...this.sanitizeUser(user),
 			roles: user.roles.map((r) => r.role),
 			email_verified: user.email_verified_at !== null,
+		};
+	}
+
+	/**
+	 * Parse Google JWT token on the server side (uses Buffer, not atob)
+	 */
+	private parseGoogleToken(token: string): { sub: string; email: string; name: string; picture?: string } {
+		try {
+			const base64Url = token.split('.')[1];
+			const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+			const json = Buffer.from(base64, 'base64').toString('utf-8');
+			return JSON.parse(json);
+		} catch {
+			throw AuthError.tokenInvalid();
+		}
+	}
+
+	/**
+	 * Authenticate with Google OAuth
+	 */
+	async googleAuth(data: { token: string }) {
+		const googleUser = this.parseGoogleToken(data.token);
+
+		if (!googleUser.email || !googleUser.sub) {
+			throw AuthError.tokenInvalid();
+		}
+
+		const { user, isNewUser } = await userRepository.upsertOAuthUser({
+			provider: 'google',
+			provider_id: googleUser.sub,
+			email: googleUser.email,
+			name: googleUser.name || googleUser.email.split('@')[0],
+			avatar_url: googleUser.picture,
+		});
+
+		// Assign default role for new users
+		if (isNewUser) {
+			const defaultRole = await roleRepository.findDefault();
+			if (defaultRole) {
+				await userRepository.assignRole(user.id, defaultRole.id);
+			}
+		}
+
+		const userWithRoles = await userRepository.findByIdWithRoles(user.id);
+		const isAdmin = userWithRoles?.roles.some((r) => r.role.is_admin) ?? false;
+
+		const payload = {
+			exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
+			iat: dayjs().unix(),
+			auid: user.id,
+			aurl: isAdmin ? 'admin' : 'user',
+			uenv: 'central',
+		};
+
+		const token = await sign(payload, process.env.APP_KEY as string);
+
+		return {
+			user: this.sanitizeUser(user),
+			token,
+			permissions: null,
+			email_verified: user.email_verified_at !== null,
+			is_admin: isAdmin,
 		};
 	}
 

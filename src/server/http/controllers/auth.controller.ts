@@ -86,6 +86,20 @@ export const authController = {
 	},
 
 	/**
+	 * POST /auths/google
+	 * Authenticate with Google OAuth
+	 */
+	async googleAuth(c: Context) {
+		const body = await c.req.json();
+		const result = await authService.googleAuth(body);
+
+		const cookieConfig = authService.getCookieConfig();
+		await setSignedCookie(c, cookieConfig.name, result.token, cookieConfig.secret, cookieConfig.options);
+
+		return response.ok(c, result, 'Google authentication successful');
+	},
+
+	/**
 	 * POST /auths/forgot-password
 	 * Send password reset email
 	 */

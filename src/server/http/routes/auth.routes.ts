@@ -1,11 +1,12 @@
 import { Hono } from 'hono';
 import { authController } from '../controllers';
-import { loginRequest, registerRequest, forgotPasswordRequest, resetPasswordRequest } from '@/server/http/validators/auths.validator';
+import { loginRequest, registerRequest, forgotPasswordRequest, resetPasswordRequest, googleAuthRequest } from '@/server/http/validators/auths.validator';
 import { auth } from '@/server/http/middlewares/auth';
 
 export const authRoutes = new Hono()
 	.post('/login', loginRequest, authController.login)
 	.post('/register', registerRequest, authController.register)
+	.post('/google', googleAuthRequest, authController.googleAuth)
 	.get('/profile', auth, authController.profile)
 	.get('/signout', authController.signout)
 	.get('/verify-email', authController.verifyEmail)

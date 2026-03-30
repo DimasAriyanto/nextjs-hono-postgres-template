@@ -6,6 +6,7 @@ export const RolesTable = pgTable('roles', {
 	id: t.uuid('id').defaultRandom().primaryKey(),
 	name: t.varchar('name', { length: 255 }).unique().notNull(),
 	is_default: t.boolean('is_default').notNull().default(false),
+	is_admin: t.boolean('is_admin').notNull().default(false),
 	created_at: t.timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
 	created_by: t.varchar('created_by'),
 	updated_at: t.timestamp('updated_at', { mode: 'string' }).notNull().defaultNow(),
@@ -15,8 +16,12 @@ export const RolesTable = pgTable('roles', {
 export const UsersTable = pgTable('users', {
 	id: t.uuid('id').defaultRandom().primaryKey(),
 	email: t.varchar('email', { length: 255 }).unique().notNull(),
-	password: t.varchar('password', { length: 255 }).notNull(),
+	password: t.varchar('password', { length: 255 }), // Nullable for OAuth users
 	name: t.varchar('name', { length: 255 }),
+	avatar_url: t.text('avatar_url'),
+	// OAuth provider info
+	provider: t.varchar('provider', { length: 50 }), // google, email
+	provider_id: t.varchar('provider_id', { length: 255 }), // User ID from OAuth provider
 	token_device: t.varchar('token_device', { length: 255 }),
 	token_forgot_password: t.varchar('token_forgot_password', { length: 255 }),
 	token_forgot_password_expires_at: t.timestamp('token_forgot_password_expires_at', { mode: 'string' }),

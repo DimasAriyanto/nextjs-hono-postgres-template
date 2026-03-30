@@ -32,6 +32,15 @@ export const registerSchema = z
 export type TRegisterRequest = z.infer<typeof registerSchema>;
 
 /**
+ * Google OAuth request schema
+ */
+export const googleAuthSchema = z.object({
+	token: z.string().min(1, 'Google token is required'),
+});
+
+export type TGoogleAuthRequest = z.infer<typeof googleAuthSchema>;
+
+/**
  * Forgot password request schema
  */
 export const forgotPasswordSchema = z.object({
@@ -81,6 +90,7 @@ export const loginResponseSchema = z.object({
 	token: z.string(),
 	permissions: z.unknown().nullable(),
 	email_verified: z.boolean(),
+	is_admin: z.boolean(),
 });
 
 export type TLoginResponse = z.infer<typeof loginResponseSchema>;

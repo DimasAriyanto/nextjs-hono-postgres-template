@@ -64,6 +64,16 @@ export async function resendVerification(): Promise<ApiSuccessResponse<null>> {
 }
 
 /**
+ * POST /api/v1/auths/google
+ * Authenticate with Google credential
+ */
+export async function googleAuth(request: { token: string }): Promise<ApiSuccessResponse<TLoginResponse>> {
+	return handleResponse<TLoginResponse>(
+		client.api.v1.auths.google.$post({ json: request })
+	);
+}
+
+/**
  * POST /api/v1/auths/forgot-password
  * Request password reset
  */

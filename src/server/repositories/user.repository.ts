@@ -2,6 +2,14 @@ import { eq, and, ilike, or } from 'drizzle-orm';
 import { db } from '@/server/databases/client';
 import { UsersTable, RoleUserTable, type TSelectUser, type TInsertUser } from '@/server/databases/schemas/users.schema';
 
+interface OAuthUserData {
+	provider: string;
+	provider_id: string;
+	email: string;
+	name: string;
+	avatar_url?: string;
+}
+
 export class UserRepository {
 	/**
 	 * Find all users with pagination and search
@@ -192,6 +200,66 @@ export class UserRepository {
 	async isEmailVerified(userId: string): Promise<boolean> {
 		const user = await this.findById(userId);
 		return user?.email_verified_at !== null;
+	}
+
+	/**
+	 * Upsert OAuth user — create if not exists, update provider info if email already registered
+	 */
+	async upsertOAuthUser(data: OAuthUserData): Promise<{ user: TSelectUser; isNewUser: boolean }> {
+		// Check by provider_id first (returning user via same OAuth provider)
+		const [byProvider] = await db
+			.select()
+			.from(UsersTable)
+			.where(and(eq(UsersTable.provider, data.provider), eq(UsersTable.provider_id, data.provider_id)))
+			.limit(1);
+
+		if (byProvider) {
+			// Update avatar/name in case they changed in Google
+			const [updated] = await db
+				.update(UsersTable)
+				.set({ name: data.name, avatar_url: data.avatar_url ?? null, updated_at: new Date().toISOString() })
+				.where(eq(UsersTable.id, byProvider.id))
+				.returning();
+			return { user: updated, isNewUser: false };
+		}
+
+		// Check by email (user registered via email/password before)
+		const [byEmail] = await db
+			.select()
+			.from(UsersTable)
+			.where(eq(UsersTable.email, data.email))
+			.limit(1);
+
+		if (byEmail) {
+			// Link OAuth provider to existing account
+			const [updated] = await db
+				.update(UsersTable)
+				.set({
+					provider: data.provider,
+					provider_id: data.provider_id,
+					avatar_url: data.avatar_url ?? null,
+					email_verified_at: byEmail.email_verified_at ?? new Date().toISOString(),
+					updated_at: new Date().toISOString(),
+				})
+				.where(eq(UsersTable.id, byEmail.id))
+				.returning();
+			return { user: updated, isNewUser: false };
+		}
+
+		// New user — create account (no password for OAuth)
+		const [created] = await db
+			.insert(UsersTable)
+			.values({
+				email: data.email,
+				name: data.name,
+				avatar_url: data.avatar_url ?? null,
+				provider: data.provider,
+				provider_id: data.provider_id,
+				email_verified_at: new Date().toISOString(), // OAuth email is pre-verified
+			})
+			.returning();
+
+		return { user: created, isNewUser: true };
 	}
 
 	/**
