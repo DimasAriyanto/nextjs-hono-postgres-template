@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import * as authApi from '@/features/auth/apis/auth.api';
-import type { TForgotPasswordRequest, TLoginRequest, TRegisterRequest, TResetPasswordRequest } from '@/contracts';
+import type { TForgotPasswordRequest, TLoginRequest, TRegisterRequest, TResetPasswordRequest, TUpdateProfileRequest, TChangePasswordRequest } from '@/contracts';
 import { toast } from 'sonner';
 
 /**
@@ -113,6 +113,58 @@ export function useResetPassword(options?: { onSuccess?: () => void; onError?: (
 			router.push('/login');
 		},
 		onError: options?.onError,
+	});
+}
+
+/**
+ * Hook for updating own profile
+ */
+export function useUpdateProfile() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (data: TUpdateProfileRequest) => authApi.updateProfile(data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: authKeys.profile() });
+			toast.success('Profile updated', { description: 'Your profile has been updated successfully.' });
+		},
+		onError: (error: Error) => {
+			toast.error('Update failed', { description: error.message });
+		},
+	});
+}
+
+/**
+ * Hook for changing own password
+ */
+export function useChangePassword() {
+	return useMutation({
+		mutationFn: (data: TChangePasswordRequest) => authApi.changePassword(data),
+		onSuccess: () => {
+			toast.success('Password changed', { description: 'Your password has been changed successfully.' });
+		},
+		onError: (error: Error) => {
+			toast.error('Change failed', { description: error.message });
+		},
+	});
+}
+
+/**
+ * Hook for deleting own account
+ */
+export function useDeleteAccount() {
+	const queryClient = useQueryClient();
+	const router = useRouter();
+
+	return useMutation({
+		mutationFn: authApi.deleteAccount,
+		onSuccess: () => {
+			queryClient.clear();
+			router.replace('/');
+		},
+		onError: (error: Error) => {
+			toast.error('Delete failed', { description: error.message });
+		},
 	});
 }
 

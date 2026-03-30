@@ -201,6 +201,53 @@ export class AuthService {
 	}
 
 	/**
+	 * Update own profile (name, avatar_url)
+	 */
+	async updateProfile(userId: string, data: { name?: string; avatar_url?: string }) {
+		const user = await userRepository.findById(userId);
+		if (!user) throw new NotFoundError('User');
+
+		const updated = await userRepository.update(userId, {
+			name: data.name,
+			avatar_url: data.avatar_url,
+		});
+
+		return this.sanitizeUser(updated!);
+	}
+
+	/**
+	 * Change own password
+	 */
+	async changePassword(userId: string, data: { current_password: string; new_password: string }) {
+		const user = await userRepository.findById(userId);
+		if (!user) throw new NotFoundError('User');
+
+		if (!user.password) {
+			throw AuthError.invalidCredentials();
+		}
+
+		const match = await comparePassword(data.current_password, user.password);
+		if (!match) throw AuthError.invalidCredentials();
+
+		const hashed = await hashPassword(data.new_password);
+		await userRepository.update(userId, { password: hashed });
+
+		return { message: 'Password changed successfully' };
+	}
+
+	/**
+	 * Delete own account
+	 */
+	async deleteAccount(userId: string) {
+		const user = await userRepository.findById(userId);
+		if (!user) throw new NotFoundError('User');
+
+		await userRepository.delete(userId);
+
+		return { message: 'Account deleted successfully' };
+	}
+
+	/**
 	 * Parse Google JWT token on the server side (uses Buffer, not atob)
 	 */
 	private parseGoogleToken(token: string): { sub: string; email: string; name: string; picture?: string } {

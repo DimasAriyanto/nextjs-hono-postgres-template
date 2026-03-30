@@ -38,6 +38,32 @@ export const googleAuthSchema = z.object({
 	token: z.string().min(1, 'Google token is required'),
 });
 
+/**
+ * Update profile request schema
+ */
+export const updateProfileSchema = z.object({
+	name: z.string().min(1, 'Name is required').optional(),
+	avatar_url: z.string().optional(),
+});
+
+export type TUpdateProfileRequest = z.infer<typeof updateProfileSchema>;
+
+/**
+ * Change password request schema
+ */
+export const changePasswordSchema = z
+	.object({
+		current_password: z.string().min(1, 'Current password is required'),
+		new_password: z.string().min(6, 'New password must be at least 6 characters'),
+		confirm_password: z.string().min(1, 'Confirm password is required'),
+	})
+	.refine((d) => d.new_password === d.confirm_password, {
+		message: 'Passwords do not match',
+		path: ['confirm_password'],
+	});
+
+export type TChangePasswordRequest = z.infer<typeof changePasswordSchema>;
+
 export type TGoogleAuthRequest = z.infer<typeof googleAuthSchema>;
 
 /**

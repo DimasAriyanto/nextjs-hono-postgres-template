@@ -122,6 +122,50 @@ export const authController = {
 	},
 
 	/**
+	 * PUT /auths/profile
+	 * Update own profile (name, avatar_url)
+	 */
+	async updateProfile(c: Context) {
+		const payload = c.get('user') as { auid: string };
+		if (!payload?.auid) throw AuthError.unauthorized();
+
+		const body = await c.req.json();
+		const result = await authService.updateProfile(payload.auid, body);
+
+		return response.ok(c, result, 'Profile updated successfully');
+	},
+
+	/**
+	 * PUT /auths/password
+	 * Change own password
+	 */
+	async changePassword(c: Context) {
+		const payload = c.get('user') as { auid: string };
+		if (!payload?.auid) throw AuthError.unauthorized();
+
+		const body = await c.req.json();
+		const result = await authService.changePassword(payload.auid, body);
+
+		return response.success(c, result.message);
+	},
+
+	/**
+	 * DELETE /auths/account
+	 * Delete own account
+	 */
+	async deleteAccount(c: Context) {
+		const payload = c.get('user') as { auid: string };
+		if (!payload?.auid) throw AuthError.unauthorized();
+
+		const result = await authService.deleteAccount(payload.auid);
+
+		const cookieConfig = authService.getCookieConfig();
+		deleteCookie(c, cookieConfig.name);
+
+		return response.success(c, result.message);
+	},
+
+	/**
 	 * GET /auths/signout
 	 * Sign out user
 	 */

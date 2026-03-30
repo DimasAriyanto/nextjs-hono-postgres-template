@@ -1,4 +1,4 @@
-import { loginSchema, registerSchema, forgotPasswordSchema, resetPasswordSchema, googleAuthSchema } from '@/contracts';
+import { loginSchema, registerSchema, forgotPasswordSchema, resetPasswordSchema, googleAuthSchema, updateProfileSchema, changePasswordSchema } from '@/contracts';
 import { validateJson } from './helper';
 
 /**
@@ -25,3 +25,13 @@ export const resetPasswordRequest = validateJson(resetPasswordSchema);
  * Google OAuth request validator
  */
 export const googleAuthRequest = validateJson(googleAuthSchema);
+
+/**
+ * Update profile request validator
+ */
+export const updateProfileRequest = validateJson(updateProfileSchema);
+
+/**
+ * Change password request validator
+ */
+export const changePasswordRequest = validateJson(changePasswordSchema);

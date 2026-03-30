@@ -7,6 +7,7 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react"
+import Link from "next/link"
 
 import {
   Avatar,
@@ -99,9 +100,11 @@ export function NavUser({
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
-                  <BadgeCheck />
-                  Account
+                <DropdownMenuItem asChild>
+                  <Link href="/gundala-admin/d/profile">
+                    <BadgeCheck />
+                    Account
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <CreditCard />

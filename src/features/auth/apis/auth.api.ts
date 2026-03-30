@@ -6,6 +6,8 @@ import type {
 	TProfileResponse,
 	TForgotPasswordRequest,
 	TResetPasswordRequest,
+	TUpdateProfileRequest,
+	TChangePasswordRequest,
 } from '@/contracts';
 import type { ApiSuccessResponse } from '@/types/api-response';
 
@@ -90,6 +92,36 @@ export async function forgotPassword(request: TForgotPasswordRequest): Promise<A
 export async function resetPassword(request: TResetPasswordRequest): Promise<ApiSuccessResponse<null>> {
 	return handleResponse<null>(
 		client.api.v1.auths['reset-password'].$post({ json: request })
+	);
+}
+
+/**
+ * PUT /api/v1/auths/profile
+ * Update own profile (name, avatar_url)
+ */
+export async function updateProfile(request: TUpdateProfileRequest): Promise<ApiSuccessResponse<TProfileResponse>> {
+	return handleResponse<TProfileResponse>(
+		client.api.v1.auths.profile.$put({ json: request })
+	);
+}
+
+/**
+ * PUT /api/v1/auths/password
+ * Change own password
+ */
+export async function changePassword(request: TChangePasswordRequest): Promise<ApiSuccessResponse<null>> {
+	return handleResponse<null>(
+		client.api.v1.auths.password.$put({ json: request })
+	);
+}
+
+/**
+ * DELETE /api/v1/auths/account
+ * Delete own account
+ */
+export async function deleteAccount(): Promise<ApiSuccessResponse<null>> {
+	return handleResponse<null>(
+		client.api.v1.auths.account.$delete()
 	);
 }
 
