@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# user uploads (runtime data, not source code)
+/public/uploads/*
+!/public/uploads/.gitkeep

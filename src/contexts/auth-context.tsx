@@ -1,10 +1,10 @@
 'use client';
 
 import { createContext } from 'react';
-import type { TTokenPayload } from '@/contracts';
+import type { TProfileResponse } from '@/contracts';
 
 export interface TAuthContextValue {
-	user?: TTokenPayload;
+	user?: TProfileResponse;
 	role?: string;
 	permissions?: string[];
 	// setPermissions?: (permissions: string[]) => void;

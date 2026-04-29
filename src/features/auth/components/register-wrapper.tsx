@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 
 import { cn } from '@/libs/utils';
 import { Button } from '@/components/ui/button';
@@ -15,6 +17,9 @@ import { useRegister, useGoogleAuth } from '@/features/auth/hooks/use-auth';
 import { ApiError } from '@/libs/api';
 
 export const RegisterWrapper = () => {
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 	const {
 		register,
 		handleSubmit,
@@ -111,12 +116,32 @@ export const RegisterWrapper = () => {
 								<div className="grid grid-cols-2 gap-4">
 									<Field>
 										<FieldLabel htmlFor="password">Password</FieldLabel>
-										<Input id="password" type="password" {...register('password')} />
+										<div className="relative">
+											<Input id="password" type={showPassword ? 'text' : 'password'} className="pr-10" {...register('password')} />
+											<button
+												type="button"
+												onClick={() => setShowPassword((prev) => !prev)}
+												className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground"
+												tabIndex={-1}
+											>
+												{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+											</button>
+										</div>
 										<FieldError errors={[errors.password]} />
 									</Field>
 									<Field>
 										<FieldLabel htmlFor="password_confirmation">Confirm Password</FieldLabel>
-										<Input id="password_confirmation" type="password" {...register('password_confirmation')} />
+										<div className="relative">
+											<Input id="password_confirmation" type={showConfirmPassword ? 'text' : 'password'} className="pr-10" {...register('password_confirmation')} />
+											<button
+												type="button"
+												onClick={() => setShowConfirmPassword((prev) => !prev)}
+												className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground"
+												tabIndex={-1}
+											>
+												{showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+											</button>
+										</div>
 										<FieldError errors={[errors.password_confirmation]} />
 									</Field>
 								</div>

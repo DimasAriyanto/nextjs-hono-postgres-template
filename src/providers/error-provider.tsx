@@ -4,7 +4,7 @@ import React, { Component, ErrorInfo, ReactNode, FunctionComponent } from 'react
 
 export type TErrorComp = {
 	message?: string | undefined;
-	setState?: ({}: any) => void;
+	setState?: () => void;
 };
 
 interface Props {

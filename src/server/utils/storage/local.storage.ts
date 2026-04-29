@@ -17,10 +17,9 @@ export class LocalStorageProvider implements StorageProvider {
 		await fs.writeFile(filePath, buffer);
 
 		const storagePath = `${folder}/${filename}`;
-		const appUrl = process.env.APP_URL ?? 'http://localhost:3000';
 
 		return {
-			url: `${appUrl}/uploads/${storagePath}`,
+			url: `/uploads/${storagePath}`,
 			path: storagePath,
 			filename,
 			size: file.size,
@@ -34,7 +33,6 @@ export class LocalStorageProvider implements StorageProvider {
 	}
 
 	getUrl(storagePath: string): string {
-		const appUrl = process.env.APP_URL ?? 'http://localhost:3000';
-		return `${appUrl}/uploads/${storagePath}`;
+		return `/uploads/${storagePath}`;
 	}
 }

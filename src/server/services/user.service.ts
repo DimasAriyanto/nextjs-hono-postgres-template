@@ -195,7 +195,7 @@ export class UserService {
 	 */
 	async verifyPassword(email: string, password: string) {
 		const user = await userRepository.findByEmail(email);
-		if (!user) {
+		if (!user || !user.password) {
 			return false;
 		}
 

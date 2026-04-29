@@ -109,6 +109,7 @@ export class AuthService {
 			token,
 			permissions: null,
 			email_verified: false,
+			is_admin: false,
 			message: 'Please check your email to verify your account',
 		};
 	}
@@ -212,7 +213,10 @@ export class AuthService {
 			avatar_url: data.avatar_url,
 		});
 
-		return this.sanitizeUser(updated!);
+		return {
+			...this.sanitizeUser(updated!),
+			email_verified: updated!.email_verified_at !== null,
+		};
 	}
 
 	/**

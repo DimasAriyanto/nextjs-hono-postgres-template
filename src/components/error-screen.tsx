@@ -11,7 +11,7 @@ export const ErrorScreen = (props: TErrorComp) => {
 					<code className="text-[12px]">Uncaught error: {props.message}</code>
 				</div>
 				<div>
-					<button onClick={() => props.setState!({ hasError: false, message: '' })}>
+					<button onClick={() => props.setState!()}>
 						<span>Coba lagi?</span>
 					</button>
 				</div>

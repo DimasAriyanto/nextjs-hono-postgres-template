@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { handle } from 'hono/vercel';
 import { errorHandler } from '@/server/errors';
-import { authRoutes, usersRoutes, rolesRoutes } from '@/server/http/routes';
+import { apiRoutes } from '@/server/http/routes';
 
 const app = new Hono()
 	.basePath('/api')
@@ -18,9 +18,7 @@ const app = new Hono()
 // Main Routes v1.0
 const appRouter = app
 	.basePath('/v1')
-	.route('/auths', authRoutes)
-	.route('/users', usersRoutes)
-	.route('/roles', rolesRoutes);
+	.route('/', apiRoutes);
 
 // The handler Next.js uses to answer API requests
 export const httpHandler = handle(app);

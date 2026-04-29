@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { client } from './hono-client';
-import type { TTokenPayload } from '@/contracts';
+import type { TProfileResponse } from '@/contracts';
 
 export const getAccount = async () => {
 	const cookieStore = await cookies();
@@ -16,14 +16,16 @@ export const getAccount = async () => {
 		},
 	);
 
-	const data: { message: string; data: TTokenPayload } | null = response.ok ? await response.json() : null;
+	const data: { message: string; data: TProfileResponse } | null = response.ok ? await response.json() : null;
 
 	// const permissions: string[] = response.status === 200 && perms ? JSON.parse(decoded(perms?.value)) : [];
+
+	const isAdmin = data?.data?.roles?.some((r) => r.is_admin) ?? false;
 
 	return {
 		status: response.status,
 		user: data?.data,
-		role: data?.data?.aurl,
+		role: isAdmin ? 'admin' : 'user',
 		token: token?.value,
 		// permissions,
 	};
