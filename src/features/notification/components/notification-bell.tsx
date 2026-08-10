@@ -5,10 +5,10 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/libs/utils';
 import { Button } from '@/components/ui/button';
 import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover';
+	DropdownMenuSub,
+	DropdownMenuSubContent,
+	DropdownMenuSubTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import { useUnreadNotifications, useMarkAsRead, useMarkAllAsRead } from '../hooks/use-notification';
 import type { TNotification, TNotificationType } from '@/contracts/notification';
@@ -80,9 +80,9 @@ function NotificationItem({
 	);
 }
 
-// ── Bell button ────────────────────────────────────────────────────────────────
+// ── Notification menu ─────────────────────────────────────────────────────────
 
-export function NotificationBell() {
+export function NotificationMenu() {
 	const { data } = useUnreadNotifications();
 	const { mutate: markAsRead } = useMarkAsRead();
 	const { mutate: markAllAsRead, isPending } = useMarkAllAsRead();
@@ -92,19 +92,18 @@ export function NotificationBell() {
 	const hasUnread = unreadCount > 0;
 
 	return (
-		<Popover>
-			<PopoverTrigger asChild>
-				<Button variant="ghost" size="icon" className="relative h-8 w-8">
-					{hasUnread ? <BellDot className="size-4" /> : <Bell className="size-4" />}
-					{hasUnread && (
-						<span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-foreground text-background text-[10px] font-bold">
-							{unreadCount > 9 ? '9+' : unreadCount}
-						</span>
-					)}
-				</Button>
-			</PopoverTrigger>
+		<DropdownMenuSub>
+			<DropdownMenuSubTrigger>
+				{hasUnread ? <BellDot className="size-4" /> : <Bell className="size-4" />}
+				Notifications
+				{hasUnread && (
+					<span className="ml-auto flex h-4 w-4 items-center justify-center rounded-full bg-foreground text-background text-[10px] font-bold">
+						{unreadCount > 9 ? '9+' : unreadCount}
+					</span>
+				)}
+			</DropdownMenuSubTrigger>
 
-			<PopoverContent align="end" className="w-80 p-0" sideOffset={8}>
+			<DropdownMenuSubContent className="w-80 p-0">
 				{/* Header */}
 				<div className="flex items-center justify-between px-4 py-3">
 					<div>
@@ -148,7 +147,7 @@ export function NotificationBell() {
 						</div>
 					)}
 				</div>
-			</PopoverContent>
-		</Popover>
+			</DropdownMenuSubContent>
+		</DropdownMenuSub>
 	);
 }
