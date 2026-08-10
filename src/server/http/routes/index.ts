@@ -5,13 +5,12 @@ import { rolesRoutes } from './roles.routes';
 import { notificationRoutes } from './notification.routes';
 import { uploadRoutes } from './upload.routes';
 
-export const apiRoutes = new Hono();
-
-// Mount routes
-apiRoutes.route('/auths', authRoutes);
-apiRoutes.route('/users', usersRoutes);
-apiRoutes.route('/roles', rolesRoutes);
-apiRoutes.route('/notifications', notificationRoutes);
-apiRoutes.route('/uploads', uploadRoutes);
+// Mount routes (chained so the type accumulates for Hono RPC client inference)
+export const apiRoutes = new Hono()
+	.route('/auths', authRoutes)
+	.route('/users', usersRoutes)
+	.route('/roles', rolesRoutes)
+	.route('/notifications', notificationRoutes)
+	.route('/uploads', uploadRoutes);
 
 export { authRoutes, usersRoutes, rolesRoutes, notificationRoutes, uploadRoutes };
