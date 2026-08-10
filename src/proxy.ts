@@ -33,7 +33,7 @@ async function getTokenPayload(request: NextRequest): Promise<TokenPayload | nul
 	}
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
 	const pathname = request.nextUrl.pathname;
 
 	const payload = await getTokenPayload(request);
