@@ -44,7 +44,7 @@ export const notificationController = {
 		const payload = c.get('user') as { auid: string };
 		if (!payload?.auid) throw AuthError.unauthorized();
 
-		const id = c.req.param('id');
+		const id = c.req.param('id') as string;
 		const notification = await notificationService.getNotificationById(id);
 
 		return response.ok(c, notification);
@@ -75,7 +75,7 @@ export const notificationController = {
 		const payload = c.get('user') as { auid: string };
 		if (!payload?.auid) throw AuthError.unauthorized();
 
-		const id = c.req.param('id');
+		const id = c.req.param('id') as string;
 		const notification = await notificationService.markAsRead(id, payload.auid);
 
 		return response.ok(c, notification, 'Notification marked as read');
@@ -102,7 +102,7 @@ export const notificationController = {
 		const payload = c.get('user') as { auid: string };
 		if (!payload?.auid) throw AuthError.unauthorized();
 
-		const id = c.req.param('id');
+		const id = c.req.param('id') as string;
 		const result = await notificationService.deleteNotification(id, payload.auid);
 
 		return response.success(c, result.message);

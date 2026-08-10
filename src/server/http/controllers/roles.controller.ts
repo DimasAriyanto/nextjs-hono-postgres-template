@@ -27,7 +27,7 @@ export const rolesController = {
 	 * Get role by ID
 	 */
 	async show(c: Context) {
-		const id = c.req.param('id');
+		const id = c.req.param('id') as string;
 		const role = await roleService.getRoleById(id);
 
 		return response.ok(c, role);
@@ -38,7 +38,7 @@ export const rolesController = {
 	 * Get role with users
 	 */
 	async showWithUsers(c: Context) {
-		const id = c.req.param('id');
+		const id = c.req.param('id') as string;
 		const role = await roleService.getRoleWithUsers(id);
 
 		return response.ok(c, role);
@@ -49,7 +49,7 @@ export const rolesController = {
 	 * Get role with permissions
 	 */
 	async showWithPermissions(c: Context) {
-		const id = c.req.param('id');
+		const id = c.req.param('id') as string;
 		const role = await roleService.getRoleWithPermissions(id);
 
 		return response.ok(c, role);
@@ -82,7 +82,7 @@ export const rolesController = {
 	 * Update role
 	 */
 	async update(c: Context) {
-		const id = c.req.param('id');
+		const id = c.req.param('id') as string;
 		const body = await c.req.json();
 		const { name } = body;
 
@@ -101,7 +101,7 @@ export const rolesController = {
 	 * Delete role
 	 */
 	async delete(c: Context) {
-		const id = c.req.param('id');
+		const id = c.req.param('id') as string;
 		await roleService.deleteRole(id);
 
 		return response.success(c, 'Role deleted successfully');
@@ -112,7 +112,7 @@ export const rolesController = {
 	 * Assign permission to role
 	 */
 	async assignPermission(c: Context) {
-		const roleId = c.req.param('id');
+		const roleId = c.req.param('id') as string;
 		const body = await c.req.json();
 		const { permission_id } = body;
 
@@ -130,8 +130,8 @@ export const rolesController = {
 	 * Remove permission from role
 	 */
 	async removePermission(c: Context) {
-		const roleId = c.req.param('id');
-		const permissionId = c.req.param('permissionId');
+		const roleId = c.req.param('id') as string;
+		const permissionId = c.req.param('permissionId') as string;
 
 		await roleService.removePermissionFromRole(roleId, permissionId);
 

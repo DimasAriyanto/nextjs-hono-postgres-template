@@ -10,13 +10,14 @@ import {
 	DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Icon } from '../icon';
-import { type Table } from '@tanstack/react-table';
+import { type LegacyTable as Table } from '@tanstack/react-table/legacy';
+import type { RowData } from '@tanstack/react-table';
 
-interface DataTableViewOptionsProps<TData> {
+interface DataTableViewOptionsProps<TData extends RowData> {
 	table: Table<TData>;
 }
 
-export const DataTableViewOptions = <TData,>({ table }: DataTableViewOptionsProps<TData>) => {
+export const DataTableViewOptions = <TData extends RowData,>({ table }: DataTableViewOptionsProps<TData>) => {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>

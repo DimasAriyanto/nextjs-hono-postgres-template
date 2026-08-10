@@ -1,23 +1,24 @@
-import { Column } from '@tanstack/react-table';
+import { type LegacyColumn as Column } from '@tanstack/react-table/legacy';
 import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/libs/utils';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { Icon } from '../icon';
+import type { RowData } from '@tanstack/react-table';
 
-interface DataTableColumnHeaderProps<TData, TValue> extends React.HTMLAttributes<HTMLDivElement> {
+interface DataTableColumnHeaderProps<TData extends RowData, TValue> extends React.HTMLAttributes<HTMLDivElement> {
 	column: Column<TData, TValue>;
 	title: string;
 }
 
-export const DataTableColumnHeader = <TData, TValue>({ column, title, className }: DataTableColumnHeaderProps<TData, TValue>) => {
+export const DataTableColumnHeader = <TData extends RowData, TValue>({ column, title, className }: DataTableColumnHeaderProps<TData, TValue>) => {
 	if (!column.getCanSort()) {
 		return <div className={cn(className)}>{title}</div>;
 	}
 
 	const onPinned = () => {
 		if (column.getIsPinned()) return column.pin(false);
-		column.pin('left');
+		column.pin('start');
 	};
 
 	return (

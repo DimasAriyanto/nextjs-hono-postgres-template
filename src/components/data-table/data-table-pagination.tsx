@@ -1,15 +1,16 @@
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Icon } from '../icon';
-import { type Table } from '@tanstack/react-table';
+import { type LegacyReactTable as Table } from '@tanstack/react-table/legacy';
+import type { RowData } from '@tanstack/react-table';
 
-interface DataTablePaginationProps<TData> {
+interface DataTablePaginationProps<TData extends RowData> {
 	table: Table<TData>;
 }
 
 // {table.getFilteredRowModel().rows?.length ?? 0} -> rows by limit
 
-export const DataTablePagination = <TData,>({ table }: DataTablePaginationProps<TData>) => {
+export const DataTablePagination = <TData extends RowData,>({ table }: DataTablePaginationProps<TData>) => {
 	return (
 		<div className="flex items-center justify-between px-2">
 			<div className="flex-1 text-sm text-muted-foreground">

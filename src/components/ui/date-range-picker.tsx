@@ -125,7 +125,6 @@ export function DateRangePickerWithSidebar({
                         </div>
                         <div className="p-2">
                             <Calendar
-                                initialFocus
                                 mode="range"
                                 defaultMonth={date?.from}
                                 selected={date}

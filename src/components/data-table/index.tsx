@@ -2,30 +2,33 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { flexRender } from '@tanstack/react-table';
 import {
-	flexRender,
 	getCoreRowModel,
 	getFacetedRowModel,
 	getFacetedUniqueValues,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
-	useReactTable,
-	type Table as TTable,
-	type ColumnDef,
-	type ColumnFiltersState,
-	type SortingState,
-	type VisibilityState,
-	type OnChangeFn,
-	type PaginationState,
-	type Column,
+	useLegacyTable,
+	type LegacyReactTable as TTable,
+	type LegacyColumnDef as ColumnDef,
+	type LegacyColumn as Column,
+} from '@tanstack/react-table/legacy';
+import type {
+	ColumnFiltersState,
+	SortingState,
+	ColumnVisibilityState,
+	OnChangeFn,
+	PaginationState,
+	RowData,
 } from '@tanstack/react-table';
 import { parseAsInteger, useQueryState } from 'nuqs';
 import { DataTablePagination } from './data-table-pagination';
 import { DataTableToolbar } from './data-table-toolbar';
 import * as React from 'react';
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends RowData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
 	meta: { limit: number; total: number };
@@ -37,7 +40,7 @@ interface DataTableProps<TData, TValue> {
 	isLoading: boolean;
 }
 
-export const DataTable = <TData, TValue>({
+export const DataTable = <TData extends RowData, TValue>({
 	columns,
 	data,
 	meta = { limit: 10, total: 0 },
@@ -49,7 +52,7 @@ export const DataTable = <TData, TValue>({
 	isLoading = true,
 }: DataTableProps<TData, TValue>) => {
 	const [rowSelection, setRowSelection] = React.useState({});
-	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+	const [columnVisibility, setColumnVisibility] = React.useState<ColumnVisibilityState>({});
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 	const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -65,9 +68,9 @@ export const DataTable = <TData, TValue>({
 		setLimit(value.pageSize);
 	};
 
-	const table = useReactTable({
+	const table = useLegacyTable<TData>({
 		data,
-		columns,
+		columns: columns as ColumnDef<TData, unknown>[],
 		state: {
 			sorting,
 			columnVisibility,
@@ -99,17 +102,19 @@ export const DataTable = <TData, TValue>({
 
 	const getCommonPinningStyles = (column: Column<TData>): React.CSSProperties => {
 		const isPinned = column.getIsPinned();
-		const isLastLeftPinnedColumn = isPinned === 'left' && column.getIsLastColumn('left');
-		const isFirstRightPinnedColumn = isPinned === 'right' && column.getIsFirstColumn('right');
+		const pinnedIndex = column.getPinnedIndex();
+		const { columnPinning } = table.getState();
+		const isLastStartPinnedColumn = isPinned === 'start' && pinnedIndex === (columnPinning.start?.length ?? 0) - 1;
+		const isFirstEndPinnedColumn = isPinned === 'end' && pinnedIndex === 0;
 
 		return {
-			boxShadow: isLastLeftPinnedColumn
+			boxShadow: isLastStartPinnedColumn
 				? '-4px 0 4px -4px #DDD inset'
-				: isFirstRightPinnedColumn
+				: isFirstEndPinnedColumn
 				? '4px 0 4px -4px #DDD inset'
 				: undefined,
-			left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
-			right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
+			left: isPinned === 'start' ? `${column.getStart('start')}px` : undefined,
+			right: isPinned === 'end' ? `${column.getAfter('end')}px` : undefined,
 			// opacity: isPinned ? 0.95 : 1,
 			position: isPinned ? 'sticky' : 'relative',
 			width: column.getSize(),

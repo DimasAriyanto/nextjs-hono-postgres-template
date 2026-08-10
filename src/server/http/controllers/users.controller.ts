@@ -27,7 +27,7 @@ export const usersController = {
 	 * Get user by ID
 	 */
 	async show(c: Context) {
-		const id = c.req.param('id');
+		const id = c.req.param('id') as string;
 		const user = await userService.getUserById(id);
 
 		return response.ok(c, user);
@@ -38,7 +38,7 @@ export const usersController = {
 	 * Get user with roles
 	 */
 	async showWithRoles(c: Context) {
-		const id = c.req.param('id');
+		const id = c.req.param('id') as string;
 		const user = await userService.getUserWithRoles(id);
 
 		return response.ok(c, user);
@@ -78,7 +78,7 @@ export const usersController = {
 	 * Update user
 	 */
 	async update(c: Context) {
-		const id = c.req.param('id');
+		const id = c.req.param('id') as string;
 		const body = await c.req.json();
 		const { email, name, avatar_url, password, role_id } = body;
 
@@ -101,7 +101,7 @@ export const usersController = {
 	 * Delete user
 	 */
 	async delete(c: Context) {
-		const id = c.req.param('id');
+		const id = c.req.param('id') as string;
 		await userService.deleteUser(id);
 
 		return response.success(c, 'User deleted successfully');
@@ -112,7 +112,7 @@ export const usersController = {
 	 * Assign role to user
 	 */
 	async assignRole(c: Context) {
-		const userId = c.req.param('id');
+		const userId = c.req.param('id') as string;
 		const body = await c.req.json();
 		const { role_id } = body;
 
@@ -130,8 +130,8 @@ export const usersController = {
 	 * Remove role from user
 	 */
 	async removeRole(c: Context) {
-		const userId = c.req.param('id');
-		const roleId = c.req.param('roleId');
+		const userId = c.req.param('id') as string;
+		const roleId = c.req.param('roleId') as string;
 
 		await userService.removeRoleFromUser(userId, roleId);
 

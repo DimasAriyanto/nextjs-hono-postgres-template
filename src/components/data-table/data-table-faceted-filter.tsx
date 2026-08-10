@@ -5,11 +5,12 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Icon } from '../icon';
-import { type Column } from '@tanstack/react-table';
+import { type LegacyColumn as Column } from '@tanstack/react-table/legacy';
+import type { RowData } from '@tanstack/react-table';
 import { parseAsString, useQueryState } from 'nuqs';
 import { type ComponentType } from 'react';
 
-interface DataTableFacetedFilterProps<TData, TValue> {
+interface DataTableFacetedFilterProps<TData extends RowData, TValue> {
 	column?: Column<TData, TValue>;
 	paramName?: string;
 	title?: string;
@@ -20,7 +21,7 @@ interface DataTableFacetedFilterProps<TData, TValue> {
 	}[];
 }
 
-export const DataTableFacetedFilter = <TData, TValue>({ column, paramName, title, options }: DataTableFacetedFilterProps<TData, TValue>) => {
+export const DataTableFacetedFilter = <TData extends RowData, TValue>({ column, paramName, title, options }: DataTableFacetedFilterProps<TData, TValue>) => {
 	// Server-side filtering with nuqs
 	const [serverValue, setServerValue] = useQueryState(
 		paramName || 'filter',

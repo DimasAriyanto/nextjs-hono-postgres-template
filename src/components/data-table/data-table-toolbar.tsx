@@ -6,16 +6,17 @@ import { Icon } from '@/components/icon';
 import { DataTableViewOptions } from './data-table-view-options';
 import { useQueryState } from 'nuqs';
 import React, { useEffect, useState } from 'react';
-import { type Table } from '@tanstack/react-table';
+import { type LegacyReactTable as Table } from '@tanstack/react-table/legacy';
+import type { RowData } from '@tanstack/react-table';
 
-interface DataTableToolbarProps<TData> {
+interface DataTableToolbarProps<TData extends RowData> {
 	table: Table<TData>;
 	FilterComp?: React.ElementType<{ table: Table<TData> }>;
 	CreateComp?: React.ElementType;
 	ExportComp?: React.ElementType;
 }
 
-export const DataTableToolbar = <TData,>({ table, FilterComp, CreateComp, ExportComp }: DataTableToolbarProps<TData>) => {
+export const DataTableToolbar = <TData extends RowData,>({ table, FilterComp, CreateComp, ExportComp }: DataTableToolbarProps<TData>) => {
 	const [searchInput, setSearchInput] = useState('');
 	const [keywords, setKeywords] = useQueryState('keywords', { shallow: false });
 

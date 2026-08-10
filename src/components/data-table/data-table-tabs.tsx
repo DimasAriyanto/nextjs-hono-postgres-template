@@ -1,6 +1,7 @@
 'use client';
 
-import { type Table } from '@tanstack/react-table';
+import { type LegacyTable as Table } from '@tanstack/react-table/legacy';
+import type { RowData } from '@tanstack/react-table';
 
 export interface TabOption {
 	label: string;
@@ -8,7 +9,7 @@ export interface TabOption {
 	count?: number;
 }
 
-interface DataTableTabsProps<TData> {
+interface DataTableTabsProps<TData extends RowData> {
 	table: Table<TData>;
 	column: string;
 	tabs: TabOption[];
@@ -16,7 +17,7 @@ interface DataTableTabsProps<TData> {
 	onTabChange: (value: string) => void;
 }
 
-export function DataTableTabs<TData>({ table, column, tabs, activeTab, onTabChange }: DataTableTabsProps<TData>) {
+export function DataTableTabs<TData extends RowData>({ table, column, tabs, activeTab, onTabChange }: DataTableTabsProps<TData>) {
 	const handleTabClick = (tabValue: string) => {
 		onTabChange(tabValue);
 
