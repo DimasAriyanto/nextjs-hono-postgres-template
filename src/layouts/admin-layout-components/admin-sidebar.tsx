@@ -65,18 +65,8 @@ const menuGroups: MenuGroup[] = [
     items: [
       {
         title: "Settings",
-        url: "#",
+        url: "/gundala-admin/d/settings",
         icon: Settings,
-        items: [
-          {
-            title: "General",
-            url: "/gundala-admin/d/settings/general",
-          },
-          {
-            title: "Appearance",
-            url: "/gundala-admin/d/settings/appearance",
-          },
-        ],
       },
     ],
   },

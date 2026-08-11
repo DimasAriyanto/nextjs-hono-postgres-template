@@ -15,3 +15,6 @@ export * from './notification';
 
 // Article
 export * from './article';
+
+// Setting
+export * from './setting';
