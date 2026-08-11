@@ -10,8 +10,11 @@ export const usersController = {
 	 */
 	async index(c: Context) {
 		const { page, limit, search } = getPaginationParams(c);
+		const verifiedParam = c.req.query('verified');
+		const verified = verifiedParam === undefined ? undefined : verifiedParam === 'true';
+		const roleId = c.req.query('role_id');
 
-		const result = await userService.getAllUsers({ page, limit, search });
+		const result = await userService.getAllUsers({ page, limit, search, verified, roleId });
 
 		return response.paginated(c, result.data, {
 			page: result.meta.page,

@@ -7,17 +7,27 @@ import {
 	type TInsertRole,
 } from '@/server/databases/schemas/users.schema';
 
+function buildFilter(search?: string, isAdmin?: boolean) {
+	const conditions = [];
+	if (search) conditions.push(ilike(RolesTable.name, `%${search}%`));
+	if (isAdmin !== undefined) conditions.push(eq(RolesTable.is_admin, isAdmin));
+
+	if (conditions.length === 0) return undefined;
+	return conditions.length === 1 ? conditions[0] : and(...conditions);
+}
+
 export class RoleRepository {
 	/**
-	 * Find all roles with pagination and search
+	 * Find all roles with pagination, search and admin-type filter
 	 */
-	async findAll(options?: { page?: number; limit?: number; search?: string }) {
-		const { page = 1, limit = 10, search } = options || {};
+	async findAll(options?: { page?: number; limit?: number; search?: string; isAdmin?: boolean }) {
+		const { page = 1, limit = 10, search, isAdmin } = options || {};
 
 		let query = db.select().from(RolesTable).$dynamic();
 
-		if (search) {
-			query = query.where(ilike(RolesTable.name, `%${search}%`));
+		const filter = buildFilter(search, isAdmin);
+		if (filter) {
+			query = query.where(filter);
 		}
 
 		const results = await query.limit(limit).offset((page - 1) * limit);
@@ -156,13 +166,14 @@ export class RoleRepository {
 	}
 
 	/**
-	 * Count total roles
+	 * Count total roles matching search and admin-type filter
 	 */
-	async count(search?: string): Promise<number> {
+	async count(search?: string, isAdmin?: boolean): Promise<number> {
 		let query = db.select().from(RolesTable).$dynamic();
 
-		if (search) {
-			query = query.where(ilike(RolesTable.name, `%${search}%`));
+		const filter = buildFilter(search, isAdmin);
+		if (filter) {
+			query = query.where(filter);
 		}
 
 		const result = await query;

@@ -8,7 +8,7 @@ import type { TCreateRoleRequest, TUpdateRoleRequest, TAssignPermissionRequest }
 export const roleKeys = {
 	all: ['roles'] as const,
 	lists: () => [...roleKeys.all, 'list'] as const,
-	list: (params?: { page?: number; limit?: number; search?: string }) => [...roleKeys.lists(), params] as const,
+	list: (params?: { page?: number; limit?: number; search?: string; is_admin?: 'true' | 'false' }) => [...roleKeys.lists(), params] as const,
 	details: () => [...roleKeys.all, 'detail'] as const,
 	detail: (id: string) => [...roleKeys.details(), id] as const,
 	withUsers: (id: string) => [...roleKeys.detail(id), 'users'] as const,
@@ -18,7 +18,7 @@ export const roleKeys = {
 /**
  * Hook to get all roles with pagination
  */
-export function useRoles(params?: { page?: number; limit?: number; search?: string }) {
+export function useRoles(params?: { page?: number; limit?: number; search?: string; is_admin?: 'true' | 'false' }) {
 	return useQuery({
 		queryKey: roleKeys.list(params),
 		queryFn: () => roleApi.getRoles(params),

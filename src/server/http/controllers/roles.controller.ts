@@ -10,8 +10,10 @@ export const rolesController = {
 	 */
 	async index(c: Context) {
 		const { page, limit, search } = getPaginationParams(c);
+		const isAdminParam = c.req.query('is_admin');
+		const isAdmin = isAdminParam === undefined ? undefined : isAdminParam === 'true';
 
-		const result = await roleService.getAllRoles({ page, limit, search });
+		const result = await roleService.getAllRoles({ page, limit, search, isAdmin });
 
 		return response.paginated(c, result.data, {
 			page: result.meta.page,

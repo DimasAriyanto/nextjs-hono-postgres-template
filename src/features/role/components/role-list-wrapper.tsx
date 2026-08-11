@@ -5,6 +5,7 @@ import { parseAsInteger, useQueryState } from 'nuqs';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { DataTable } from '@/components/data-table';
+import { DataTableFacetedFilter } from '@/components/data-table/data-table-faceted-filter';
 import { createRoleColumns } from './role-columns';
 import { RoleFormModal } from './role-form-modal';
 import { PageHeader } from '@/components/page-header';
@@ -22,6 +23,11 @@ import {
 import { toast } from 'sonner';
 import type { TRole } from '@/contracts';
 
+const ROLE_TYPE_OPTIONS = [
+	{ label: 'Admin', value: 'true' },
+	{ label: 'Standard', value: 'false' },
+];
+
 export function RoleListWrapper() {
 	const [showModal, setShowModal] = useState(false);
 	const [editingRole, setEditingRole] = useState<TRole | null>(null);
@@ -30,11 +36,13 @@ export function RoleListWrapper() {
 	const [keywords] = useQueryState('keywords');
 	const [page] = useQueryState('page', parseAsInteger.withDefault(1));
 	const [limit] = useQueryState('limit', parseAsInteger.withDefault(10));
+	const [isAdmin] = useQueryState('is_admin');
 
 	const { data: rolesData, isLoading, isError } = useRoles({
 		page,
 		limit,
 		search: keywords ?? undefined,
+		is_admin: (isAdmin as 'true' | 'false') ?? undefined,
 	});
 	const roles = rolesData?.data || [];
 	const total = rolesData?.meta?.pagination?.total ?? 0;
@@ -73,7 +81,13 @@ export function RoleListWrapper() {
 	const columns = createRoleColumns({
 		onEdit: handleEdit,
 		onDelete: (id) => setDeleteId(id),
+		page,
+		limit,
 	});
+
+	const RoleFilter = () => (
+		<DataTableFacetedFilter paramName="is_admin" title="Type" options={ROLE_TYPE_OPTIONS} />
+	);
 
 	const CreateButton = () => (
 		<Button onClick={handleCreate} size="sm">
@@ -98,6 +112,7 @@ export function RoleListWrapper() {
 				columns={columns}
 				data={roles}
 				meta={{ limit, total }}
+				FilterComp={RoleFilter}
 				CreateComp={CreateButton}
 				isError={isError}
 				isLoading={isLoading}

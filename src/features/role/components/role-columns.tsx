@@ -10,9 +10,21 @@ import type { TRole } from '@/contracts';
 interface RoleColumnsProps {
 	onEdit: (role: TRole) => void;
 	onDelete: (roleId: string) => void;
+	page: number;
+	limit: number;
 }
 
-export const createRoleColumns = ({ onEdit, onDelete }: RoleColumnsProps): ColumnDef<TRole>[] => [
+export const createRoleColumns = ({ onEdit, onDelete, page, limit }: RoleColumnsProps): ColumnDef<TRole>[] => [
+	{
+		id: 'no',
+		header: 'No',
+		cell: ({ row }) => (
+			<span className="text-sm text-muted-foreground">{(page - 1) * limit + row.index + 1}</span>
+		),
+		meta: { shrink: true },
+		enableSorting: false,
+		enableHiding: false,
+	},
 	{
 		accessorKey: 'name',
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
@@ -24,6 +36,11 @@ export const createRoleColumns = ({ onEdit, onDelete }: RoleColumnsProps): Colum
 					{role.is_default && (
 						<Badge variant="secondary" className="text-xs">
 							Default
+						</Badge>
+					)}
+					{role.is_admin && (
+						<Badge variant="outline" className="text-xs">
+							Admin
 						</Badge>
 					)}
 				</div>

@@ -7,11 +7,11 @@ export class UserService {
 	/**
 	 * Get all users with pagination
 	 */
-	async getAllUsers(options?: { page?: number; limit?: number; search?: string }) {
-		const { page = 1, limit = 10, search } = options || {};
+	async getAllUsers(options?: { page?: number; limit?: number; search?: string; verified?: boolean; roleId?: string }) {
+		const { page = 1, limit = 10, search, verified, roleId } = options || {};
 
-		const users = await userRepository.findAll({ page, limit, search });
-		const total = await userRepository.count(search);
+		const users = await userRepository.findAll({ page, limit, search, verified, roleId });
+		const total = await userRepository.count(search, verified, roleId);
 
 		return {
 			data: users.map((user) => ({

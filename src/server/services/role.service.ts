@@ -6,11 +6,11 @@ export class RoleService {
 	/**
 	 * Get all roles with pagination
 	 */
-	async getAllRoles(options?: { page?: number; limit?: number; search?: string }) {
-		const { page = 1, limit = 10, search } = options || {};
+	async getAllRoles(options?: { page?: number; limit?: number; search?: string; isAdmin?: boolean }) {
+		const { page = 1, limit = 10, search, isAdmin } = options || {};
 
-		const roles = await roleRepository.findAll({ page, limit, search });
-		const total = await roleRepository.count(search);
+		const roles = await roleRepository.findAll({ page, limit, search, isAdmin });
+		const total = await roleRepository.count(search, isAdmin);
 
 		return {
 			data: roles,

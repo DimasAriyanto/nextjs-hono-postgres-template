@@ -2,6 +2,8 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { AlertCircle, Inbox } from 'lucide-react';
 import { flexRender } from '@tanstack/react-table';
 import {
 	getCoreRowModel,
@@ -106,6 +108,7 @@ export const DataTable = <TData extends RowData, TValue>({
 		const { columnPinning } = table.getState();
 		const isLastStartPinnedColumn = isPinned === 'start' && pinnedIndex === (columnPinning.start?.length ?? 0) - 1;
 		const isFirstEndPinnedColumn = isPinned === 'end' && pinnedIndex === 0;
+		const shrink = column.columnDef.meta?.shrink;
 
 		return {
 			boxShadow: isLastStartPinnedColumn
@@ -117,7 +120,8 @@ export const DataTable = <TData extends RowData, TValue>({
 			right: isPinned === 'end' ? `${column.getAfter('end')}px` : undefined,
 			// opacity: isPinned ? 0.95 : 1,
 			position: isPinned ? 'sticky' : 'relative',
-			width: column.getSize(),
+			width: shrink ? '1%' : column.getSize(),
+			whiteSpace: shrink ? 'nowrap' : undefined,
 			zIndex: isPinned ? 1 : 0,
 		};
 	};
@@ -173,8 +177,12 @@ export const DataTable = <TData extends RowData, TValue>({
 							))
 						) : (
 							<TableRow>
-								<TableCell colSpan={columns.length} className="h-30 text-center">
-									{isError && 'Error load! '}No results.
+								<TableCell colSpan={columns.length} className="p-0">
+									<EmptyState
+										icon={isError ? <AlertCircle className="size-5" /> : <Inbox className="size-5" />}
+										title={isError ? 'Gagal memuat data' : 'Tidak ada data'}
+										description={isError ? 'Terjadi kesalahan saat memuat data. Silakan coba lagi.' : 'Belum ada data untuk ditampilkan.'}
+									/>
 								</TableCell>
 							</TableRow>
 						)}

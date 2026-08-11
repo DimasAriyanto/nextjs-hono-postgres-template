@@ -17,7 +17,7 @@ import type { ApiSuccessResponse } from '@/types/api-response';
  * GET /api/v1/roles
  * Get all roles with pagination
  */
-export async function getRoles(params?: { page?: number; limit?: number; search?: string }): Promise<ApiSuccessResponse<TRole[]>> {
+export async function getRoles(params?: { page?: number; limit?: number; search?: string; is_admin?: 'true' | 'false' }): Promise<ApiSuccessResponse<TRole[]>> {
 	return handleResponse<TRole[]>(
 		client.api.v1.roles.$get({ query: params as Record<string, string> })
 	);

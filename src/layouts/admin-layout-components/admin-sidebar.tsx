@@ -3,11 +3,9 @@
 import * as React from "react"
 import {
   LayoutDashboard,
-  Package,
+  Newspaper,
   Settings,
   Shield,
-  ShoppingCart,
-  Tags,
   Users,
 } from "lucide-react"
 
@@ -53,22 +51,12 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
-    label: "Product Management",
+    label: "Content Management",
     items: [
       {
-        title: "Product",
-        url: "/gundala-admin/d/product",
-        icon: Package,
-      },
-      {
-        title: "Category",
-        url: "/gundala-admin/d/category",
-        icon: Tags,
-      },
-      {
-        title: "Order",
-        url: "/gundala-admin/d/order",
-        icon: ShoppingCart,
+        title: "Article",
+        url: "/gundala-admin/d/article",
+        icon: Newspaper,
       },
     ],
   },

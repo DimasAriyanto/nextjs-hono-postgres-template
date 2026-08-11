@@ -15,6 +15,13 @@
       "when": 1774854035117,
       "tag": "0001_careful_shiver_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786437496844,
+      "tag": "0002_tired_exiles",
+      "breakpoints": true
     }
   ]
 }

@@ -7,12 +7,11 @@ import { Plus } from 'lucide-react';
 import { DataTable } from '@/components/data-table';
 import { DataTableFacetedFilter } from '@/components/data-table/data-table-faceted-filter';
 import { ExportButton } from '@/components/export-button';
-import { createUserColumns } from './user-columns';
-import { UserFormModal } from './user-form-modal';
+import { createArticleColumns } from './article-columns';
+import { ArticleFormModal } from './article-form-modal';
 import { PageHeader } from '@/components/page-header';
-import { useUsers, useDeleteUser } from '@/features/user/hooks/use-user';
-import { getUsers } from '@/features/user/apis/user.api';
-import { useRoles } from '@/features/role/hooks/use-role';
+import { useArticles, useDeleteArticle } from '@/features/article/hooks/use-article';
+import { getArticles } from '@/features/article/apis/article.api';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import {
@@ -25,103 +24,93 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import type { TUserWithRoles } from '@/contracts';
+import type { TArticleStatus, TArticleWithAuthor } from '@/contracts';
 
-const USER_VERIFIED_OPTIONS = [
-	{ label: 'Verified', value: 'true' },
-	{ label: 'Unverified', value: 'false' },
+const ARTICLE_STATUS_OPTIONS = [
+	{ label: 'Draft', value: 'draft' },
+	{ label: 'Published', value: 'published' },
 ];
 
-export function UserListWrapper() {
+export function ArticleListWrapper() {
 	const [showModal, setShowModal] = useState(false);
-	const [editingUser, setEditingUser] = useState<TUserWithRoles | null>(null);
+	const [editingArticle, setEditingArticle] = useState<TArticleWithAuthor | null>(null);
 	const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 	const [deleteId, setDeleteId] = useState<string | null>(null);
 	const [keywords] = useQueryState('keywords');
 	const [page] = useQueryState('page', parseAsInteger.withDefault(1));
 	const [limit] = useQueryState('limit', parseAsInteger.withDefault(10));
-	const [verified] = useQueryState('verified');
-	const [roleId] = useQueryState('role_id');
+	const [status] = useQueryState('status');
 
-	const { data: usersData, isLoading, isError } = useUsers({
+	const { data: articlesData, isLoading, isError } = useArticles({
 		page,
 		limit,
 		search: keywords ?? undefined,
-		verified: (verified as 'true' | 'false') ?? undefined,
-		role_id: roleId ?? undefined,
+		status: (status as TArticleStatus) ?? undefined,
 	});
-	const users = usersData?.data || [];
-	const total = usersData?.meta?.pagination?.total ?? 0;
+	const articles = articlesData?.data || [];
+	const total = articlesData?.meta?.pagination?.total ?? 0;
 
-	const { data: rolesData } = useRoles({ limit: 100 });
-	const roleOptions = (rolesData?.data ?? []).map((role) => ({ label: role.name, value: role.id }));
-
-	const deleteMutation = useDeleteUser({
+	const deleteMutation = useDeleteArticle({
 		onSuccess: () => setDeleteId(null),
 	});
 
-	const handleEdit = (user: TUserWithRoles) => {
-		setEditingUser(user);
+	const handleEdit = (article: TArticleWithAuthor) => {
+		setEditingArticle(article);
 		setModalMode('edit');
 		setShowModal(true);
 	};
 
 	const handleCreate = () => {
-		setEditingUser(null);
+		setEditingArticle(null);
 		setModalMode('create');
 		setShowModal(true);
 	};
 
 	const handleCloseModal = () => {
 		setShowModal(false);
-		setEditingUser(null);
+		setEditingArticle(null);
 	};
 
 	const handleDeleteConfirm = async () => {
 		if (!deleteId) return;
 		try {
 			await deleteMutation.mutateAsync(deleteId);
-			toast.success('User deleted successfully');
+			toast.success('Article deleted successfully');
 		} catch {
-			toast.error('Failed to delete user');
+			toast.error('Failed to delete article');
 		}
 	};
 
-	const columns = createUserColumns({
+	const columns = createArticleColumns({
 		onEdit: handleEdit,
 		onDelete: (id) => setDeleteId(id),
 		page,
 		limit,
 	});
 
-	const UserFilter = () => (
-		<>
-			<DataTableFacetedFilter paramName="verified" title="Verified" options={USER_VERIFIED_OPTIONS} />
-			{roleOptions.length > 0 && (
-				<DataTableFacetedFilter paramName="role_id" title="Role" options={roleOptions} />
-			)}
-		</>
+	const ArticleFilter = () => (
+		<DataTableFacetedFilter paramName="status" title="Status" options={ARTICLE_STATUS_OPTIONS} />
 	);
 
 	const CreateButton = () => (
 		<Button onClick={handleCreate} size="sm">
 			<Plus className="w-4 h-4 mr-2" />
-			Add User
+			Add Article
 		</Button>
 	);
 
-	const UserExportButton = () => (
+	const ArticleExportButton = () => (
 		<ExportButton
-			filename={`users-${format(new Date(), 'yyyy-MM-dd')}`}
-			title="User List"
+			filename={`articles-${format(new Date(), 'yyyy-MM-dd')}`}
+			title="Article List"
 			onFetchData={async () => {
-				const res = await getUsers({ page: 1, limit: 10000, search: keywords ?? undefined });
-				return (res.data ?? []).map((u) => ({
-					'Name': u.name ?? '-',
-					'Email': u.email,
-					'Roles': (u.roles as { name: string }[] | undefined)?.map((r) => r.name).join(', ') || '-',
-					'Verified': (u as { email_verified_at?: string | null }).email_verified_at ? 'Yes' : 'No',
-					'Created At': u.created_at,
+				const res = await getArticles({ page: 1, limit: 10000, search: keywords ?? undefined });
+				return (res.data ?? []).map((a) => ({
+					'Title': a.title,
+					'Slug': a.slug,
+					'Status': a.status,
+					'Author': (a.author as { name?: string; email?: string } | null | undefined)?.name ?? (a.author as { email?: string } | null | undefined)?.email ?? '-',
+					'Created At': a.created_at,
 				}));
 			}}
 		/>
@@ -132,32 +121,32 @@ export function UserListWrapper() {
 			<PageHeader
 				breadcrumbs={[
 					{ label: 'Dashboard', href: '/gundala-admin/d' },
-					{ label: 'User Management' },
-					{ label: 'User' },
+					{ label: 'Content Management' },
+					{ label: 'Article' },
 				]}
-				title="Users"
-				description="Manage users for your application."
+				title="Articles"
+				description="Manage blog articles for your application."
 			/>
 
 			<DataTable
 				columns={columns}
-				data={users}
+				data={articles}
 				meta={{ limit, total }}
-				FilterComp={UserFilter}
+				FilterComp={ArticleFilter}
 				CreateComp={CreateButton}
-				ExportComp={UserExportButton}
+				ExportComp={ArticleExportButton}
 				isError={isError}
 				isLoading={isLoading}
 			/>
 
-			<UserFormModal isOpen={showModal} onClose={handleCloseModal} user={editingUser} mode={modalMode} />
+			<ArticleFormModal isOpen={showModal} onClose={handleCloseModal} article={editingArticle} mode={modalMode} />
 
 			<AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Delete User</AlertDialogTitle>
+						<AlertDialogTitle>Delete Article</AlertDialogTitle>
 						<AlertDialogDescription>
-							Are you sure you want to delete this user? This action cannot be undone.
+							Are you sure you want to delete this article? This action cannot be undone.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>

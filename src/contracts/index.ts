@@ -12,3 +12,6 @@ export * from './role';
 
 // Notification
 export * from './notification';
+
+// Article
+export * from './article';

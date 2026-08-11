@@ -1,4 +1,4 @@
-import { eq, and, ilike, or } from 'drizzle-orm';
+import { eq, and, ilike, or, isNull, isNotNull, inArray } from 'drizzle-orm';
 import { db } from '@/server/databases/client';
 import { UsersTable, RoleUserTable, type TSelectUser, type TInsertUser } from '@/server/databases/schemas/users.schema';
 
@@ -10,17 +10,32 @@ interface OAuthUserData {
 	avatar_url?: string;
 }
 
+function buildFilter(search?: string, verified?: boolean, roleId?: string) {
+	const conditions = [];
+	if (search) conditions.push(or(ilike(UsersTable.email, `%${search}%`), ilike(UsersTable.name, `%${search}%`)));
+	if (verified !== undefined) conditions.push(verified ? isNotNull(UsersTable.email_verified_at) : isNull(UsersTable.email_verified_at));
+	if (roleId) {
+		conditions.push(
+			inArray(
+				UsersTable.id,
+				db.select({ id: RoleUserTable.user_id }).from(RoleUserTable).where(eq(RoleUserTable.role_id, roleId))
+			)
+		);
+	}
+
+	if (conditions.length === 0) return undefined;
+	return conditions.length === 1 ? conditions[0] : and(...conditions);
+}
+
 export class UserRepository {
 	/**
-	 * Find all users with pagination and search
+	 * Find all users with pagination, search, verification and role filter
 	 */
-	async findAll(options?: { page?: number; limit?: number; search?: string }) {
-		const { page = 1, limit = 10, search } = options || {};
+	async findAll(options?: { page?: number; limit?: number; search?: string; verified?: boolean; roleId?: string }) {
+		const { page = 1, limit = 10, search, verified, roleId } = options || {};
 
 		const results = await db.query.UsersTable.findMany({
-			where: search
-				? or(ilike(UsersTable.email, `%${search}%`), ilike(UsersTable.name, `%${search}%`))
-				: undefined,
+			where: buildFilter(search, verified, roleId),
 			with: {
 				roles: {
 					with: {
@@ -129,13 +144,14 @@ export class UserRepository {
 	}
 
 	/**
-	 * Count total users
+	 * Count total users matching search, verification and role filter
 	 */
-	async count(search?: string): Promise<number> {
+	async count(search?: string, verified?: boolean, roleId?: string): Promise<number> {
 		let query = db.select().from(UsersTable).$dynamic();
 
-		if (search) {
-			query = query.where(or(ilike(UsersTable.email, `%${search}%`), ilike(UsersTable.name, `%${search}%`)));
+		const filter = buildFilter(search, verified, roleId);
+		if (filter) {
+			query = query.where(filter);
 		}
 
 		const result = await query;

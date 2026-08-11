@@ -8,7 +8,7 @@ import type { TCreateUserRequest, TUpdateUserRequest, TAssignRoleRequest } from 
 export const userKeys = {
 	all: ['users'] as const,
 	lists: () => [...userKeys.all, 'list'] as const,
-	list: (params?: { page?: number; limit?: number; search?: string }) => [...userKeys.lists(), params] as const,
+	list: (params?: { page?: number; limit?: number; search?: string; verified?: 'true' | 'false'; role_id?: string }) => [...userKeys.lists(), params] as const,
 	details: () => [...userKeys.all, 'detail'] as const,
 	detail: (id: string) => [...userKeys.details(), id] as const,
 	withRoles: (id: string) => [...userKeys.detail(id), 'roles'] as const,
@@ -17,7 +17,7 @@ export const userKeys = {
 /**
  * Hook to get all users with pagination
  */
-export function useUsers(params?: { page?: number; limit?: number; search?: string }) {
+export function useUsers(params?: { page?: number; limit?: number; search?: string; verified?: 'true' | 'false'; role_id?: string }) {
 	return useQuery({
 		queryKey: userKeys.list(params),
 		queryFn: () => userApi.getUsers(params),

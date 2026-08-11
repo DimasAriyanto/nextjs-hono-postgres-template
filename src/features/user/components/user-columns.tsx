@@ -10,9 +10,21 @@ import type { TUserWithRoles } from '@/contracts';
 interface UserColumnsProps {
 	onEdit: (user: TUserWithRoles) => void;
 	onDelete: (userId: string) => void;
+	page: number;
+	limit: number;
 }
 
-export const createUserColumns = ({ onEdit, onDelete }: UserColumnsProps): ColumnDef<TUserWithRoles>[] => [
+export const createUserColumns = ({ onEdit, onDelete, page, limit }: UserColumnsProps): ColumnDef<TUserWithRoles>[] => [
+	{
+		id: 'no',
+		header: 'No',
+		cell: ({ row }) => (
+			<span className="text-sm text-muted-foreground">{(page - 1) * limit + row.index + 1}</span>
+		),
+		meta: { shrink: true },
+		enableSorting: false,
+		enableHiding: false,
+	},
 	{
 		accessorKey: 'email',
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
