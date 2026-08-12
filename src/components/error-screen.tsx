@@ -12,7 +12,7 @@ export const ErrorScreen = (props: TErrorComp) => {
 				</div>
 				<div>
 					<button onClick={() => props.setState!()}>
-						<span>Coba lagi?</span>
+						<span>Try again?</span>
 					</button>
 				</div>
 			</div>

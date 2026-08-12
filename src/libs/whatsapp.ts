@@ -25,7 +25,7 @@ export const buildWhatsAppUrl = (phone: string | undefined, message: string): st
  * @returns WhatsApp URL with plan inquiry message
  */
 export const buildPlanInquiryUrl = (phone: string | undefined, planName: string): string => {
-	const message = `Halo, saya ingin upgrade ke paket ${planName}. Bisa bantu prosesnya?`;
+	const message = `Hello, I would like to upgrade to the ${planName} plan. Could you help me with the process?`;
 	return buildWhatsAppUrl(phone, message);
 };
 
@@ -36,7 +36,7 @@ export const buildPlanInquiryUrl = (phone: string | undefined, planName: string)
  * @returns WhatsApp URL with onboarding subscription message
  */
 export const buildOnboardingPlanUrl = (phone: string | undefined, planName: string): string => {
-	const message = `Halo, saya baru mendaftar dan ingin berlangganan paket ${planName}. Bisa bantu prosesnya?`;
+	const message = `Hello, I just signed up and would like to subscribe to the ${planName} plan. Could you help me with the process?`;
 	return buildWhatsAppUrl(phone, message);
 };
 
@@ -58,13 +58,13 @@ export const buildInvoicePaymentUrl = (
 	const invoiceLink = `${baseUrl}/invoice/${invoiceId}`;
 	
 	const message = [
-		`Halo! Ini adalah pengingat pembayaran untuk invoice *${invoiceNumber}*`,
+		`Hello! This is a payment reminder for invoice *${invoiceNumber}*`,
 		'',
 		`Total: *${total}*`,
 		'',
-		`Link invoice: ${invoiceLink}`,
+		`Invoice link: ${invoiceLink}`,
 		'',
-		'Terima kasih! 🙏'
+		'Thank you! 🙏'
 	].join('\n');
 	
 	return buildWhatsAppUrl(phone, message);
@@ -82,8 +82,8 @@ export const buildCustomerContactUrl = (
 	customerName: string, 
 	context?: string
 ): string => {
-	const contextText = context ? ` terkait ${context}` : '';
-	const message = `Halo ${customerName}! Ada yang ingin kami tanyakan${contextText}. Terima kasih! 🙏`;
+	const contextText = context ? ` regarding ${context}` : '';
+	const message = `Hello ${customerName}! We have something to ask you${contextText}. Thank you! 🙏`;
 	return buildWhatsAppUrl(phone, message);
 };
 

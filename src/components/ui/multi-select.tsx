@@ -29,9 +29,9 @@ export function MultiSelect({
 	options,
 	value = [],
 	onValueChange,
-	placeholder = 'Pilih...',
-	searchPlaceholder = 'Cari...',
-	emptyText = 'Tidak ditemukan.',
+	placeholder = 'Select...',
+	searchPlaceholder = 'Search...',
+	emptyText = 'Not found.',
 	disabled,
 	maxDisplay = 3,
 	className,
@@ -85,7 +85,7 @@ export function MultiSelect({
 							</Badge>
 						))}
 						{value.length > maxDisplay && (
-							<Badge variant="secondary">+{value.length - maxDisplay} lainnya</Badge>
+							<Badge variant="secondary">+{value.length - maxDisplay} more</Badge>
 						)}
 					</div>
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

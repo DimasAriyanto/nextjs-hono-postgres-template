@@ -48,7 +48,7 @@ export function CopyButton({
 			size={size}
 			className={cn(className)}
 			onClick={handleCopy}
-			aria-label={copied ? 'Disalin!' : 'Salin'}
+			aria-label={copied ? 'Copied!' : 'Copy'}
 			{...props}
 		>
 			{copied ? <Check className="size-4 text-green-500" /> : <Copy className="size-4" />}

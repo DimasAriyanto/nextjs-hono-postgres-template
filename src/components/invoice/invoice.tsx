@@ -93,11 +93,11 @@ export function Invoice({
   const getInvoiceTitle = () => {
     switch (type) {
       case 'consignment':
-        return 'INVOICE KONSINYASI';
+        return 'CONSIGNMENT INVOICE';
       case 'pickup':
-        return 'INVOICE PICKUP';
+        return 'PICKUP INVOICE';
       case 'settlement':
-        return 'INVOICE SETTLEMENT';
+        return 'SETTLEMENT INVOICE';
       default:
         return 'INVOICE';
     }
@@ -116,9 +116,9 @@ export function Invoice({
             <p className="text-gray-600 mt-2">Invoice #{invoiceNumber}</p>
           </div>
           <div className="text-right">
-            <p className="text-lg font-semibold">Tanggal: {dayjs(invoiceDate).format('DD MMMM YYYY')}</p>
+            <p className="text-lg font-semibold">Date: {dayjs(invoiceDate).format('DD MMMM YYYY')}</p>
             {dueDate && (
-              <p className="text-red-600 font-medium">Jatuh Tempo: {dayjs(dueDate).format('DD MMMM YYYY')}</p>
+              <p className="text-red-600 font-medium">Due Date: {dayjs(dueDate).format('DD MMMM YYYY')}</p>
             )}
           </div>
         </div>
@@ -127,20 +127,20 @@ export function Invoice({
       {/* Parties */}
       <div className="grid grid-cols-2 gap-8 mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Dari:</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">From:</h3>
           <div className="bg-gray-50 p-4 rounded">
             <p className="font-bold text-lg">{from.name}</p>
             {from.address && <p className="text-gray-600">{from.address}</p>}
-            {from.phone && <p className="text-gray-600">Telp: {from.phone}</p>}
+            {from.phone && <p className="text-gray-600">Phone: {from.phone}</p>}
             {from.email && <p className="text-gray-600">Email: {from.email}</p>}
           </div>
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Kepada:</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">To:</h3>
           <div className="bg-gray-50 p-4 rounded">
             <p className="font-bold text-lg">{to.name}</p>
             {to.address && <p className="text-gray-600">{to.address}</p>}
-            {to.phone && <p className="text-gray-600">Telp: {to.phone}</p>}
+            {to.phone && <p className="text-gray-600">Phone: {to.phone}</p>}
             {to.email && <p className="text-gray-600">Email: {to.email}</p>}
           </div>
         </div>
@@ -149,17 +149,17 @@ export function Invoice({
       {/* Consignment Details */}
       {type === 'consignment' && (consignmentDate || totalSent) && (
         <div className="bg-blue-50 p-4 rounded mb-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-3">Detail Konsinyasi</h3>
+          <h3 className="text-lg font-semibold text-blue-900 mb-3">Consignment Details</h3>
           <div className="grid grid-cols-2 gap-4">
             {consignmentDate && (
               <div>
-                <span className="text-blue-700 font-medium">Tanggal Konsinyasi:</span>
+                <span className="text-blue-700 font-medium">Consignment Date:</span>
                 <span className="ml-2">{dayjs(consignmentDate).format('DD MMMM YYYY')}</span>
               </div>
             )}
             {totalSent && (
               <div>
-                <span className="text-blue-700 font-medium">Total Barang Dikirim:</span>
+                <span className="text-blue-700 font-medium">Total Items Sent:</span>
                 <span className="ml-2 font-bold">{totalSent} item</span>
               </div>
             )}
@@ -170,23 +170,23 @@ export function Invoice({
       {/* Pickup Details */}
       {type === 'pickup' && (pickupDate || totalReturned || totalSold) && (
         <div className="bg-green-50 p-4 rounded mb-6">
-          <h3 className="text-lg font-semibold text-green-900 mb-3">Detail Pickup</h3>
+          <h3 className="text-lg font-semibold text-green-900 mb-3">Pickup Details</h3>
           <div className="grid grid-cols-3 gap-4">
             {pickupDate && (
               <div>
-                <span className="text-green-700 font-medium">Tanggal Pickup:</span>
+                <span className="text-green-700 font-medium">Pickup Date:</span>
                 <span className="ml-2">{dayjs(pickupDate).format('DD MMMM YYYY')}</span>
               </div>
             )}
             {totalReturned && (
               <div>
-                <span className="text-green-700 font-medium">Barang Dikembalikan:</span>
+                <span className="text-green-700 font-medium">Items Returned:</span>
                 <span className="ml-2 font-bold">{totalReturned} item</span>
               </div>
             )}
             {totalSold && (
               <div>
-                <span className="text-green-700 font-medium">Barang Terjual:</span>
+                <span className="text-green-700 font-medium">Items Sold:</span>
                 <span className="ml-2 font-bold">{totalSold} item</span>
               </div>
             )}
@@ -199,9 +199,9 @@ export function Invoice({
         <table className="w-full border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-100">
-              <th className="border border-gray-300 p-3 text-left">Nama Produk</th>
+              <th className="border border-gray-300 p-3 text-left">Product Name</th>
               <th className="border border-gray-300 p-3 text-center">Qty</th>
-              <th className="border border-gray-300 p-3 text-right">Harga Satuan</th>
+              <th className="border border-gray-300 p-3 text-right">Unit Price</th>
               <th className="border border-gray-300 p-3 text-right">Total</th>
             </tr>
           </thead>
@@ -240,14 +240,14 @@ export function Invoice({
             
             {discount > 0 && (
               <div className="flex justify-between text-red-600">
-                <span>Diskon:</span>
+                <span>Discount:</span>
                 <span className="font-mono">-{formatCurrency(discount)}</span>
               </div>
             )}
             
             {tax > 0 && (
               <div className="flex justify-between">
-                <span>Pajak:</span>
+                <span>Tax:</span>
                 <span className="font-mono">{formatCurrency(tax)}</span>
               </div>
             )}
@@ -263,7 +263,7 @@ export function Invoice({
       {/* Settlement Details */}
       {type === 'settlement' && (supplierPortion || ownerMargin || markupPercentage) && (
         <div className="bg-yellow-50 p-4 rounded mb-6">
-          <h3 className="text-lg font-semibold text-yellow-900 mb-3">Detail Settlement</h3>
+          <h3 className="text-lg font-semibold text-yellow-900 mb-3">Settlement Details</h3>
           <div className="grid grid-cols-2 gap-4">
             {markupPercentage && (
               <div>
@@ -273,7 +273,7 @@ export function Invoice({
             )}
             {supplierPortion && (
               <div>
-                <span className="text-yellow-700 font-medium">Bagian Supplier:</span>
+                <span className="text-yellow-700 font-medium">Supplier Portion:</span>
                 <span className="ml-2 font-bold">{formatCurrency(supplierPortion)}</span>
               </div>
             )}
@@ -293,16 +293,16 @@ export function Invoice({
           <div className="flex items-center justify-between">
             <div>
               <span className={`font-bold text-lg ${isPaid ? 'text-green-800' : 'text-red-800'}`}>
-                Status Pembayaran: {isPaid ? 'LUNAS' : 'BELUM LUNAS'}
+                Payment Status: {isPaid ? 'PAID' : 'UNPAID'}
               </span>
               {isPaid && paymentDate && (
                 <p className="text-green-700">
-                  Dibayar pada: {dayjs(paymentDate).format('DD MMMM YYYY')}
+                  Paid on: {dayjs(paymentDate).format('DD MMMM YYYY')}
                 </p>
               )}
               {isPaid && paymentMethod && (
                 <p className="text-green-700">
-                  Metode: {paymentMethod}
+                  Method: {paymentMethod}
                 </p>
               )}
             </div>
@@ -316,7 +316,7 @@ export function Invoice({
       {/* Notes */}
       {notes && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Catatan:</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Notes:</h3>
           <p className="text-gray-700 bg-gray-50 p-4 rounded">{notes}</p>
         </div>
       )}
@@ -324,7 +324,7 @@ export function Invoice({
       {/* Terms */}
       {terms && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Syarat & Ketentuan:</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Terms & Conditions:</h3>
           <p className="text-sm text-gray-600">{terms}</p>
         </div>
       )}
@@ -335,11 +335,11 @@ export function Invoice({
           <p className="text-center text-gray-600">{footer}</p>
         ) : (
           <p className="text-center text-gray-600">
-            Terima kasih atas kerjasama yang baik. Invoice ini dibuat secara otomatis.
+            Thank you for your good cooperation. This invoice is generated automatically.
           </p>
         )}
         <p className="text-center text-xs text-gray-500 mt-2">
-          Dicetak pada: {dayjs().format('DD MMMM YYYY HH:mm')}
+          Printed on: {dayjs().format('DD MMMM YYYY HH:mm')}
         </p>
       </div>
     </div>

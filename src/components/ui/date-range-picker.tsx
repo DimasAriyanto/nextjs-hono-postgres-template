@@ -37,23 +37,23 @@ export function DateRangePickerWithSidebar({
 
     const presets = [
         {
-            label: "Hari Ini",
+            label: "Today",
             range: { from: new Date(), to: new Date() },
         },
         {
-            label: "Kemarin",
+            label: "Yesterday",
             range: { from: subDays(new Date(), 1), to: subDays(new Date(), 1) },
         },
         {
-            label: "Minggu Ini",
+            label: "This Week",
             range: { from: startOfWeek(new Date(), { weekStartsOn: 1 }), to: endOfWeek(new Date(), { weekStartsOn: 1 }) },
         },
         {
-            label: "Bulan Ini",
+            label: "This Month",
             range: { from: startOfMonth(new Date()), to: endOfMonth(new Date()) },
         },
         {
-            label: "Tahun Ini",
+            label: "This Year",
             range: { from: startOfYear(new Date()), to: endOfYear(new Date()) },
         },
     ]
@@ -81,7 +81,7 @@ export function DateRangePickerWithSidebar({
                             )
                         ) : (
                             <span className="text-muted-foreground italic">
-                                {noFilterLabel ?? "Pilih tanggal"}
+                                {noFilterLabel ?? "Select date"}
                             </span>
                         )}
                     </Button>

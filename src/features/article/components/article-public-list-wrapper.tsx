@@ -19,8 +19,8 @@ export function ArticlePublicListWrapper() {
 	return (
 		<div className="container mx-auto px-4 md:px-6 py-16">
 			<div className="mb-10 text-center">
-				<h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Artikel</h1>
-				<p className="mt-2 text-muted-foreground">Kabar dan wawasan terbaru dari kami.</p>
+				<h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Articles</h1>
+				<p className="mt-2 text-muted-foreground">The latest news and insights from us.</p>
 			</div>
 
 			{isLoading ? (
@@ -30,7 +30,7 @@ export function ArticlePublicListWrapper() {
 					))}
 				</div>
 			) : articles.length === 0 ? (
-				<p className="py-20 text-center text-muted-foreground">Belum ada artikel.</p>
+				<p className="py-20 text-center text-muted-foreground">No articles yet.</p>
 			) : (
 				<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 					{articles.map((article) => (
@@ -48,10 +48,10 @@ export function ArticlePublicListWrapper() {
 						disabled={page <= 1}
 					>
 						<ChevronLeft className="size-4" />
-						Sebelumnya
+						Previous
 					</Button>
 					<span className="text-sm text-muted-foreground">
-						Halaman {pagination.page} dari {pagination.totalPages}
+						Page {pagination.page} of {pagination.totalPages}
 					</span>
 					<Button
 						variant="outline"
@@ -59,7 +59,7 @@ export function ArticlePublicListWrapper() {
 						onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
 						disabled={page >= pagination.totalPages}
 					>
-						Berikutnya
+						Next
 						<ChevronRight className="size-4" />
 					</Button>
 				</div>

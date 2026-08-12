@@ -46,7 +46,7 @@ export function ReceiptDialog({
         printWindow.document.write(`
           <html>
             <head>
-              <title>Struk - ${receiptData.receiptNumber}</title>
+              <title>Receipt - ${receiptData.receiptNumber}</title>
               <style>
                 body { font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
                 .receipt { max-width: 300px; margin: 0 auto; }
@@ -76,7 +76,7 @@ export function ReceiptDialog({
           <DialogTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Eye className="h-4 w-4" />
-              Struk Pembayaran
+              Payment Receipt
             </div>
             <div className="flex items-center gap-1">
               {onPrint !== undefined && (

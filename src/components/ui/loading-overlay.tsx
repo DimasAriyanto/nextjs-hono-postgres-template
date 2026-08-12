@@ -11,7 +11,7 @@ interface LoadingOverlayProps {
 
 export function LoadingOverlay({
 	show = true,
-	label = 'Memuat...',
+	label = 'Loading...',
 	fullScreen = false,
 	className,
 }: LoadingOverlayProps) {

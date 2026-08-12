@@ -1,12 +1,13 @@
 import { ReceiptProps } from './receipt';
 import { InvoiceProps } from '../invoice';
 import { formatCurrency } from '@/libs/currency';
+import { getAppCurrency, getAppLocale } from '@/libs/dayjs';
 
 export function printReceipt(receiptData: ReceiptProps) {
   const printWindow = window.open('', '_blank', 'width=400,height=600');
   
   if (!printWindow) {
-    alert('Pop-up diblokir! Harap izinkan pop-up untuk mencetak.');
+    alert('Pop-up blocked! Please allow pop-ups to print.');
     return;
   }
 
@@ -26,7 +27,7 @@ export function printReceipt(receiptData: ReceiptProps) {
     <!DOCTYPE html>
     <html>
       <head>
-        <title>Struk - ${receiptData.receiptNumber}</title>
+        <title>Receipt - ${receiptData.receiptNumber}</title>
         <style>
           body {
             font-family: 'Courier New', monospace;
@@ -141,16 +142,16 @@ export function printReceipt(receiptData: ReceiptProps) {
 
         <div class="receipt-info">
           <div class="info-row">
-            <span>No. Struk:</span>
+            <span>Receipt No.:</span>
             <span><strong>${receiptData.receiptNumber}</strong></span>
           </div>
           <div class="info-row">
-            <span>Tanggal:</span>
-            <span>${new Date(receiptData.date).toLocaleString('id-ID')}</span>
+            <span>Date:</span>
+            <span>${new Date(receiptData.date).toLocaleString(getAppLocale())}</span>
           </div>
           ${receiptData.cashierName ? `
           <div class="info-row">
-            <span>Kasir:</span>
+            <span>Cashier:</span>
             <span>${receiptData.cashierName}</span>
           </div>` : ''}
           <div class="info-row">
@@ -173,7 +174,7 @@ export function printReceipt(receiptData: ReceiptProps) {
 
         ${formattedExtras.length > 0 ? `
         <div class="extras">
-          <div class="extras-title">BIAYA TAMBAHAN:</div>
+          <div class="extras-title">ADDITIONAL FEES:</div>
           ${formattedExtras.map(extra => `
             <div class="extra-row">
               <span>${extra.label}</span>
@@ -191,19 +192,19 @@ export function printReceipt(receiptData: ReceiptProps) {
           
           ${formattedExtras.length > 0 ? `
           <div class="total-row" style="color: green;">
-            <span>+ Biaya Tambahan:</span>
+            <span>+ Additional Fees:</span>
             <span>+${formatCurrency(receiptData.extras!.reduce((sum, e) => sum + e.amount, 0))}</span>
           </div>` : ''}
           
           ${receiptData.discount && receiptData.discount > 0 ? `
           <div class="total-row" style="color: red;">
-            <span>- Diskon:</span>
+            <span>- Discount:</span>
             <span>-${formatCurrency(receiptData.discount)}</span>
           </div>` : ''}
           
           ${receiptData.platformFee && receiptData.platformFee > 0 ? `
           <div class="total-row" style="color: red;">
-            <span>- Fee Platform:</span>
+            <span>- Platform Fee:</span>
             <span>-${formatCurrency(receiptData.platformFee)}</span>
           </div>` : ''}
           
@@ -216,17 +217,17 @@ export function printReceipt(receiptData: ReceiptProps) {
         ${receiptData.payment ? `
         <div class="payment">
           <div class="info-row">
-            <span>Pembayaran:</span>
+            <span>Payment:</span>
             <span>${receiptData.payment.method.toUpperCase()}</span>
           </div>
           ${receiptData.payment.amount ? `
           <div class="info-row">
-            <span>Bayar:</span>
+            <span>Paid:</span>
             <span>${formatCurrency(receiptData.payment.amount)}</span>
           </div>` : ''}
           ${receiptData.payment.change && receiptData.payment.change > 0 ? `
           <div class="info-row">
-            <span><strong>Kembalian:</strong></span>
+            <span><strong>Change:</strong></span>
             <span><strong>${formatCurrency(receiptData.payment.change)}</strong></span>
           </div>` : ''}
         </div>
@@ -239,14 +240,14 @@ export function printReceipt(receiptData: ReceiptProps) {
         ` : ''}
 
         <div class="thank-you">
-          *** TERIMA KASIH ***
+          *** THANK YOU ***
         </div>
 
         <script>
           function formatCurrency(amount) {
-            return new Intl.NumberFormat('id-ID', {
+            return new Intl.NumberFormat(${JSON.stringify(getAppLocale())}, {
               style: 'currency',
-              currency: 'IDR',
+              currency: ${JSON.stringify(getAppCurrency())},
               minimumFractionDigits: 0,
               maximumFractionDigits: 0
             }).format(amount);
@@ -272,22 +273,22 @@ export function printInvoice(invoiceData: InvoiceProps) {
   const printWindow = window.open('', '_blank', 'width=800,height=600');
   
   if (!printWindow) {
-    alert('Pop-up diblokir! Harap izinkan pop-up untuk mencetak.');
+    alert('Pop-up blocked! Please allow pop-ups to print.');
     return;
   }
 
   // Helper functions for formatting
   const formatCurrencyValue = (amount: number) => formatCurrency(amount);
-  const formatDateValue = (date: string) => new Date(date).toLocaleDateString('id-ID', {
+  const formatDateValue = (date: string) => new Date(date).toLocaleDateString(getAppLocale(), {
     year: 'numeric',
     month: 'long', 
     day: 'numeric'
   });
   const getInvoiceTitle = (type: string) => {
     switch (type) {
-      case 'consignment': return 'INVOICE KONSINYASI';
-      case 'pickup': return 'INVOICE PICKUP';
-      case 'settlement': return 'INVOICE SETTLEMENT';
+      case 'consignment': return 'CONSIGNMENT INVOICE';
+      case 'pickup': return 'PICKUP INVOICE';
+      case 'settlement': return 'SETTLEMENT INVOICE';
       default: return 'INVOICE';
     }
   };
@@ -500,30 +501,30 @@ export function printInvoice(invoiceData: InvoiceProps) {
             <p class="invoice-number">Invoice #${formattedInvoice.invoiceNumber}</p>
           </div>
           <div class="invoice-date">
-            <p>Tanggal: ${formattedInvoice.formattedInvoiceDate}</p>
-            ${formattedInvoice.formattedDueDate ? `<p class="due-date">Jatuh Tempo: ${formattedInvoice.formattedDueDate}</p>` : ''}
+            <p>Date: ${formattedInvoice.formattedInvoiceDate}</p>
+            ${formattedInvoice.formattedDueDate ? `<p class="due-date">Due Date: ${formattedInvoice.formattedDueDate}</p>` : ''}
           </div>
         </div>
 
         <div class="parties">
           <div class="party">
-            <h3 class="party-title">Dari:</h3>
+            <h3 class="party-title">From:</h3>
             <div class="party-info">
               <div class="party-name">${formattedInvoice.from.name}</div>
               <div class="party-details">
                 ${formattedInvoice.from.address ? `<div>${formattedInvoice.from.address}</div>` : ''}
-                ${formattedInvoice.from.phone ? `<div>Telp: ${formattedInvoice.from.phone}</div>` : ''}
+                ${formattedInvoice.from.phone ? `<div>Phone: ${formattedInvoice.from.phone}</div>` : ''}
                 ${formattedInvoice.from.email ? `<div>Email: ${formattedInvoice.from.email}</div>` : ''}
               </div>
             </div>
           </div>
           <div class="party">
-            <h3 class="party-title">Kepada:</h3>
+            <h3 class="party-title">To:</h3>
             <div class="party-info">
               <div class="party-name">${formattedInvoice.to.name}</div>
               <div class="party-details">
                 ${formattedInvoice.to.address ? `<div>${formattedInvoice.to.address}</div>` : ''}
-                ${formattedInvoice.to.phone ? `<div>Telp: ${formattedInvoice.to.phone}</div>` : ''}
+                ${formattedInvoice.to.phone ? `<div>Phone: ${formattedInvoice.to.phone}</div>` : ''}
                 ${formattedInvoice.to.email ? `<div>Email: ${formattedInvoice.to.email}</div>` : ''}
               </div>
             </div>
@@ -532,21 +533,21 @@ export function printInvoice(invoiceData: InvoiceProps) {
 
         ${formattedInvoice.type === 'pickup' && (formattedInvoice.formattedPickupDate || formattedInvoice.totalReturned || formattedInvoice.totalSold) ? `
         <div class="details-section">
-          <h3 class="details-title">Detail Pickup</h3>
+          <h3 class="details-title">Pickup Details</h3>
           <div class="details-grid">
             ${formattedInvoice.formattedPickupDate ? `
             <div class="detail-item">
-              <span class="detail-label">Tanggal Pickup:</span>
+              <span class="detail-label">Pickup Date:</span>
               <span class="detail-value">${formattedInvoice.formattedPickupDate}</span>
             </div>` : ''}
             ${formattedInvoice.totalReturned ? `
             <div class="detail-item">
-              <span class="detail-label">Barang Dikembalikan:</span>
+              <span class="detail-label">Items Returned:</span>
               <span class="detail-value">${formattedInvoice.totalReturned} item</span>
             </div>` : ''}
             ${formattedInvoice.totalSold ? `
             <div class="detail-item">
-              <span class="detail-label">Barang Terjual:</span>
+              <span class="detail-label">Items Sold:</span>
               <span class="detail-value">${formattedInvoice.totalSold} item</span>
             </div>` : ''}
           </div>
@@ -556,9 +557,9 @@ export function printInvoice(invoiceData: InvoiceProps) {
         <table class="items-table">
           <thead>
             <tr>
-              <th>Nama Produk</th>
+              <th>Product Name</th>
               <th class="qty-col">Qty</th>
-              <th class="price-col">Harga Satuan</th>
+              <th class="price-col">Unit Price</th>
               <th class="total-col">Total</th>
             </tr>
           </thead>
@@ -585,12 +586,12 @@ export function printInvoice(invoiceData: InvoiceProps) {
             </div>
             ${formattedInvoice.formattedDiscount ? `
             <div class="totals-row" style="color: #dc2626;">
-              <span>Diskon:</span>
+              <span>Discount:</span>
               <span>-${formattedInvoice.formattedDiscount}</span>
             </div>` : ''}
             ${formattedInvoice.formattedTax ? `
             <div class="totals-row">
-              <span>Pajak:</span>
+              <span>Tax:</span>
               <span>${formattedInvoice.formattedTax}</span>
             </div>` : ''}
             <div class="totals-row totals-final">
@@ -603,26 +604,26 @@ export function printInvoice(invoiceData: InvoiceProps) {
         ${formattedInvoice.isPaid !== undefined ? `
         <div class="status-section ${formattedInvoice.isPaid ? 'status-paid' : 'status-unpaid'}">
           <div class="status-title">
-            Status Pembayaran: ${formattedInvoice.isPaid ? 'LUNAS' : 'BELUM LUNAS'}
+            Payment Status: ${formattedInvoice.isPaid ? 'PAID' : 'UNPAID'}
           </div>
           ${formattedInvoice.isPaid && formattedInvoice.formattedPaymentDate ? `
-          <div>Dibayar pada: ${formattedInvoice.formattedPaymentDate}</div>` : ''}
+          <div>Paid on: ${formattedInvoice.formattedPaymentDate}</div>` : ''}
           ${formattedInvoice.isPaid && formattedInvoice.paymentMethod ? `
-          <div>Metode: ${formattedInvoice.paymentMethod}</div>` : ''}
+          <div>Method: ${formattedInvoice.paymentMethod}</div>` : ''}
         </div>
         ` : ''}
 
         ${formattedInvoice.notes ? `
         <div style="margin-bottom: 30px;">
-          <h3 style="color: #374151; margin-bottom: 8px;">Catatan:</h3>
+          <h3 style="color: #374151; margin-bottom: 8px;">Notes:</h3>
           <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">${formattedInvoice.notes}</div>
         </div>
         ` : ''}
 
         <div class="footer">
-          <p>Terima kasih atas kerjasama yang baik. Invoice ini dibuat secara otomatis.</p>
+          <p>Thank you for your good cooperation. This invoice is generated automatically.</p>
           <p style="font-size: 12px; margin-top: 8px;">
-            Dicetak pada: ${new Date().toLocaleString('id-ID')}
+            Printed on: ${new Date().toLocaleString(getAppLocale())}
           </p>
         </div>
 

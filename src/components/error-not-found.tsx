@@ -18,7 +18,7 @@ const ErrorNotFoundContent = () => {
 			</div>
 			<div className="flex items-center gap-2">
 				<button onClick={() => router.back()}>
-					<span>Kembali?</span>
+					<span>Go back?</span>
 				</button>
 			</div>
 		</>

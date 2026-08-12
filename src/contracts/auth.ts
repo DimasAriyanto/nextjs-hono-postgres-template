@@ -70,7 +70,7 @@ export type TGoogleAuthRequest = z.infer<typeof googleAuthSchema>;
  * Forgot password request schema
  */
 export const forgotPasswordSchema = z.object({
-	email: z.string().min(1, 'Email wajib diisi').email('Format email tidak valid'),
+	email: z.string().min(1, 'Email is required').email('Invalid email format'),
 });
 
 export type TForgotPasswordRequest = z.infer<typeof forgotPasswordSchema>;
@@ -80,12 +80,12 @@ export type TForgotPasswordRequest = z.infer<typeof forgotPasswordSchema>;
  */
 export const resetPasswordSchema = z
 	.object({
-		token: z.string().min(1, 'Token tidak valid'),
-		password: z.string().min(6, 'Password minimal 6 karakter'),
-		password_confirmation: z.string().min(1, 'Konfirmasi password wajib diisi'),
+		token: z.string().min(1, 'Invalid token'),
+		password: z.string().min(6, 'Password must be at least 6 characters'),
+		password_confirmation: z.string().min(1, 'Password confirmation is required'),
 	})
 	.refine((data) => data.password === data.password_confirmation, {
-		message: 'Password tidak cocok',
+		message: 'Passwords do not match',
 		path: ['password_confirmation'],
 	});
 

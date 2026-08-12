@@ -6,33 +6,33 @@ import { formatTZ } from '@/libs/dayjs';
 import { buildWhatsAppUrl, openWhatsApp } from '@/libs/whatsapp';
 
 const DEFAULT_GREETINGS = [
-	'Halo! Ada yang bisa kami bantu? 👋',
-	'Punya pertanyaan? Kami siap membantu! 💬',
-	'Chat kami sekarang, gratis! ✨',
+	'Hi! How can we help? 👋',
+	'Got a question? We are happy to help! 💬',
+	'Chat with us now, it is free! ✨',
 ];
 
 const DEFAULT_QUICK_REPLIES = [
-	'Halo, saya ingin tahu lebih lanjut 👋',
-	'Apakah ini masih tersedia? 📋',
-	'Bagaimana cara melakukan pemesanan? 💰',
-	'Berapa lama estimasi pengiriman? 🔍',
-	'Saya ingin bertanya soal pesanan saya 🔄',
+	'Hi, I would like to know more 👋',
+	'Is this still available? 📋',
+	'How do I place an order? 💰',
+	'How long is the estimated delivery time? 🔍',
+	'I would like to ask about my order 🔄',
 ];
 
 export interface WhatsAppButtonProps {
-	/** Nomor WhatsApp tujuan (format bebas, akan dinormalisasi otomatis). Jika kosong, tombol tidak ditampilkan. */
+	/** Destination WhatsApp number (any format, will be normalized automatically). If empty, the button is not shown. */
 	phone?: string | null;
-	/** Nama yang tampil di header chat dan pesan sambutan. */
+	/** Name shown in the chat header and welcome message. */
 	name?: string;
-	/** Keterangan kecil di bawah nama pada header chat. */
+	/** Small caption below the name in the chat header. */
 	subtitle?: string;
-	/** Pesan sambutan pada bubble chat (mendukung ReactNode agar bisa disisipi elemen seperti <strong>). */
+	/** Welcome message in the chat bubble (supports ReactNode so elements like <strong> can be inserted). */
 	welcomeMessage?: React.ReactNode;
-	/** Pesan default yang dikirim jika kolom input dikosongkan pengguna. */
+	/** Default message sent if the user leaves the input field empty. */
 	defaultMessage?: string;
-	/** Daftar pesan sapaan yang berputar pada bubble mengambang. */
+	/** List of greeting messages that rotate on the floating bubble. */
 	greetings?: string[];
-	/** Daftar balasan cepat yang bisa dipilih pengguna. */
+	/** List of quick replies the user can select. */
 	quickReplies?: string[];
 }
 
@@ -45,8 +45,8 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 
 export const WhatsAppButton = ({
 	phone,
-	name = 'Kami',
-	subtitle = 'Tim Support · Biasanya membalas cepat',
+	name = 'Us',
+	subtitle = 'Support Team · Usually replies fast',
 	welcomeMessage,
 	defaultMessage,
 	greetings = DEFAULT_GREETINGS,
@@ -102,7 +102,7 @@ export const WhatsAppButton = ({
 
 	const sendMessage = () => {
 		if (!phone) return;
-		const text = message.trim() || defaultMessage || `Halo, saya ingin bertanya tentang produk di ${name}.`;
+		const text = message.trim() || defaultMessage || `Hi, I would like to ask about a product at ${name}.`;
 		const url = buildWhatsAppUrl(phone, text);
 		openWhatsApp(url);
 		closeModal();
@@ -121,7 +121,7 @@ export const WhatsAppButton = ({
 		}
 	};
 
-	// Sembunyikan jika nomor WA belum dikonfigurasi
+	// Hide if the WhatsApp number is not configured yet
 	if (!phone) return null;
 
 	return (
@@ -145,7 +145,7 @@ export const WhatsAppButton = ({
 							<p className="text-white font-semibold text-sm truncate">{name}</p>
 							<p className="text-green-200 text-xs">{subtitle}</p>
 						</div>
-						<button onClick={closeModal} className="text-white/70 hover:text-white transition-colors flex-shrink-0" aria-label="Tutup">
+						<button onClick={closeModal} className="text-white/70 hover:text-white transition-colors flex-shrink-0" aria-label="Close">
 							<X className="w-5 h-5" />
 						</button>
 					</div>
@@ -166,8 +166,8 @@ export const WhatsAppButton = ({
 								<p className="text-sm text-gray-800 leading-relaxed">
 									{welcomeMessage ?? (
 										<>
-											Halo! 👋 Selamat datang di <strong>{name}</strong>.<br />
-											Ada yang bisa kami bantu? Silakan pilih topik di bawah.
+											Hi! 👋 Welcome to <strong>{name}</strong>.<br />
+											How can we help? Please choose a topic below.
 										</>
 									)}
 								</p>
@@ -178,7 +178,7 @@ export const WhatsAppButton = ({
 						</div>
 
 						<div className="space-y-1.5 pt-1">
-							<p className="text-[11px] text-gray-500 text-center">Pilih topik pertanyaan:</p>
+							<p className="text-[11px] text-gray-500 text-center">Choose a question topic:</p>
 							{quickReplies.map((reply, i) => (
 								<button
 									key={i}
@@ -202,7 +202,7 @@ export const WhatsAppButton = ({
 							value={message}
 							onChange={(e) => setMessage(e.target.value)}
 							onKeyDown={handleKeyDown}
-							placeholder="Ketik pesan Anda..."
+							placeholder="Type your message..."
 							rows={1}
 							className="flex-1 resize-none bg-white rounded-2xl px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none border border-transparent focus:border-green-400 transition-colors max-h-28 overflow-y-auto shadow-sm"
 							style={{ fieldSizing: 'content' } as React.CSSProperties}
@@ -210,7 +210,7 @@ export const WhatsAppButton = ({
 						<button
 							onClick={sendMessage}
 							className="flex-shrink-0 w-10 h-10 rounded-full bg-green-500 hover:bg-green-600 active:bg-green-700 text-white flex items-center justify-center shadow transition-all duration-150 hover:scale-105 active:scale-95"
-							aria-label="Kirim pesan"
+							aria-label="Send message"
 						>
 							<Send className="w-4 h-4" />
 						</button>
@@ -218,7 +218,7 @@ export const WhatsAppButton = ({
 
 					<div className="bg-gray-100 pb-2 flex items-center justify-center gap-1">
 						<WhatsAppIcon className="w-3 h-3 text-green-600" />
-						<span className="text-[10px] text-gray-400">Melanjutkan ke WhatsApp</span>
+						<span className="text-[10px] text-gray-400">Continuing to WhatsApp</span>
 					</div>
 				</div>
 			)}
@@ -230,7 +230,7 @@ export const WhatsAppButton = ({
 							<button
 								onClick={() => setShowBubble(false)}
 								className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-gray-300 hover:bg-gray-400 text-gray-600 flex items-center justify-center text-xs leading-none transition-colors"
-								aria-label="Tutup"
+								aria-label="Close"
 							>
 								×
 							</button>
@@ -271,7 +271,7 @@ export const WhatsAppButton = ({
 							{showModal ? <ChevronDown className="w-6 h-6" /> : <WhatsAppIcon className="w-7 h-7" />}
 						</span>
 						<span className="text-sm font-semibold whitespace-nowrap pr-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100">
-							{showModal ? 'Tutup Chat' : 'Hubungi Kami'}
+							{showModal ? 'Close Chat' : 'Contact Us'}
 						</span>
 					</button>
 				</div>

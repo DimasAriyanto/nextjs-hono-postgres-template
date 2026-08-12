@@ -46,7 +46,7 @@ export function ImagePreview({ src, alt = 'Preview', className, thumbnailClassNa
 					<button
 						className="absolute right-4 top-4 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80"
 						onClick={() => setOpen(false)}
-						aria-label="Tutup"
+						aria-label="Close"
 					>
 						<X className="size-5" />
 					</button>

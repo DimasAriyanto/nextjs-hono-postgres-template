@@ -8,12 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-const DAYS_SHORT = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+const DAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
-	'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-	'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+	'January', 'February', 'March', 'April', 'May', 'June',
+	'July', 'August', 'September', 'October', 'November', 'December',
 ];
-const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 interface DatePickerProps {
 	/** Value as YYYY-MM-DD or ISO string */
@@ -36,7 +36,7 @@ export function DatePicker({
 	value,
 	onChange,
 	valueFormat = 'date',
-	placeholder = 'Pilih tanggal',
+	placeholder = 'Select date',
 	disabled,
 	className,
 	minDate,
@@ -119,7 +119,7 @@ export function DatePicker({
 			<PopoverContent className="w-auto p-0 overflow-hidden" align="start">
 				{/* Header */}
 				<div className="bg-primary text-primary-foreground px-4 pt-4 pb-3">
-					<p className="text-xs font-medium uppercase tracking-wider opacity-70 mb-1">Pilih Tanggal</p>
+					<p className="text-xs font-medium uppercase tracking-wider opacity-70 mb-1">Select Date</p>
 					<p className="text-2xl font-bold tracking-tight">
 						{headerLabel ?? <span className="opacity-50 text-base font-normal">{placeholder}</span>}
 					</p>

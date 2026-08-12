@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/libs/currency';
+import { getAppCurrency, getAppLocale } from '@/libs/dayjs';
 import { cn } from '@/libs/utils';
 
 interface CurrencyInputProps extends Omit<React.ComponentProps<typeof Input>, 'onChange' | 'value' | 'type'> {
@@ -11,12 +12,12 @@ interface CurrencyInputProps extends Omit<React.ComponentProps<typeof Input>, 'o
 }
 
 /**
- * Input field yang otomatis memformat nilai ke Rupiah saat diketik.
- * Menyimpan raw number ke form state, menampilkan "Rp X.XXX.XXX" ke user.
+ * Input field that automatically formats the value as currency as the user types.
+ * Stores the raw number in the form state, displaying "IDR X,XXX,XXX" to the user.
  */
 const formatThousands = (digits: string): string => {
   if (!digits) return '';
-  return new Intl.NumberFormat('id-ID').format(parseInt(digits, 10));
+  return new Intl.NumberFormat(getAppLocale()).format(parseInt(digits, 10));
 };
 
 export function CurrencyInput({ value, onChange, className, ...props }: CurrencyInputProps) {
@@ -41,7 +42,7 @@ export function CurrencyInput({ value, onChange, className, ...props }: Currency
     onChange(digits ? parseInt(digits, 10) : 0);
   };
 
-  // Posisikan cursor ke akhir setelah format berubah saat mengetik
+  // Position the cursor at the end after the format changes while typing
   React.useEffect(() => {
     if (isFocused && inputRef.current) {
       const len = inputRef.current.value.length;
@@ -66,7 +67,7 @@ export function CurrencyInput({ value, onChange, className, ...props }: Currency
       onChange={handleChange}
       onFocus={handleFocus}
       onBlur={handleBlur}
-      placeholder={props.placeholder ?? 'Rp 0'}
+      placeholder={props.placeholder ?? `${getAppCurrency()} 0`}
     />
   );
 }

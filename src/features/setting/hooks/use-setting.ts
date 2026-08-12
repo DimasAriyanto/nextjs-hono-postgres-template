@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as settingApi from '@/features/setting/apis/setting.api';
-import { setAppTimezone } from '@/libs/dayjs';
+import { setAppCurrency, setAppLocale, setAppTimezone } from '@/libs/dayjs';
 import type { TUpdateSettingRequest } from '@/contracts';
 
 /**
@@ -30,6 +30,8 @@ export function useUpdateSettings(options?: { onSuccess?: () => void; onError?: 
 		mutationFn: (data: TUpdateSettingRequest) => settingApi.updateSettings(data),
 		onSuccess: (res) => {
 			setAppTimezone(res.data.timezone);
+			setAppLocale(res.data.locale);
+			setAppCurrency(res.data.currency);
 			queryClient.setQueryData(settingKeys.all, res);
 			options?.onSuccess?.();
 		},

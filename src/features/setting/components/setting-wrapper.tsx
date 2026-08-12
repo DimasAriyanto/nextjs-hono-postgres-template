@@ -18,7 +18,7 @@ import { SocialLinksInput } from '@/components/social-links-input';
 import { FaqInput } from '@/components/faq-input';
 import { PageHeader } from '@/components/page-header';
 import { useSettings, useUpdateSettings } from '@/features/setting/hooks/use-setting';
-import { setAppTimezone } from '@/libs/dayjs';
+import { LOCALE_OPTIONS, setAppCurrency, setAppLocale, setAppTimezone } from '@/libs/dayjs';
 import { updateSettingSchema, type TUpdateSettingRequest } from '@/contracts';
 
 // ─── Upload helper ─────────────────────────────────────────────────────────────
@@ -39,9 +39,46 @@ async function uploadLogo(file: File): Promise<string> {
 // ─── Timezone options ───────────────────────────────────────────────────────────
 
 const TIMEZONE_OPTIONS = [
+	{ value: 'UTC', label: 'UTC' },
 	{ value: 'Asia/Jakarta', label: 'WIB — Asia/Jakarta' },
 	{ value: 'Asia/Makassar', label: 'WITA — Asia/Makassar' },
 	{ value: 'Asia/Jayapura', label: 'WIT — Asia/Jayapura' },
+	{ value: 'Asia/Singapore', label: 'Asia/Singapore' },
+	{ value: 'Asia/Kuala_Lumpur', label: 'Asia/Kuala Lumpur' },
+	{ value: 'Asia/Bangkok', label: 'Asia/Bangkok' },
+	{ value: 'Asia/Manila', label: 'Asia/Manila' },
+	{ value: 'Asia/Tokyo', label: 'Asia/Tokyo' },
+	{ value: 'Asia/Seoul', label: 'Asia/Seoul' },
+	{ value: 'Asia/Shanghai', label: 'Asia/Shanghai' },
+	{ value: 'Asia/Hong_Kong', label: 'Asia/Hong Kong' },
+	{ value: 'Asia/Kolkata', label: 'Asia/Kolkata' },
+	{ value: 'Asia/Dubai', label: 'Asia/Dubai' },
+	{ value: 'Australia/Sydney', label: 'Australia/Sydney' },
+	{ value: 'Europe/London', label: 'Europe/London' },
+	{ value: 'Europe/Paris', label: 'Europe/Paris' },
+	{ value: 'America/New_York', label: 'America/New York' },
+	{ value: 'America/Chicago', label: 'America/Chicago' },
+	{ value: 'America/Los_Angeles', label: 'America/Los Angeles' },
+];
+
+// ─── Currency options ───────────────────────────────────────────────────────────
+
+const CURRENCY_OPTIONS = [
+	{ value: 'IDR', label: 'IDR — Indonesian Rupiah' },
+	{ value: 'USD', label: 'USD — US Dollar' },
+	{ value: 'EUR', label: 'EUR — Euro' },
+	{ value: 'GBP', label: 'GBP — British Pound' },
+	{ value: 'JPY', label: 'JPY — Japanese Yen' },
+	{ value: 'SGD', label: 'SGD — Singapore Dollar' },
+	{ value: 'MYR', label: 'MYR — Malaysian Ringgit' },
+	{ value: 'AUD', label: 'AUD — Australian Dollar' },
+	{ value: 'CNY', label: 'CNY — Chinese Yuan' },
+	{ value: 'INR', label: 'INR — Indian Rupee' },
+	{ value: 'KRW', label: 'KRW — South Korean Won' },
+	{ value: 'THB', label: 'THB — Thai Baht' },
+	{ value: 'PHP', label: 'PHP — Philippine Peso' },
+	{ value: 'VND', label: 'VND — Vietnamese Dong' },
+	{ value: 'AED', label: 'AED — UAE Dirham' },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -70,15 +107,19 @@ export function SettingWrapper() {
 				address: settings.address ?? '',
 				social_links: settings.social_links,
 				timezone: settings.timezone,
+				locale: settings.locale,
+				currency: settings.currency,
 				faqs: settings.faqs,
 			}
 			: undefined,
 	});
 
-	// Reflect the app's configured timezone as soon as settings load
+	// Reflect the app's configured regional preferences as soon as settings load
 	useEffect(() => {
 		if (settings?.timezone) setAppTimezone(settings.timezone);
-	}, [settings?.timezone]);
+		if (settings?.locale) setAppLocale(settings.locale);
+		if (settings?.currency) setAppCurrency(settings.currency);
+	}, [settings?.timezone, settings?.locale, settings?.currency]);
 
 	const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
@@ -267,6 +308,44 @@ export function SettingWrapper() {
 												<SelectContent>
 													{TIMEZONE_OPTIONS.map((tz) => (
 														<SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)} />
+
+									<FormField control={form.control} name="locale" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Regional Format</FormLabel>
+											<Select value={field.value} onValueChange={field.onChange} disabled={isSaving}>
+												<FormControl>
+													<SelectTrigger className="w-full sm:w-80">
+														<SelectValue placeholder="Select regional format" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{LOCALE_OPTIONS.map((locale) => (
+														<SelectItem key={locale.value} value={locale.value}>{locale.label}</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)} />
+
+									<FormField control={form.control} name="currency" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Currency</FormLabel>
+											<Select value={field.value} onValueChange={field.onChange} disabled={isSaving}>
+												<FormControl>
+													<SelectTrigger className="w-full sm:w-80">
+														<SelectValue placeholder="Select currency" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{CURRENCY_OPTIONS.map((currency) => (
+														<SelectItem key={currency.value} value={currency.value}>{currency.label}</SelectItem>
 													))}
 												</SelectContent>
 											</Select>

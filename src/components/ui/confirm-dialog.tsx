@@ -28,10 +28,10 @@ interface ConfirmDialogProps {
 
 export function ConfirmDialog({
 	trigger,
-	title = 'Apakah kamu yakin?',
-	description = 'Tindakan ini tidak dapat dibatalkan.',
-	confirmLabel = 'Ya, lanjutkan',
-	cancelLabel = 'Batal',
+	title = 'Are you sure?',
+	description = 'This action cannot be undone.',
+	confirmLabel = 'Yes, continue',
+	cancelLabel = 'Cancel',
 	variant = 'destructive',
 	onConfirm,
 	disabled,
@@ -64,7 +64,7 @@ export function ConfirmDialog({
 						className={cn(buttonVariants({ variant }))}
 						onClick={handleConfirm}
 					>
-						{loading ? 'Memproses...' : confirmLabel}
+						{loading ? 'Processing...' : confirmLabel}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

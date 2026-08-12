@@ -22,7 +22,7 @@ export async function ArticleDetailWrapper({ slug }: ArticleDetailWrapperProps) 
 		<article className="container mx-auto max-w-3xl px-4 md:px-6 py-16">
 			<Link href="/articles" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
 				<ArrowLeft className="size-4" />
-				Kembali ke Artikel
+				Back to Articles
 			</Link>
 
 			<header className="mt-6 space-y-3">
@@ -51,7 +51,7 @@ export async function ArticleDetailWrapper({ slug }: ArticleDetailWrapperProps) 
 
 			{relatedArticles.length > 0 && (
 				<div className="mt-16 border-t border-border pt-10">
-					<h2 className="mb-6 text-xl font-bold tracking-tight">Artikel Terkait</h2>
+					<h2 className="mb-6 text-xl font-bold tracking-tight">Related Articles</h2>
 					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 						{relatedArticles.map((related) => (
 							<ArticleCard key={related.id} article={related} />

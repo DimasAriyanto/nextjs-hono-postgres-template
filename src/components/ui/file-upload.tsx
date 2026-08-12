@@ -45,7 +45,7 @@ async function compressImage(
       const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
       canvas.toBlob(
         (blob) => {
-          if (!blob) { reject(new Error('Kompresi gagal')); return; }
+          if (!blob) { reject(new Error('Compression failed')); return; }
           // Keep original name but update extension if type changed
           const ext = outputType === 'image/jpeg' ? '.jpg' : '.png';
           const baseName = file.name.replace(/\.[^.]+$/, '');
@@ -56,7 +56,7 @@ async function compressImage(
       );
     };
 
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Gagal memuat gambar')); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Failed to load image')); };
     img.src = url;
   });
 }
@@ -149,7 +149,7 @@ export function FileUpload({
 
   function validateFile(file: File): string | null {
     if (maxSize && file.size > maxSize) {
-      return `${file.name}: terlalu besar (maks ${formatBytes(maxSize)})`;
+      return `${file.name}: too large (max ${formatBytes(maxSize)})`;
     }
     if (accept) {
       const types = accept.split(',').map((t) => t.trim());
@@ -157,7 +157,7 @@ export function FileUpload({
         if (t.endsWith('/*')) return file.type.startsWith(t.slice(0, -1));
         return file.type === t;
       });
-      if (!accepted) return `${file.name}: tipe file tidak didukung`;
+      if (!accepted) return `${file.name}: file type not supported`;
     }
     return null;
   }
@@ -186,7 +186,7 @@ export function FileUpload({
           ),
         );
       } catch {
-        setFieldError('Gagal mengompresi gambar, coba lagi.');
+        setFieldError('Failed to compress image, please try again.');
         setIsCompressing(false);
         return;
       }
@@ -244,7 +244,7 @@ export function FileUpload({
           {isCompressing ? (
             <>
               <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" />
-              <span className="text-muted-foreground">Mengompresi...</span>
+              <span className="text-muted-foreground">Compressing...</span>
             </>
           ) : (
             <>
@@ -252,11 +252,11 @@ export function FileUpload({
               <span className="text-muted-foreground">
                 {description ?? (
                   <>
-                    Drag &amp; drop atau{' '}
+                    Drag &amp; drop or{' '}
                     <span className="font-medium text-primary">Browse</span>
-                    {maxSize ? ` · maks ${formatBytes(maxSize)}` : ''}
+                    {maxSize ? ` · max ${formatBytes(maxSize)}` : ''}
                     {multiple && maxFiles && files.length > 0
-                      ? ` · ${maxFiles - files.length} file lagi`
+                      ? ` · ${maxFiles - files.length} more file(s)`
                       : ''}
                   </>
                 )}

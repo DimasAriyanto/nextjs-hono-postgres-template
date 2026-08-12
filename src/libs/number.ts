@@ -1,4 +1,6 @@
-export function formatNumber(value: number, locale = 'id-ID'): string {
+import { getAppLocale } from '@/libs/dayjs';
+
+export function formatNumber(value: number, locale = getAppLocale()): string {
 	return new Intl.NumberFormat(locale).format(value);
 }
 
@@ -6,9 +8,9 @@ export function abbreviate(value: number): string {
 	const abs = Math.abs(value);
 	const sign = value < 0 ? '-' : '';
 
-	if (abs >= 1_000_000_000) return `${sign}${(abs / 1_000_000_000).toFixed(1).replace(/\.0$/, '')}M`;
-	if (abs >= 1_000_000) return `${sign}${(abs / 1_000_000).toFixed(1).replace(/\.0$/, '')}jt`;
-	if (abs >= 1_000) return `${sign}${(abs / 1_000).toFixed(1).replace(/\.0$/, '')}rb`;
+	if (abs >= 1_000_000_000) return `${sign}${(abs / 1_000_000_000).toFixed(1).replace(/\.0$/, '')}B`;
+	if (abs >= 1_000_000) return `${sign}${(abs / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+	if (abs >= 1_000) return `${sign}${(abs / 1_000).toFixed(1).replace(/\.0$/, '')}K`;
 	return `${sign}${abs}`;
 }
 

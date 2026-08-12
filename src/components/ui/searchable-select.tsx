@@ -27,9 +27,9 @@ export function SearchableSelect({
 	options,
 	value,
 	onValueChange,
-	placeholder = 'Pilih...',
-	searchPlaceholder = 'Cari...',
-	emptyText = 'Tidak ditemukan.',
+	placeholder = 'Select...',
+	searchPlaceholder = 'Search...',
+	emptyText = 'Not found.',
 	disabled,
 	className,
 }: SearchableSelectProps) {

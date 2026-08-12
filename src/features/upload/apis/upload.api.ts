@@ -35,7 +35,7 @@ export async function uploadImage(params: UploadImageParams): Promise<ApiSuccess
 
 	if (!res.ok) {
 		const errorData = await res.json().catch(() => null);
-		const message = errorData?.message || 'Gagal mengupload gambar';
+		const message = errorData?.message || 'Failed to upload image';
 		const code = errorData?.errors?.code || 'UPLOAD_ERROR';
 		const type = errorData?.errors?.type || 'UploadError';
 		const details = errorData?.errors?.details;
@@ -65,7 +65,7 @@ export async function uploadDocument(params: UploadImageParams): Promise<ApiSucc
 
 	if (!res.ok) {
 		const errorData = await res.json().catch(() => null);
-		const message = errorData?.message || 'Gagal mengupload dokumen';
+		const message = errorData?.message || 'Failed to upload document';
 		const code = errorData?.errors?.code || 'UPLOAD_ERROR';
 		const type = errorData?.errors?.type || 'UploadError';
 		const details = errorData?.errors?.details;

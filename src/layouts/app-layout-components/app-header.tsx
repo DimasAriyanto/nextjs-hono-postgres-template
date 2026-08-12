@@ -107,7 +107,7 @@ function UserMenu({ name, onLogout }: { name: string; onLogout: () => void }) {
 // ── Nav ────────────────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-	{ href: '/articles', label: 'Artikel' },
+	{ href: '/articles', label: 'Articles' },
 ];
 
 function isNavActive(pathname: string, href: string) {

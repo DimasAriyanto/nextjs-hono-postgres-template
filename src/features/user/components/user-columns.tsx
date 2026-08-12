@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2 } from 'lucide-react';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
+import { getAppLocale } from '@/libs/dayjs';
 import type { TUserWithRoles } from '@/contracts';
 
 interface UserColumnsProps {
@@ -76,7 +77,7 @@ export const createUserColumns = ({ onEdit, onDelete, page, limit }: UserColumns
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
 		cell: ({ row }) => {
 			const date = new Date(row.getValue('created_at') as string);
-			return <span className="text-sm text-muted-foreground">{date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>;
+			return <span className="text-sm text-muted-foreground">{date.toLocaleDateString(getAppLocale(), { day: '2-digit', month: 'short', year: 'numeric' })}</span>;
 		},
 	},
 	{

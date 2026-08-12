@@ -12,7 +12,7 @@ export function HomeWrapper() {
 		<>
 			<section className="container mx-auto px-4 md:px-6 py-20 text-center">
 				<h1 className="text-3xl font-bold tracking-tight sm:text-5xl">
-					{settings?.app_name ?? 'Selamat Datang'}
+					{settings?.app_name ?? 'Welcome'}
 				</h1>
 				{settings?.description && (
 					<p className="mx-auto mt-4 max-w-2xl text-muted-foreground sm:text-lg">{settings.description}</p>

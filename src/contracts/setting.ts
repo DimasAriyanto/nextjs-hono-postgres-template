@@ -25,6 +25,8 @@ export const SETTING_KEYS = {
 	ADDRESS: 'address',
 	SOCIAL_LINKS: 'social_links',
 	TIMEZONE: 'timezone',
+	LOCALE: 'locale',
+	CURRENCY: 'currency',
 	FAQS: 'faqs',
 } as const;
 
@@ -40,6 +42,8 @@ export const SETTING_KEY_GROUP_MAP: Record<TSettingKey, TSettingGroup> = {
 	[SETTING_KEYS.ADDRESS]: SETTING_GROUPS.CONTACT,
 	[SETTING_KEYS.SOCIAL_LINKS]: SETTING_GROUPS.CONTACT,
 	[SETTING_KEYS.TIMEZONE]: SETTING_GROUPS.REGIONAL,
+	[SETTING_KEYS.LOCALE]: SETTING_GROUPS.REGIONAL,
+	[SETTING_KEYS.CURRENCY]: SETTING_GROUPS.REGIONAL,
 	[SETTING_KEYS.FAQS]: SETTING_GROUPS.FAQ,
 };
 
@@ -73,6 +77,8 @@ export const updateSettingSchema = z.object({
 	address: z.string().optional(),
 	social_links: z.array(socialLinkSchema).optional(),
 	timezone: z.string().optional(),
+	locale: z.string().optional(),
+	currency: z.string().optional(),
 	faqs: z.array(faqItemSchema).optional(),
 });
 
@@ -91,6 +97,8 @@ export const settingSchema = z.object({
 	address: z.string().nullable(),
 	social_links: z.array(socialLinkSchema),
 	timezone: z.string(),
+	locale: z.string(),
+	currency: z.string(),
 	faqs: z.array(faqItemSchema),
 });
 

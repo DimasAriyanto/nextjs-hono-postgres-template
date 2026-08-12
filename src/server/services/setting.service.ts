@@ -10,6 +10,8 @@ const DEFAULTS: TSetting = {
 	address: null,
 	social_links: [],
 	timezone: 'Asia/Jakarta',
+	locale: 'en-US',
+	currency: 'IDR',
 	faqs: [],
 };
 
@@ -30,6 +32,8 @@ export class SettingService {
 			address: (byKey.get(SETTING_KEYS.ADDRESS) as string | undefined) ?? DEFAULTS.address,
 			social_links: (byKey.get(SETTING_KEYS.SOCIAL_LINKS) as TSocialLink[] | undefined) ?? DEFAULTS.social_links,
 			timezone: (byKey.get(SETTING_KEYS.TIMEZONE) as string | undefined) ?? DEFAULTS.timezone,
+			locale: (byKey.get(SETTING_KEYS.LOCALE) as string | undefined) ?? DEFAULTS.locale,
+			currency: (byKey.get(SETTING_KEYS.CURRENCY) as string | undefined) ?? DEFAULTS.currency,
 			faqs: (byKey.get(SETTING_KEYS.FAQS) as TFaqItem[] | undefined) ?? DEFAULTS.faqs,
 		};
 	}

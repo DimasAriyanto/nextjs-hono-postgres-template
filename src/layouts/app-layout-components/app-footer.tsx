@@ -31,7 +31,7 @@ export const AppFooter = ({ settings }: AppFooterProps) => {
 
 				{/* Contact */}
 				<div className="space-y-3">
-					<h3 className="text-sm font-semibold">Kontak</h3>
+					<h3 className="text-sm font-semibold">Contact</h3>
 					<ul className="space-y-2 text-sm text-muted-foreground">
 						{settings?.contact_email && (
 							<li className="flex items-center gap-2">
@@ -61,7 +61,7 @@ export const AppFooter = ({ settings }: AppFooterProps) => {
 				{/* Social */}
 				{socialLinks.length > 0 && (
 					<div className="space-y-3">
-						<h3 className="text-sm font-semibold">Media Sosial</h3>
+						<h3 className="text-sm font-semibold">Social Media</h3>
 						<div className="flex flex-wrap gap-2">
 							{socialLinks.map((link) => {
 								const platform = getSocialPlatform(link.platform);

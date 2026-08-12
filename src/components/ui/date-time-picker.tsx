@@ -8,12 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-const DAYS_SHORT = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+const DAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
-	'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-	'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+	'January', 'February', 'March', 'April', 'May', 'June',
+	'July', 'August', 'September', 'October', 'November', 'December',
 ];
-const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 interface DateTimePickerProps {
 	/** Value in YYYY-MM-DDTHH:mm:ss format (or any dayjs-parseable string) */
@@ -31,7 +31,7 @@ interface DateTimePickerProps {
 export function DateTimePicker({
 	value,
 	onChange,
-	placeholder = 'Pilih tanggal & waktu',
+	placeholder = 'Select date & time',
 	disabled,
 	className,
 	minDate,
@@ -99,7 +99,7 @@ export function DateTimePicker({
 
 	const displayLabel = parsed?.isValid() ? parsed.format('DD MMM YYYY, HH:mm') : null;
 
-	// Header label: "Sen, 17 Agu"
+	// Header label: "Mon, 17 Aug"
 	const headerLabel = parsed?.isValid()
 		? `${DAYS_SHORT[parsed.day()]}, ${parsed.format('DD')} ${MONTHS_SHORT[parsed.month()]}`
 		: null;
@@ -125,7 +125,7 @@ export function DateTimePicker({
 				{/* ── Header: selected date ── */}
 				<div className="bg-primary text-primary-foreground px-4 pt-4 pb-3">
 					<p className="text-xs font-medium uppercase tracking-wider opacity-70 mb-1">
-						Pilih Tanggal
+						Select Date
 					</p>
 					<p className="text-2xl font-bold tracking-tight">
 						{headerLabel ?? <span className="opacity-50 text-base font-normal">{placeholder}</span>}
@@ -231,7 +231,7 @@ export function DateTimePicker({
 				{/* ── Time selector ── */}
 				<div className="border-t px-4 py-3 flex items-center gap-3">
 					<Clock className="h-4 w-4 text-muted-foreground shrink-0" />
-					<span className="text-sm text-muted-foreground">Waktu</span>
+					<span className="text-sm text-muted-foreground">Time</span>
 					<input
 						type="time"
 						value={timeString}

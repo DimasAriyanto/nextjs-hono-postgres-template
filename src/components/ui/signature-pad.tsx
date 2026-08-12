@@ -135,10 +135,10 @@ export function SignaturePad({ onChange, initialValue, height = 200, className =
             />
             <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
-                    {isEmpty ? 'Tanda tangani di area di atas' : 'Tanda tangan telah diisi'}
+                    {isEmpty ? 'Sign in the area above' : 'Signature has been filled'}
                 </p>
                 <Button type="button" variant="outline" size="sm" onClick={clear}>
-                    Hapus
+                    Clear
                 </Button>
             </div>
         </div>

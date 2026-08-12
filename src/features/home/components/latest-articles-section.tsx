@@ -17,12 +17,12 @@ export function LatestArticlesSection() {
 		<section className="container mx-auto px-4 md:px-6 py-16">
 			<div className="flex items-end justify-between gap-4 mb-8">
 				<div>
-					<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Artikel Terbaru</h2>
-					<p className="text-muted-foreground mt-1">Kabar dan wawasan terbaru dari kami.</p>
+					<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Latest Articles</h2>
+					<p className="text-muted-foreground mt-1">The latest news and insights from us.</p>
 				</div>
 				<Button variant="outline" asChild className="shrink-0">
 					<Link href="/articles">
-						Lihat Semua
+						View All
 						<ArrowRight className="size-4" />
 					</Link>
 				</Button>

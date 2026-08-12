@@ -180,8 +180,8 @@ export const DataTable = <TData extends RowData, TValue>({
 								<TableCell colSpan={columns.length} className="p-0">
 									<EmptyState
 										icon={isError ? <AlertCircle className="size-5" /> : <Inbox className="size-5" />}
-										title={isError ? 'Gagal memuat data' : 'Tidak ada data'}
-										description={isError ? 'Terjadi kesalahan saat memuat data. Silakan coba lagi.' : 'Belum ada data untuk ditampilkan.'}
+										title={isError ? 'Failed to load data' : 'No data'}
+										description={isError ? 'An error occurred while loading data. Please try again.' : 'There is no data to display yet.'}
 									/>
 								</TableCell>
 							</TableRow>

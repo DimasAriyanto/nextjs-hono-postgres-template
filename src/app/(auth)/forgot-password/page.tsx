@@ -3,7 +3,7 @@ import { ForgotPasswordWrapper } from '@/features/auth';
 
 export const metadata: Metadata = {
 	robots: 'noindex, nofollow',
-	title: 'Lupa Password',
+	title: 'Forgot Password',
 };
 
 export default function Page() {

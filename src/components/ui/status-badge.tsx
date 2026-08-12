@@ -37,13 +37,13 @@ const statusBadgeVariants = cva(
 
 export interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof statusBadgeVariants> {
 	/**
-	 * Status string untuk auto-detect variant (opsional)
-	 * Jika tidak ada children, akan menggunakan default text dari status
+	 * Status string for auto-detecting the variant (optional)
+	 * If there are no children, the default text from the status will be used
 	 */
 	status?: string;
 	/**
-	 * Custom text untuk ditampilkan di badge
-	 * Jika ada, akan override text default dari status
+	 * Custom text to display in the badge
+	 * If provided, it will override the default text from the status
 	 */
 	children?: React.ReactNode;
 }
@@ -53,7 +53,7 @@ const StatusBadge = React.forwardRef<HTMLSpanElement, StatusBadgeProps>(
 		// Auto-detect variant from status prop if not explicitly provided
 		const computedVariant = variant || (status ? getVariantFromStatus(status) : 'default');
 
-		// Jika ada children, gunakan children. Jika tidak, gunakan getStatusText dari status
+		// If there are children, use children. Otherwise, use getStatusText from status
 		const displayText = children || (status ? getStatusText(status) : null);
 
 		return (
@@ -128,28 +128,28 @@ function getStatusText(status: string): string {
 		case 'approved':
 		case 'completed':
 		case 'success':
-			return 'Sukses';
+			return 'Success';
 		case 'rejected':
 		case 'ditolak':
-			return 'Ditolak';
+			return 'Rejected';
 		case 'cancelled':
 		case 'dibatalkan':
-			return 'Dibatalkan';
+			return 'Cancelled';
 		case 'failed':
 		case 'gagal':
-			return 'Gagal';
+			return 'Failed';
 		case 'processing':
 		case 'diproses':
-			return 'Diproses';
+			return 'Processing';
 		// Billing status
 		case 'paid':
-			return 'Lunas';
+			return 'Paid';
 		case 'unpaid':
-			return 'Belum Dibayar';
+			return 'Unpaid';
 		case 'overdue':
-			return 'Terlambat';
+			return 'Overdue';
 		case 'partially_paid':
-			return 'Dibayar Sebagian';
+			return 'Partially Paid';
 		// General status
 		case 'active':
 			return 'Active';

@@ -15,13 +15,13 @@ export function canAccess(role: TRole, pathname: string): boolean {
 	}
 }
 
-// Redirect default setelah login per role
+// Default redirect after login, per role
 export const ROLE_DEFAULT_REDIRECT: Record<TRole, string> = {
 	platform_admin: '/gundala-admin/d',
 	owner: '/dashboard/d',
 };
 
-// Judul menu item yang disembunyikan per role (digunakan di sidebar)
+// Menu item titles hidden per role (used in the sidebar)
 export const ROLE_HIDDEN_MENUS: Partial<Record<TRole, string[]>> = {
 	platform_admin: [],
 	owner: [],

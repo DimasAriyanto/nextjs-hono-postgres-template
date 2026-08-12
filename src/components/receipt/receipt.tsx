@@ -77,16 +77,16 @@ export function Receipt({
       {/* Receipt Info */}
       <div className="border-b pb-2 mb-2 space-y-1">
         <div className="flex justify-between">
-          <span>No. Struk:</span>
+          <span>Receipt No.:</span>
           <span className="font-bold">{receiptNumber}</span>
         </div>
         <div className="flex justify-between">
-          <span>Tanggal:</span>
+          <span>Date:</span>
           <span>{dayjs(date).format('DD/MM/YYYY HH:mm')}</span>
         </div>
         {cashierName && (
           <div className="flex justify-between">
-            <span>Kasir:</span>
+            <span>Cashier:</span>
             <span>{cashierName}</span>
           </div>
         )}
@@ -114,7 +114,7 @@ export function Receipt({
       {/* Extras */}
       {extras.length > 0 && (
         <div className="border-b pb-2 mb-2">
-          <div className="text-[10px] font-semibold mb-1">BIAYA TAMBAHAN:</div>
+          <div className="text-[10px] font-semibold mb-1">ADDITIONAL FEES:</div>
           {extras.map((extra, index) => (
             <div key={index} className="flex justify-between text-[10px]">
               <span>{extra.label}</span>
@@ -133,21 +133,21 @@ export function Receipt({
         
         {extras.length > 0 && (
           <div className="flex justify-between text-green-600">
-            <span>+ Biaya Tambahan:</span>
+            <span>+ Additional Fees:</span>
             <span>+{formatCurrency(extras.reduce((sum, e) => sum + e.amount, 0))}</span>
           </div>
         )}
         
         {discount > 0 && (
           <div className="flex justify-between text-red-600">
-            <span>- Diskon:</span>
+            <span>- Discount:</span>
             <span>-{formatCurrency(discount)}</span>
           </div>
         )}
         
         {platformFee > 0 && (
           <div className="flex justify-between text-red-600">
-            <span>- Fee Platform:</span>
+            <span>- Platform Fee:</span>
             <span>-{formatCurrency(platformFee)}</span>
           </div>
         )}
@@ -162,18 +162,18 @@ export function Receipt({
       {payment && (
         <div className="border-t pt-2 mt-2 space-y-1">
           <div className="flex justify-between">
-            <span>Pembayaran:</span>
+            <span>Payment:</span>
             <span className="uppercase">{payment.method}</span>
           </div>
           {payment.amount && (
             <div className="flex justify-between">
-              <span>Bayar:</span>
+              <span>Paid:</span>
               <span>{formatCurrency(payment.amount)}</span>
             </div>
           )}
           {payment.change && payment.change > 0 && (
             <div className="flex justify-between font-bold">
-              <span>Kembalian:</span>
+              <span>Change:</span>
               <span>{formatCurrency(payment.change)}</span>
             </div>
           )}
@@ -188,7 +188,7 @@ export function Receipt({
       )}
 
       <div className="text-center mt-3 text-[10px]">
-        *** TERIMA KASIH ***
+        *** THANK YOU ***
       </div>
     </div>
   );

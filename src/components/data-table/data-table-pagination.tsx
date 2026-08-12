@@ -21,7 +21,7 @@ export const DataTablePagination = <TData extends RowData,>({ table }: DataTable
 					<p className="text-sm font-medium">Rows per page</p>
 					<Select
 						value={`${table.getState().pagination.pageSize}`}
-						onValueChange={(value: '10' | '20' | '30' | '40' | '50' | '100' | 'Semua') => {
+						onValueChange={(value: '10' | '20' | '30' | '40' | '50' | '100' | 'All') => {
 							table.setPageSize(Number(value));
 						}}
 					>

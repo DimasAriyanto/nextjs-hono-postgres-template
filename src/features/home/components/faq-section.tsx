@@ -17,7 +17,7 @@ export function FaqSection({ faqs }: FaqSectionProps) {
 	return (
 		<section className="container mx-auto px-4 md:px-6 py-16">
 			<div className="mx-auto max-w-2xl text-center mb-10">
-				<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Pertanyaan yang Sering Diajukan</h2>
+				<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Frequently Asked Questions</h2>
 			</div>
 
 			<div className="mx-auto max-w-2xl divide-y divide-border rounded-lg border border-border">
