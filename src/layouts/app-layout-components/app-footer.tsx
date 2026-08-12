@@ -83,10 +83,14 @@ export const AppFooter = ({ settings }: AppFooterProps) => {
 				)}
 			</div>
 
-			<div className="border-t border-border py-4">
+			<div className="border-t border-border py-4 flex flex-col items-center gap-2 sm:flex-row sm:justify-between container mx-auto px-4 md:px-6">
 				<p className="text-center text-xs text-muted-foreground">
 					© {year} {appName}. All rights reserved.
 				</p>
+				<div className="flex items-center gap-4 text-xs text-muted-foreground">
+					<a href="/terms-of-service" className="hover:text-foreground transition-colors">Terms of Service</a>
+					<a href="/privacy-policy" className="hover:text-foreground transition-colors">Privacy Policy</a>
+				</div>
 			</div>
 		</footer>
 	);

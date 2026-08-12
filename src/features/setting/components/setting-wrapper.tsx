@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Building2, Contact, Globe2, HelpCircle, ImagePlus, Loader2 } from 'lucide-react';
+import { Building2, Contact, Globe2, HelpCircle, ImagePlus, Loader2, Scale } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SocialLinksInput } from '@/components/social-links-input';
 import { FaqInput } from '@/components/faq-input';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { PageHeader } from '@/components/page-header';
 import { useSettings, useUpdateSettings } from '@/features/setting/hooks/use-setting';
 import { LOCALE_OPTIONS, setAppCurrency, setAppLocale, setAppTimezone } from '@/libs/dayjs';
@@ -110,6 +111,8 @@ export function SettingWrapper() {
 				locale: settings.locale,
 				currency: settings.currency,
 				faqs: settings.faqs,
+				terms_of_service: settings.terms_of_service ?? '',
+				privacy_policy: settings.privacy_policy ?? '',
 			}
 			: undefined,
 	});
@@ -202,6 +205,7 @@ export function SettingWrapper() {
 							<TabsTrigger value="contact"><Contact className="size-3.5 mr-1.5" />Contact</TabsTrigger>
 							<TabsTrigger value="regional"><Globe2 className="size-3.5 mr-1.5" />Regional</TabsTrigger>
 							<TabsTrigger value="faq"><HelpCircle className="size-3.5 mr-1.5" />FAQ</TabsTrigger>
+							<TabsTrigger value="legal"><Scale className="size-3.5 mr-1.5" />Legal</TabsTrigger>
 						</TabsList>
 
 						{/* ── General ── */}
@@ -364,6 +368,29 @@ export function SettingWrapper() {
 										<FormItem>
 											<FormLabel>Frequently Asked Questions</FormLabel>
 											<FaqInput value={field.value ?? []} onChange={field.onChange} />
+											<FormMessage />
+										</FormItem>
+									)} />
+								</CardContent>
+							</Card>
+						</TabsContent>
+
+						{/* ── Legal ── */}
+						<TabsContent value="legal">
+							<Card>
+								<CardContent className="pt-6 space-y-6">
+									<FormField control={form.control} name="terms_of_service" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Terms of Service</FormLabel>
+											<RichTextEditor content={field.value ?? ''} onChange={field.onChange} placeholder="Write your terms of service..." />
+											<FormMessage />
+										</FormItem>
+									)} />
+
+									<FormField control={form.control} name="privacy_policy" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Privacy Policy</FormLabel>
+											<RichTextEditor content={field.value ?? ''} onChange={field.onChange} placeholder="Write your privacy policy..." />
 											<FormMessage />
 										</FormItem>
 									)} />

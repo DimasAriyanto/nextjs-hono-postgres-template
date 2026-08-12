@@ -13,6 +13,8 @@ const DEFAULTS: TSetting = {
 	locale: 'en-US',
 	currency: 'IDR',
 	faqs: [],
+	terms_of_service: null,
+	privacy_policy: null,
 };
 
 export class SettingService {
@@ -35,6 +37,8 @@ export class SettingService {
 			locale: (byKey.get(SETTING_KEYS.LOCALE) as string | undefined) ?? DEFAULTS.locale,
 			currency: (byKey.get(SETTING_KEYS.CURRENCY) as string | undefined) ?? DEFAULTS.currency,
 			faqs: (byKey.get(SETTING_KEYS.FAQS) as TFaqItem[] | undefined) ?? DEFAULTS.faqs,
+			terms_of_service: (byKey.get(SETTING_KEYS.TERMS_OF_SERVICE) as string | undefined) ?? DEFAULTS.terms_of_service,
+			privacy_policy: (byKey.get(SETTING_KEYS.PRIVACY_POLICY) as string | undefined) ?? DEFAULTS.privacy_policy,
 		};
 	}
 
