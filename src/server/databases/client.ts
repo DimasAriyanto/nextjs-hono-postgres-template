@@ -56,22 +56,28 @@ const getConnectionConfig = () => {
 /**
  * Lazy initialization for database connection
  * This ensures environment variables are loaded before creating the pool
+ *
+ * Cached on `globalThis` so the pool survives Next.js dev-mode hot reloads
+ * (Fast Refresh re-evaluates this module without closing old connections,
+ * which otherwise leaks connections to Postgres over time).
  */
-let _pool: ReturnType<typeof postgres> | null = null;
-let _db: ReturnType<typeof drizzle<typeof schemas>> | null = null;
+const globalForDb = globalThis as unknown as {
+	_pool?: ReturnType<typeof postgres>;
+	_db?: ReturnType<typeof drizzle<typeof schemas>>;
+};
 
 const getPool = () => {
-	if (!_pool) {
-		_pool = postgres(getDatabaseUrl(), getConnectionConfig());
+	if (!globalForDb._pool) {
+		globalForDb._pool = postgres(getDatabaseUrl(), getConnectionConfig());
 	}
-	return _pool;
+	return globalForDb._pool;
 };
 
 const getDb = () => {
-	if (!_db) {
-		_db = drizzle(getPool(), { schema: schemas });
+	if (!globalForDb._db) {
+		globalForDb._db = drizzle(getPool(), { schema: schemas });
 	}
-	return _db;
+	return globalForDb._db;
 };
 
 export const db = new Proxy({} as ReturnType<typeof drizzle<typeof schemas>>, {
@@ -81,8 +87,8 @@ export const db = new Proxy({} as ReturnType<typeof drizzle<typeof schemas>>, {
 }) as ReturnType<typeof drizzle<typeof schemas>>;
 
 export const poolEnd = () => {
-	if (_pool) {
-		return _pool.end();
+	if (globalForDb._pool) {
+		return globalForDb._pool.end();
 	}
 };
 
