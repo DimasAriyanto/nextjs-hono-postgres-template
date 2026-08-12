@@ -155,7 +155,7 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 					status,
 					...(thumbnailUrl ? { thumbnail_url: thumbnailUrl } : {}),
 				});
-				toast.success('Article created successfully');
+				toast.success('Article created', { description: 'The article has been created successfully.' });
 			} else if (article) {
 				await updateMutation.mutateAsync({
 					id: article.id,
@@ -168,7 +168,7 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 						...(thumbnailUrl ? { thumbnail_url: thumbnailUrl } : {}),
 					},
 				});
-				toast.success('Article updated successfully');
+				toast.success('Article updated', { description: 'The article has been updated successfully.' });
 			}
 		} catch (err) {
 			if (err instanceof ApiError) {
@@ -176,7 +176,7 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 				toast.error('Failed', { description: err.message });
 			} else {
 				setError('An error occurred');
-				toast.error('An error occurred');
+				toast.error('Something went wrong', { description: 'An error occurred. Please try again.' });
 			}
 		}
 	};

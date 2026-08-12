@@ -72,7 +72,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-blue-600 hover:text-blue-800 underline'
+          class: 'text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline'
         }
       }),
       TextAlign.configure({
@@ -88,7 +88,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: 'focus:outline-none min-h-[200px] p-4 text-gray-900 leading-relaxed',
+        class: 'focus:outline-none min-h-[200px] p-4 text-foreground leading-relaxed',
         placeholder: placeholder || 'Start writing...'
       }
     },
@@ -116,9 +116,9 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
   }
 
   return (
-    <div className={`border border-gray-300 rounded-lg ${className}`}>
+    <div className={`border border-input rounded-lg ${className}`}>
       {/* Toolbar */}
-      <div className="border-b border-gray-200 p-2 flex flex-wrap gap-1">
+      <div className="border-b border-border p-2 flex flex-wrap gap-1">
         {/* Text Formatting */}
         <Button
           type="button"
@@ -160,7 +160,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
           <Strikethrough className="h-4 w-4" />
         </Button>
 
-        <div className="w-px h-6 bg-gray-300 mx-1" />
+        <div className="w-px h-6 bg-border mx-1" />
 
         {/* Headings */}
         <Button
@@ -193,7 +193,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
           <Heading3 className="h-4 w-4" />
         </Button>
 
-        <div className="w-px h-6 bg-gray-300 mx-1" />
+        <div className="w-px h-6 bg-border mx-1" />
 
         {/* Lists */}
         <Button
@@ -216,7 +216,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
           <ListOrdered className="h-4 w-4" />
         </Button>
 
-        <div className="w-px h-6 bg-gray-300 mx-1" />
+        <div className="w-px h-6 bg-border mx-1" />
 
         {/* Alignment */}
         <Button
@@ -249,7 +249,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
           <AlignRight className="h-4 w-4" />
         </Button>
 
-        <div className="w-px h-6 bg-gray-300 mx-1" />
+        <div className="w-px h-6 bg-border mx-1" />
 
         {/* Link & Image */}
         <Button
@@ -272,7 +272,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
           <ImageIcon className="h-4 w-4" />
         </Button>
 
-        <div className="w-px h-6 bg-gray-300 mx-1" />
+        <div className="w-px h-6 bg-border mx-1" />
 
         {/* Undo/Redo */}
         <Button

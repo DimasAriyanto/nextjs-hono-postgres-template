@@ -1,7 +1,7 @@
 'use client';
 
 import { type LegacyColumnDef as ColumnDef } from '@tanstack/react-table/legacy';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -11,11 +11,13 @@ import type { TArticleWithAuthor } from '@/contracts';
 interface ArticleColumnsProps {
 	onEdit: (article: TArticleWithAuthor) => void;
 	onDelete: (articleId: string) => void;
+	onToggleStatus: (article: TArticleWithAuthor) => void;
+	togglingId?: string | null;
 	page: number;
 	limit: number;
 }
 
-export const createArticleColumns = ({ onEdit, onDelete, page, limit }: ArticleColumnsProps): ColumnDef<TArticleWithAuthor>[] => [
+export const createArticleColumns = ({ onEdit, onDelete, onToggleStatus, togglingId, page, limit }: ArticleColumnsProps): ColumnDef<TArticleWithAuthor>[] => [
 	{
 		id: 'no',
 		header: 'No',
@@ -62,8 +64,20 @@ export const createArticleColumns = ({ onEdit, onDelete, page, limit }: ArticleC
 		header: 'Actions',
 		cell: ({ row }) => {
 			const article = row.original;
+			const isPublished = article.status === 'published';
+			const isToggling = togglingId === article.id;
 			return (
 				<div className="flex items-center space-x-1">
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={() => onToggleStatus(article)}
+						disabled={isToggling}
+						className="h-8 w-8 p-0"
+						title={isPublished ? 'Set to Draft' : 'Publish Article'}
+					>
+						{isPublished ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+					</Button>
 					<Button variant="ghost" size="sm" onClick={() => onEdit(article)} className="h-8 w-8 p-0" title="Edit Article">
 						<Edit className="w-4 h-4" />
 					</Button>

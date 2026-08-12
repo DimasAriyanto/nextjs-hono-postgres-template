@@ -112,9 +112,9 @@ export const DataTable = <TData extends RowData, TValue>({
 
 		return {
 			boxShadow: isLastStartPinnedColumn
-				? '-4px 0 4px -4px #DDD inset'
+				? '-4px 0 4px -4px var(--border) inset'
 				: isFirstEndPinnedColumn
-				? '4px 0 4px -4px #DDD inset'
+				? '4px 0 4px -4px var(--border) inset'
 				: undefined,
 			left: isPinned === 'start' ? `${column.getStart('start')}px` : undefined,
 			right: isPinned === 'end' ? `${column.getAfter('end')}px` : undefined,
@@ -147,7 +147,7 @@ export const DataTable = <TData extends RowData, TValue>({
 											key={header.id}
 											colSpan={header.colSpan}
 											style={{ width: header.getSize(), ...getCommonPinningStyles(column) }}
-											className="px-3 bg-white [&:has([role=checkbox])]:pr-1"
+											className="px-3 bg-background [&:has([role=checkbox])]:pr-1"
 										>
 											{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
 										</TableHead>
@@ -167,7 +167,7 @@ export const DataTable = <TData extends RowData, TValue>({
 											<TableCell
 												key={cell.id}
 												style={{ ...getCommonPinningStyles(column) }}
-												className="px-3 bg-white [&:has([role=checkbox])]:pr-1"
+												className="px-3 bg-background [&:has([role=checkbox])]:pr-1"
 											>
 												{flexRender(cell.column.columnDef.cell, cell.getContext())}
 											</TableCell>

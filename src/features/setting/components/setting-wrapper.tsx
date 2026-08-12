@@ -166,7 +166,7 @@ export function SettingWrapper() {
 				onSuccess: () => {
 					setLogoFile(null);
 					setLocalLogoPreview(null);
-					toast.success('Settings updated successfully');
+					toast.success('Settings updated', { description: 'Your settings have been updated successfully.' });
 				},
 				onError: (err) => toast.error('Failed to update settings', { description: err.message }),
 			},

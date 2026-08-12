@@ -155,15 +155,15 @@ export const WhatsAppButton = ({
 						className="px-4 pt-4 pb-3 space-y-3"
 						style={{
 							background:
-								"url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300000008'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\") #e5ddd5",
+								"url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300000008'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\") var(--muted)",
 						}}
 					>
 						<div className="flex items-end gap-2">
 							<div className="w-7 h-7 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
 								<WhatsAppIcon className="w-4 h-4 text-white" />
 							</div>
-							<div className="bg-white rounded-2xl rounded-bl-sm px-4 py-2.5 shadow-sm max-w-[85%]">
-								<p className="text-sm text-gray-800 leading-relaxed">
+							<div className="bg-card rounded-2xl rounded-bl-sm px-4 py-2.5 shadow-sm max-w-[85%]">
+								<p className="text-sm text-card-foreground leading-relaxed">
 									{welcomeMessage ?? (
 										<>
 											Hi! 👋 Welcome to <strong>{name}</strong>.<br />
@@ -171,14 +171,14 @@ export const WhatsAppButton = ({
 										</>
 									)}
 								</p>
-								<p className="text-[10px] text-gray-400 text-right mt-1">
+								<p className="text-[10px] text-muted-foreground text-right mt-1">
 									{formatTZ(new Date().toISOString(), 'HH:mm')}
 								</p>
 							</div>
 						</div>
 
 						<div className="space-y-1.5 pt-1">
-							<p className="text-[11px] text-gray-500 text-center">Choose a question topic:</p>
+							<p className="text-[11px] text-muted-foreground text-center">Choose a question topic:</p>
 							{quickReplies.map((reply, i) => (
 								<button
 									key={i}
@@ -186,7 +186,7 @@ export const WhatsAppButton = ({
 									className={`w-full text-left text-sm px-3 py-2 rounded-xl border transition-all duration-150 ${
 										message === reply
 											? 'bg-green-500 text-white border-green-500 shadow-sm'
-											: 'bg-white text-gray-700 border-gray-200 hover:border-green-400 hover:bg-green-50'
+											: 'bg-card text-foreground border-border hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-950'
 									}`}
 								>
 									{reply}
@@ -196,7 +196,7 @@ export const WhatsAppButton = ({
 					</div>
 
 					{/* Input area */}
-					<div className="bg-gray-100 px-3 py-2.5 flex items-end gap-2 border-t border-gray-200">
+					<div className="bg-muted px-3 py-2.5 flex items-end gap-2 border-t border-border">
 						<textarea
 							ref={textareaRef}
 							value={message}
@@ -204,7 +204,7 @@ export const WhatsAppButton = ({
 							onKeyDown={handleKeyDown}
 							placeholder="Type your message..."
 							rows={1}
-							className="flex-1 resize-none bg-white rounded-2xl px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none border border-transparent focus:border-green-400 transition-colors max-h-28 overflow-y-auto shadow-sm"
+							className="flex-1 resize-none bg-background rounded-2xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none border border-transparent focus:border-green-400 transition-colors max-h-28 overflow-y-auto shadow-sm"
 							style={{ fieldSizing: 'content' } as React.CSSProperties}
 						/>
 						<button
@@ -216,9 +216,9 @@ export const WhatsAppButton = ({
 						</button>
 					</div>
 
-					<div className="bg-gray-100 pb-2 flex items-center justify-center gap-1">
+					<div className="bg-muted pb-2 flex items-center justify-center gap-1">
 						<WhatsAppIcon className="w-3 h-3 text-green-600" />
-						<span className="text-[10px] text-gray-400">Continuing to WhatsApp</span>
+						<span className="text-[10px] text-muted-foreground">Continuing to WhatsApp</span>
 					</div>
 				</div>
 			)}
@@ -226,15 +226,15 @@ export const WhatsAppButton = ({
 			<div className={`fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 pointer-events-none ${showModal ? 'hidden sm:flex' : 'flex'}`}>
 				{!showModal && (
 					<div className={`transition-all duration-500 ease-in-out ${showBubble ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'}`}>
-						<div className="relative bg-white rounded-2xl rounded-br-sm shadow-xl border border-gray-100 px-4 py-3 max-w-[220px]">
+						<div className="relative bg-card rounded-2xl rounded-br-sm shadow-xl border border-border px-4 py-3 max-w-[220px]">
 							<button
 								onClick={() => setShowBubble(false)}
-								className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-gray-300 hover:bg-gray-400 text-gray-600 flex items-center justify-center text-xs leading-none transition-colors"
+								className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-secondary hover:bg-secondary/80 text-secondary-foreground flex items-center justify-center text-xs leading-none transition-colors"
 								aria-label="Close"
 							>
 								×
 							</button>
-							<p className={`text-[13px] font-medium text-gray-700 leading-snug transition-all duration-300 ${greetingVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1'}`}>
+							<p className={`text-[13px] font-medium text-foreground leading-snug transition-all duration-300 ${greetingVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1'}`}>
 								{greetings[greetingIndex]}
 							</p>
 							<div className="flex items-center gap-1 mt-2">
@@ -242,7 +242,7 @@ export const WhatsAppButton = ({
 								<span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-bounce [animation-delay:150ms]" />
 								<span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-bounce [animation-delay:300ms]" />
 							</div>
-							<div className="absolute bottom-0 right-3 translate-y-full w-0 h-0 border-l-[8px] border-l-transparent border-t-[8px] border-t-white" />
+							<div className="absolute bottom-0 right-3 translate-y-full w-0 h-0 border-l-[8px] border-l-transparent border-t-[8px] border-t-[var(--card)]" />
 						</div>
 					</div>
 				)}

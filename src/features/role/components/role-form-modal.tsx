@@ -63,10 +63,10 @@ export function RoleFormModal({ isOpen, onClose, role, mode }: RoleFormModalProp
 		try {
 			if (mode === 'create') {
 				await createMutation.mutateAsync({ name: name.trim(), is_admin: isAdmin, is_default: isDefault });
-				toast.success('Role created successfully');
+				toast.success('Role created', { description: 'The role has been created successfully.' });
 			} else if (role) {
 				await updateMutation.mutateAsync({ id: role.id, data: { name: name.trim(), is_admin: isAdmin, is_default: isDefault } });
-				toast.success('Role updated successfully');
+				toast.success('Role updated', { description: 'The role has been updated successfully.' });
 			}
 		} catch (err) {
 			if (err instanceof ApiError) {
@@ -74,7 +74,7 @@ export function RoleFormModal({ isOpen, onClose, role, mode }: RoleFormModalProp
 				toast.error('Failed', { description: err.message });
 			} else {
 				setError('An error occurred');
-				toast.error('An error occurred');
+				toast.error('Something went wrong', { description: 'An error occurred. Please try again.' });
 			}
 		}
 	};

@@ -54,26 +54,26 @@ export function Pagination({
   if (totalPages <= 1) return null
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
+    <div className="flex items-center justify-between px-4 py-3 bg-background border-t border-border sm:px-6">
       <div className="flex items-center justify-between w-full">
         {/* Items per page selector */}
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-700">Show</span>
+          <span className="text-sm text-muted-foreground">Show</span>
           <select
             value={itemsPerPage}
             onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-            className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-asita-500"
+            className="border border-input bg-background rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value={10}>10</option>
             <option value={25}>25</option>
             <option value={50}>50</option>
             <option value={100}>100</option>
           </select>
-          <span className="text-sm text-gray-700">per page</span>
+          <span className="text-sm text-muted-foreground">per page</span>
         </div>
 
         {/* Results info */}
-        <div className="text-sm text-gray-700">
+        <div className="text-sm text-muted-foreground">
           Showing {startItem} to {endItem} of {totalItems} results
         </div>
 
@@ -93,7 +93,7 @@ export function Pagination({
             {getPageNumbers().map((pageNumber, index) => (
               <div key={index}>
                 {pageNumber === '...' ? (
-                  <span className="px-3 py-1 text-gray-500">...</span>
+                  <span className="px-3 py-1 text-muted-foreground">...</span>
                 ) : (
                   <Button
                     variant={currentPage === pageNumber ? "default" : "outline"}

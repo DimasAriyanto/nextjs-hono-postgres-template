@@ -10,7 +10,7 @@ import { ExportButton } from '@/components/export-button';
 import { createArticleColumns } from './article-columns';
 import { ArticleFormModal } from './article-form-modal';
 import { PageHeader } from '@/components/page-header';
-import { useArticles, useDeleteArticle } from '@/features/article/hooks/use-article';
+import { useArticles, useDeleteArticle, useUpdateArticle } from '@/features/article/hooks/use-article';
 import { getArticles } from '@/features/article/apis/article.api';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -36,6 +36,7 @@ export function ArticleListWrapper() {
 	const [editingArticle, setEditingArticle] = useState<TArticleWithAuthor | null>(null);
 	const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 	const [deleteId, setDeleteId] = useState<string | null>(null);
+	const [toggleArticle, setToggleArticle] = useState<TArticleWithAuthor | null>(null);
 	const [keywords] = useQueryState('keywords');
 	const [page] = useQueryState('page', parseAsInteger.withDefault(1));
 	const [limit] = useQueryState('limit', parseAsInteger.withDefault(10));
@@ -52,6 +53,10 @@ export function ArticleListWrapper() {
 
 	const deleteMutation = useDeleteArticle({
 		onSuccess: () => setDeleteId(null),
+	});
+
+	const updateMutation = useUpdateArticle({
+		onSuccess: () => setToggleArticle(null),
 	});
 
 	const handleEdit = (article: TArticleWithAuthor) => {
@@ -75,15 +80,32 @@ export function ArticleListWrapper() {
 		if (!deleteId) return;
 		try {
 			await deleteMutation.mutateAsync(deleteId);
-			toast.success('Article deleted successfully');
+			toast.success('Article deleted', { description: 'The article has been deleted successfully.' });
 		} catch {
-			toast.error('Failed to delete article');
+			toast.error('Delete failed', { description: 'Failed to delete the article. Please try again.' });
+		}
+	};
+
+	const handleToggleStatusConfirm = async () => {
+		if (!toggleArticle) return;
+		const nextStatus: TArticleStatus = toggleArticle.status === 'published' ? 'draft' : 'published';
+		try {
+			await updateMutation.mutateAsync({ id: toggleArticle.id, data: { status: nextStatus } });
+			toast.success(nextStatus === 'published' ? 'Article published' : 'Article set to draft', {
+				description: nextStatus === 'published'
+					? 'The article is now visible to the public.'
+					: 'The article has been set back to draft.',
+			});
+		} catch {
+			toast.error('Update failed', { description: 'Failed to update article status. Please try again.' });
 		}
 	};
 
 	const columns = createArticleColumns({
 		onEdit: handleEdit,
 		onDelete: (id) => setDeleteId(id),
+		onToggleStatus: (article) => setToggleArticle(article),
+		togglingId: updateMutation.isPending ? toggleArticle?.id : null,
 		page,
 		limit,
 	});
@@ -157,6 +179,31 @@ export function ArticleListWrapper() {
 							className="bg-red-600 hover:bg-red-700"
 						>
 							{deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			<AlertDialog open={!!toggleArticle} onOpenChange={(open) => !open && setToggleArticle(null)}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>
+							{toggleArticle?.status === 'published' ? 'Set Article to Draft' : 'Publish Article'}
+						</AlertDialogTitle>
+						<AlertDialogDescription>
+							{toggleArticle?.status === 'published'
+								? `Are you sure you want to set "${toggleArticle?.title}" back to draft? It will no longer be visible to the public.`
+								: `Are you sure you want to publish "${toggleArticle?.title}"? It will become visible to the public.`}
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel disabled={updateMutation.isPending}>Cancel</AlertDialogCancel>
+						<AlertDialogAction onClick={handleToggleStatusConfirm} disabled={updateMutation.isPending}>
+							{updateMutation.isPending
+								? 'Saving...'
+								: toggleArticle?.status === 'published'
+									? 'Set to Draft'
+									: 'Publish'}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

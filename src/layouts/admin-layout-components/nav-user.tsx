@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/avatar"
 import { useLogout } from "@/features/auth/hooks/use-auth"
 import { NotificationMenu } from "@/features/notification/components/notification-bell"
+import { ThemeMenuSub } from "@/components/theme-toggle"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -96,6 +97,7 @@ export function NavUser({
                 <Sparkles />
                 Upgrade to Pro
               </DropdownMenuItem>
+              <ThemeMenuSub />
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>

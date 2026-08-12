@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, X, User, LogOut, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -15,14 +16,15 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useProfile, useLogout } from '@/features/auth/hooks/use-auth';
+import { ThemeToggle } from '@/components/theme-toggle';
 import type { TSetting } from '@/contracts';
 
 // ── Avatar trigger ─────────────────────────────────────────────────────────────
 
 const AvatarTrigger = forwardRef<
 	HTMLButtonElement,
-	{ name: string } & React.ButtonHTMLAttributes<HTMLButtonElement>
->(({ name, ...props }, ref) => {
+	{ name: string; avatarUrl?: string | null } & React.ButtonHTMLAttributes<HTMLButtonElement>
+>(({ name, avatarUrl, ...props }, ref) => {
 	const initials = name
 		.split(' ')
 		.slice(0, 2)
@@ -35,9 +37,12 @@ const AvatarTrigger = forwardRef<
 			{...props}
 			className="flex items-center gap-2 rounded-full border border-input bg-background px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none"
 		>
-			<span className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-background text-xs font-bold shrink-0">
-				{initials || <User className="size-3" />}
-			</span>
+			<Avatar className="h-7 w-7 shrink-0">
+				<AvatarImage src={avatarUrl ?? undefined} alt={name} />
+				<AvatarFallback className="rounded-full bg-foreground text-background text-xs font-bold">
+					{initials || <User className="size-3" />}
+				</AvatarFallback>
+			</Avatar>
 			<span className="hidden sm:block max-w-[120px] truncate">{name}</span>
 			<ChevronDown className="size-3.5 text-muted-foreground" />
 		</button>
@@ -47,16 +52,24 @@ AvatarTrigger.displayName = 'AvatarTrigger';
 
 // ── Admin dropdown ─────────────────────────────────────────────────────────────
 
-function AdminMenu({ name, onLogout }: { name: string; onLogout: () => void }) {
+function AdminMenu({ name, avatarUrl, onLogout }: { name: string; avatarUrl?: string | null; onLogout: () => void }) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<AvatarTrigger name={name} />
+				<AvatarTrigger name={name} avatarUrl={avatarUrl} />
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-52">
-				<DropdownMenuLabel className="font-normal">
-					<p className="text-xs text-muted-foreground">Admin</p>
-					<p className="truncate font-semibold">{name}</p>
+				<DropdownMenuLabel className="flex items-center gap-2 font-normal">
+					<Avatar className="h-8 w-8 shrink-0">
+						<AvatarImage src={avatarUrl ?? undefined} alt={name} />
+						<AvatarFallback className="text-xs font-bold">
+							{name.slice(0, 2).toUpperCase()}
+						</AvatarFallback>
+					</Avatar>
+					<span className="min-w-0">
+						<p className="text-xs text-muted-foreground">Admin</p>
+						<p className="truncate font-semibold">{name}</p>
+					</span>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem asChild>
@@ -80,16 +93,24 @@ function AdminMenu({ name, onLogout }: { name: string; onLogout: () => void }) {
 
 // ── User dropdown ──────────────────────────────────────────────────────────────
 
-function UserMenu({ name, onLogout }: { name: string; onLogout: () => void }) {
+function UserMenu({ name, avatarUrl, onLogout }: { name: string; avatarUrl?: string | null; onLogout: () => void }) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<AvatarTrigger name={name} />
+				<AvatarTrigger name={name} avatarUrl={avatarUrl} />
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-52">
-				<DropdownMenuLabel className="font-normal">
-					<p className="text-xs text-muted-foreground">Logged in as</p>
-					<p className="truncate font-semibold">{name}</p>
+				<DropdownMenuLabel className="flex items-center gap-2 font-normal">
+					<Avatar className="h-8 w-8 shrink-0">
+						<AvatarImage src={avatarUrl ?? undefined} alt={name} />
+						<AvatarFallback className="text-xs font-bold">
+							{name.slice(0, 2).toUpperCase()}
+						</AvatarFallback>
+					</Avatar>
+					<span className="min-w-0">
+						<p className="text-xs text-muted-foreground">Logged in as</p>
+						<p className="truncate font-semibold">{name}</p>
+					</span>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
@@ -159,6 +180,7 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 	const user = profileData?.data;
 	const isAdmin = user?.roles?.some((r) => r.is_admin) ?? false;
 	const displayName = user?.email ?? '';
+	const avatarUrl = user?.avatar_url;
 
 	return (
 		<header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
@@ -191,11 +213,12 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 
 				{/* Desktop right */}
 				<div className="hidden md:flex items-center gap-3">
+					<ThemeToggle />
 					{user ? (
 						isAdmin ? (
-							<AdminMenu name={displayName} onLogout={() => logout()} />
+							<AdminMenu name={displayName} avatarUrl={avatarUrl} onLogout={() => logout()} />
 						) : (
-							<UserMenu name={displayName} onLogout={() => logout()} />
+							<UserMenu name={displayName} avatarUrl={avatarUrl} onLogout={() => logout()} />
 						)
 					) : (
 						<>
@@ -209,15 +232,17 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 					)}
 				</div>
 
-				{/* Mobile hamburger */}
-				<Button
-					variant="ghost"
-					size="icon"
-					className="md:hidden"
-					onClick={() => setMobileOpen(!mobileOpen)}
-				>
-					{mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-				</Button>
+				{/* Mobile right */}
+				<div className="flex items-center gap-1 md:hidden">
+					<ThemeToggle />
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => setMobileOpen(!mobileOpen)}
+					>
+						{mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+					</Button>
+				</div>
 			</div>
 
 			{/* Mobile menu */}

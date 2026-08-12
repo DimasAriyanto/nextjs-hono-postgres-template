@@ -81,9 +81,9 @@ export function UserListWrapper() {
 		if (!deleteId) return;
 		try {
 			await deleteMutation.mutateAsync(deleteId);
-			toast.success('User deleted successfully');
+			toast.success('User deleted', { description: 'The user has been deleted successfully.' });
 		} catch {
-			toast.error('Failed to delete user');
+			toast.error('Delete failed', { description: 'Failed to delete the user. Please try again.' });
 		}
 	};
 

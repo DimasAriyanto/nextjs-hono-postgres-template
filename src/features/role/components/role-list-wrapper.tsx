@@ -74,9 +74,9 @@ export function RoleListWrapper() {
 		if (!deleteId) return;
 		try {
 			await deleteMutation.mutateAsync(deleteId);
-			toast.success('Role deleted successfully');
+			toast.success('Role deleted', { description: 'The role has been deleted successfully.' });
 		} catch {
-			toast.error('Failed to delete role');
+			toast.error('Delete failed', { description: 'Failed to delete the role. Please try again.' });
 		}
 	};
 

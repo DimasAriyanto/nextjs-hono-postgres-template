@@ -142,7 +142,7 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 					role_id: roleId,
 					...(avatarUrl ? { avatar_url: avatarUrl } : {}),
 				});
-				toast.success('User created successfully');
+				toast.success('User created', { description: 'The user has been created successfully.' });
 			} else if (user) {
 				await updateMutation.mutateAsync({
 					id: user.id,
@@ -154,7 +154,7 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 						...(avatarUrl ? { avatar_url: avatarUrl } : {}),
 					},
 				});
-				toast.success('User updated successfully');
+				toast.success('User updated', { description: 'The user has been updated successfully.' });
 			}
 		} catch (err) {
 			if (err instanceof ApiError) {
@@ -162,7 +162,7 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 				toast.error('Failed', { description: err.message });
 			} else {
 				setError('An error occurred');
-				toast.error('An error occurred');
+				toast.error('Something went wrong', { description: 'An error occurred. Please try again.' });
 			}
 		}
 	};

@@ -45,7 +45,7 @@ export function RolePermissionsModal({ isOpen, onClose, role }: RolePermissionsM
 				await removeMutation.mutateAsync({ roleId: role.id, permissionId });
 			}
 		} catch {
-			toast.error('Failed to update permission');
+			toast.error('Update failed', { description: 'Failed to update permission. Please try again.' });
 		}
 	};
 

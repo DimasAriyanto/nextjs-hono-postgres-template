@@ -60,7 +60,7 @@ export function ExportButton({
 			const data = await onFetchData();
 
 			if (!data || data.length === 0) {
-				toast.info('No data to export');
+				toast.info('No data to export', { description: 'There is nothing to export yet.' });
 				return;
 			}
 

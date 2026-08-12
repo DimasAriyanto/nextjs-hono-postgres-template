@@ -79,15 +79,15 @@ const menuGroups: MenuGroup[] = [
   },
 ]
 
-const userData = {
-  name: "Admin",
-  email: "admin@example.com",
-  avatar: "",
-}
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { role, permissions } = useAuthContext()
+  const { user, role, permissions } = useAuthContext()
   const can = (key: TMenuPermissionKey) => role === "admin" || (permissions ?? []).includes(key)
+
+  const userData = {
+    name: user?.name ?? "Admin",
+    email: user?.email ?? "admin@example.com",
+    avatar: user?.avatar_url ?? "",
+  }
 
   const visibleGroups = menuGroups
     .map((group) => ({ ...group, items: group.items.filter((item) => can(item.permission)) }))
