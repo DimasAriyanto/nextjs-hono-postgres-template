@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
+import { ArrowLeft } from 'lucide-react';
 
 import { cn } from '@/libs/utils';
 import { Button } from '@/components/ui/button';
@@ -58,6 +59,10 @@ export const ForgotPasswordWrapper = () => {
 
 	return (
 		<div className={cn('flex flex-col gap-6')}>
+			<Link href="/" className="flex w-fit items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+				<ArrowLeft size={16} />
+				Back to home
+			</Link>
 			<Card className="overflow-hidden p-0">
 				<CardContent className="grid p-0 md:grid-cols-2">
 					<div className="p-6 md:p-8">

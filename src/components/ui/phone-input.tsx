@@ -78,7 +78,10 @@ export function PhoneInput({ value = '', onChange, defaultCountry = 'ID', disabl
 	const [country, setCountry] = React.useState<CountryCode>(defaultCountry);
 	const [nationalInput, setNationalInput] = React.useState('');
 	const [isFocused, setIsFocused] = React.useState(false);
-	const [syncedValue, setSyncedValue] = React.useState(value);
+	// Seeded as `undefined` (never equal to a string `value`) so the sync check below
+	// always runs on the first render too — otherwise an initial non-empty `value`
+	// (e.g. editing a saved phone number) would never get formatted into `nationalInput`.
+	const [syncedValue, setSyncedValue] = React.useState<string | undefined>(undefined);
 	const [open, setOpen] = React.useState(false);
 
 	// Adjust the displayed country + national number when the external E.164 value
