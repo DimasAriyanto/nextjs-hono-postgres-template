@@ -4,9 +4,10 @@ import { auth } from '@/server/http/middlewares/auth';
 import { createArticleRequest, updateArticleRequest } from '@/server/http/validators/articles.validator';
 
 export const articlesRoutes = new Hono()
-	.use(auth)
-	.get('/', articlesController.index)
-	.get('/:id', articlesController.show)
-	.post('/', createArticleRequest, articlesController.create)
-	.put('/:id', updateArticleRequest, articlesController.update)
-	.delete('/:id', articlesController.delete);
+	.get('/public', articlesController.publicIndex)
+	.get('/public/:slug', articlesController.publicShow)
+	.get('/', auth, articlesController.index)
+	.get('/:id', auth, articlesController.show)
+	.post('/', auth, createArticleRequest, articlesController.create)
+	.put('/:id', auth, updateArticleRequest, articlesController.update)
+	.delete('/:id', auth, articlesController.delete);

@@ -13,13 +13,15 @@ export const AppLayout = ({ children, ...props }: PropsWithChildren) => {
 
 	return (
 		<ErrorBoundaries ErrorContent={ErrorScreen}>
-			<AppHeader settings={settingsRes?.data} />
+			<div className="flex min-h-screen flex-col">
+				<AppHeader settings={settingsRes?.data} />
 
-			<main className="" {...props}>
-				<ErrorBoundaries ErrorContent={ErrorContent}>{children}</ErrorBoundaries>
-			</main>
+				<main className="flex-1" {...props}>
+					<ErrorBoundaries ErrorContent={ErrorContent}>{children}</ErrorBoundaries>
+				</main>
 
-			<AppFooter settings={settingsRes?.data} />
+				<AppFooter settings={settingsRes?.data} />
+			</div>
 		</ErrorBoundaries>
 	);
 };

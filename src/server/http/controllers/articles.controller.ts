@@ -5,6 +5,34 @@ import type { TArticleStatus } from '@/contracts/article';
 
 export const articlesController = {
 	/**
+	 * GET /articles/public
+	 * Get published articles with pagination — public, no auth required
+	 */
+	async publicIndex(c: Context) {
+		const { page, limit, search } = getPaginationParams(c);
+
+		const result = await articleService.getAllArticles({ page, limit, search, status: 'published' });
+
+		return response.paginated(c, result.data, {
+			page: result.meta.page,
+			limit: result.meta.limit,
+			total: result.meta.total,
+			totalPages: result.meta.pages,
+		}, 'OK');
+	},
+
+	/**
+	 * GET /articles/public/:slug
+	 * Get a published article by slug — public, no auth required
+	 */
+	async publicShow(c: Context) {
+		const slug = c.req.param('slug') as string;
+		const article = await articleService.getPublishedArticleBySlug(slug);
+
+		return response.ok(c, article);
+	},
+
+	/**
 	 * GET /articles
 	 * Get all articles with pagination
 	 */

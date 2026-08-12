@@ -1,5 +1,5 @@
-import { WelcomeWrapper } from '@/features/welcome';
+import { HomeWrapper } from '@/features/home';
 
 export default function Page() {
-	return <WelcomeWrapper />;
+	return <HomeWrapper />;
 }

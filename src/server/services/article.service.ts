@@ -39,6 +39,20 @@ export class ArticleService {
 	}
 
 	/**
+	 * Get a published article by slug — for public-facing pages.
+	 * Drafts 404 even if the slug matches, so unpublished content never leaks.
+	 */
+	async getPublishedArticleBySlug(slug: string) {
+		const article = await articleRepository.findBySlug(slug);
+
+		if (!article || article.status !== 'published') {
+			throw new NotFoundError('Article');
+		}
+
+		return article;
+	}
+
+	/**
 	 * Create new article
 	 */
 	async createArticle(data: {

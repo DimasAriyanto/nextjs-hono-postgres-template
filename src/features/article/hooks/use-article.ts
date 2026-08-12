@@ -11,6 +11,10 @@ export const articleKeys = {
 	list: (params?: { page?: number; limit?: number; search?: string; status?: TArticleStatus }) => [...articleKeys.lists(), params] as const,
 	details: () => [...articleKeys.all, 'detail'] as const,
 	detail: (id: string) => [...articleKeys.details(), id] as const,
+	publicLists: () => [...articleKeys.all, 'public-list'] as const,
+	publicList: (params?: { page?: number; limit?: number; search?: string }) => [...articleKeys.publicLists(), params] as const,
+	publicDetails: () => [...articleKeys.all, 'public-detail'] as const,
+	publicDetail: (slug: string) => [...articleKeys.publicDetails(), slug] as const,
 };
 
 /**
@@ -31,6 +35,27 @@ export function useArticle(id: string) {
 		queryKey: articleKeys.detail(id),
 		queryFn: () => articleApi.getArticleById(id),
 		enabled: !!id,
+	});
+}
+
+/**
+ * Hook to get published articles with pagination — public pages
+ */
+export function usePublicArticles(params?: { page?: number; limit?: number; search?: string }) {
+	return useQuery({
+		queryKey: articleKeys.publicList(params),
+		queryFn: () => articleApi.getPublicArticles(params),
+	});
+}
+
+/**
+ * Hook to get a published article by slug — public pages
+ */
+export function usePublicArticleBySlug(slug: string) {
+	return useQuery({
+		queryKey: articleKeys.publicDetail(slug),
+		queryFn: () => articleApi.getPublicArticleBySlug(slug),
+		enabled: !!slug,
 	});
 }
 

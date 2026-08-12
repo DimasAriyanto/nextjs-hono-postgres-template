@@ -22,7 +22,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 	return {
 		metadataBase: new URL(appUrl),
-		title: data.app_name,
+		title: {
+			default: data.app_name,
+			template: `%s | ${data.app_name}`,
+		},
 		description: data.description ?? undefined,
 		icons: data.logo_url ? { icon: data.logo_url } : undefined,
 		openGraph: {

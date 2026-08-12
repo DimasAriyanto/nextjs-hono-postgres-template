@@ -23,6 +23,49 @@ export async function getArticles(params?: { page?: number; limit?: number; sear
 }
 
 /**
+ * GET /api/v1/articles/public
+ * Get published articles with pagination — public, no auth required
+ */
+export async function getPublicArticles(params?: { page?: number; limit?: number; search?: string }): Promise<ApiSuccessResponse<TArticleWithAuthor[]>> {
+	return handleResponse<TArticleWithAuthor[]>(
+		client.api.v1.articles.public.$get({ query: params as Record<string, string> })
+	);
+}
+
+/**
+ * GET /api/v1/articles/public/:slug
+ * Get a published article by slug — public, no auth required
+ */
+export async function getPublicArticleBySlug(slug: string): Promise<ApiSuccessResponse<TArticleWithAuthor>> {
+	return handleResponse<TArticleWithAuthor>(
+		client.api.v1.articles.public[':slug'].$get({ param: { slug } })
+	);
+}
+
+/**
+ * Get a published article by slug, resolving to null on 404 instead of throwing —
+ * for public detail pages that need to call notFound() themselves.
+ */
+export async function getPublicArticleBySlugSafe(slug: string): Promise<TArticleWithAuthor | null> {
+	try {
+		const { data } = await getPublicArticleBySlug(slug);
+		return data;
+	} catch (err) {
+		if (err instanceof ApiError && err.isNotFound()) return null;
+		throw err;
+	}
+}
+
+/**
+ * Get a few published articles related to (i.e. excluding) the given article —
+ * for the "related articles" section on public detail pages.
+ */
+export async function getRelatedArticles(excludeId: string, limit = 3): Promise<TArticleWithAuthor[]> {
+	const { data } = await getPublicArticles({ page: 1, limit: limit + 1 });
+	return data.filter((article) => article.id !== excludeId).slice(0, limit);
+}
+
+/**
  * GET /api/v1/articles/:id
  * Get article by ID
  */

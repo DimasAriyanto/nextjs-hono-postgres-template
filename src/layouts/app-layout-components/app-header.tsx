@@ -3,6 +3,7 @@
 import { useState, useEffect, forwardRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { Menu, X, User, LogOut, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -103,6 +104,16 @@ function UserMenu({ name, onLogout }: { name: string; onLogout: () => void }) {
 	);
 }
 
+// ── Nav ────────────────────────────────────────────────────────────────────────
+
+const NAV_ITEMS = [
+	{ href: '/articles', label: 'Artikel' },
+];
+
+function isNavActive(pathname: string, href: string) {
+	return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 // ── Brand ──────────────────────────────────────────────────────────────────────
 
 function Brand({ appName, logoUrl, className }: { appName: string; logoUrl?: string | null; className?: string }) {
@@ -128,6 +139,7 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 
 	const { data: profileData } = useProfile();
 	const { mutate: logout } = useLogout();
+	const pathname = usePathname();
 
 	const appName = settings?.app_name ?? 'App';
 
@@ -156,6 +168,26 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 				<Link href="/" className="hover:opacity-80 transition-opacity">
 					<Brand appName={appName} logoUrl={settings?.logo_url} />
 				</Link>
+
+				{/* Desktop nav */}
+				<nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+					{NAV_ITEMS.map((item) => {
+						const active = isNavActive(pathname, item.href);
+						return (
+							<Link
+								key={item.href}
+								href={item.href}
+								className={`border-b-2 py-1 transition-colors ${
+									active
+										? 'border-primary text-foreground'
+										: 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+								}`}
+							>
+								{item.label}
+							</Link>
+						);
+					})}
+				</nav>
 
 				{/* Desktop right */}
 				<div className="hidden md:flex items-center gap-3">
@@ -207,6 +239,20 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 							</div>
 
 							<div className="px-6 py-6 space-y-3">
+								{NAV_ITEMS.map((item) => {
+									const active = isNavActive(pathname, item.href);
+									return (
+										<Button
+											key={item.href}
+											variant={active ? 'secondary' : 'ghost'}
+											asChild
+											className="w-full justify-start h-11"
+										>
+											<Link href={item.href} onClick={() => setMobileOpen(false)}>{item.label}</Link>
+										</Button>
+									);
+								})}
+
 								{user ? (
 									<>
 										{isAdmin && (
