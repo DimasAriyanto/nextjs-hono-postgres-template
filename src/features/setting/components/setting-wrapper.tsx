@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SocialLinksInput } from '@/components/social-links-input';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { FaqInput } from '@/components/faq-input';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { PageHeader } from '@/components/page-header';
@@ -271,7 +272,7 @@ export function SettingWrapper() {
 										<FormField control={form.control} name="contact_phone" render={({ field }) => (
 											<FormItem>
 												<FormLabel>Phone Number</FormLabel>
-												<FormControl><Input {...field} placeholder="+62 812-3456-7890" disabled={isSaving} /></FormControl>
+												<FormControl><PhoneInput value={field.value} onChange={field.onChange} disabled={isSaving} /></FormControl>
 												<FormMessage />
 											</FormItem>
 										)} />
