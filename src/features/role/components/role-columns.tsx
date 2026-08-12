@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2 } from 'lucide-react';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
-import { getAppLocale } from '@/libs/dayjs';
+import { formatTZ } from '@/libs/dayjs';
 import type { TRole } from '@/contracts';
 
 interface RoleColumnsProps {
@@ -51,18 +51,16 @@ export const createRoleColumns = ({ onEdit, onDelete, page, limit }: RoleColumns
 	{
 		accessorKey: 'created_at',
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
-		cell: ({ row }) => {
-			const date = new Date(row.getValue('created_at') as string);
-			return <span className="text-sm text-muted-foreground">{date.toLocaleDateString(getAppLocale(), { day: '2-digit', month: 'short', year: 'numeric' })}</span>;
-		},
+		cell: ({ row }) => (
+			<span className="text-sm text-muted-foreground">{formatTZ(row.getValue('created_at'), 'DD MMM YYYY')}</span>
+		),
 	},
 	{
 		accessorKey: 'updated_at',
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Updated At" />,
-		cell: ({ row }) => {
-			const date = new Date(row.getValue('updated_at') as string);
-			return <span className="text-sm text-muted-foreground">{date.toLocaleDateString(getAppLocale(), { day: '2-digit', month: 'short', year: 'numeric' })}</span>;
-		},
+		cell: ({ row }) => (
+			<span className="text-sm text-muted-foreground">{formatTZ(row.getValue('updated_at'), 'DD MMM YYYY')}</span>
+		),
 	},
 	{
 		id: 'actions',

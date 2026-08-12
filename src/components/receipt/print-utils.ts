@@ -1,7 +1,7 @@
 import { ReceiptProps } from './receipt';
 import { InvoiceProps } from '../invoice';
 import { formatCurrency } from '@/libs/currency';
-import { getAppCurrency, getAppLocale } from '@/libs/dayjs';
+import { formatTZ, getAppCurrency, getAppLocale } from '@/libs/dayjs';
 
 export function printReceipt(receiptData: ReceiptProps) {
   const printWindow = window.open('', '_blank', 'width=400,height=600');
@@ -147,7 +147,7 @@ export function printReceipt(receiptData: ReceiptProps) {
           </div>
           <div class="info-row">
             <span>Date:</span>
-            <span>${new Date(receiptData.date).toLocaleString(getAppLocale())}</span>
+            <span>${formatTZ(receiptData.date, 'DD MMM YYYY, HH:mm')}</span>
           </div>
           ${receiptData.cashierName ? `
           <div class="info-row">
@@ -279,11 +279,7 @@ export function printInvoice(invoiceData: InvoiceProps) {
 
   // Helper functions for formatting
   const formatCurrencyValue = (amount: number) => formatCurrency(amount);
-  const formatDateValue = (date: string) => new Date(date).toLocaleDateString(getAppLocale(), {
-    year: 'numeric',
-    month: 'long', 
-    day: 'numeric'
-  });
+  const formatDateValue = (date: string) => formatTZ(date, 'D MMMM YYYY');
   const getInvoiceTitle = (type: string) => {
     switch (type) {
       case 'consignment': return 'CONSIGNMENT INVOICE';
@@ -623,7 +619,7 @@ export function printInvoice(invoiceData: InvoiceProps) {
         <div class="footer">
           <p>Thank you for your good cooperation. This invoice is generated automatically.</p>
           <p style="font-size: 12px; margin-top: 8px;">
-            Printed on: ${new Date().toLocaleString(getAppLocale())}
+            Printed on: ${formatTZ(new Date().toISOString(), 'DD MMM YYYY, HH:mm')}
           </p>
         </div>
 

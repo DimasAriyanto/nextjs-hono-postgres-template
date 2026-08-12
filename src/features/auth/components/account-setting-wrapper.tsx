@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/page-header';
 import { useProfile, useUpdateProfile, useChangePassword } from '@/features/auth/hooks/use-auth';
+import { formatTZ } from '@/libs/dayjs';
 import { changePasswordSchema } from '@/contracts';
 
 // ─── Local schemas ─────────────────────────────────────────────────────────────
@@ -390,11 +391,11 @@ export function AccountSettingWrapper() {
 						<div className="grid grid-cols-2 gap-4">
 							<InfoRow
 								label="Created"
-								value={user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) : undefined}
+								value={user?.created_at ? formatTZ(user.created_at, 'D MMMM YYYY') : undefined}
 							/>
 							<InfoRow
 								label="Last Updated"
-								value={user?.updated_at ? new Date(user.updated_at).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) : undefined}
+								value={user?.updated_at ? formatTZ(user.updated_at, 'D MMMM YYYY') : undefined}
 							/>
 						</div>
 					</CardContent>
