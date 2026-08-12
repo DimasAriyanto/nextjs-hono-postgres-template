@@ -11,6 +11,7 @@ export const SETTING_GROUPS = {
 	GENERAL: 'general',
 	CONTACT: 'contact',
 	REGIONAL: 'regional',
+	FAQ: 'faq',
 } as const;
 
 export type TSettingGroup = (typeof SETTING_GROUPS)[keyof typeof SETTING_GROUPS];
@@ -24,6 +25,7 @@ export const SETTING_KEYS = {
 	ADDRESS: 'address',
 	SOCIAL_LINKS: 'social_links',
 	TIMEZONE: 'timezone',
+	FAQS: 'faqs',
 } as const;
 
 export type TSettingKey = (typeof SETTING_KEYS)[keyof typeof SETTING_KEYS];
@@ -38,6 +40,7 @@ export const SETTING_KEY_GROUP_MAP: Record<TSettingKey, TSettingGroup> = {
 	[SETTING_KEYS.ADDRESS]: SETTING_GROUPS.CONTACT,
 	[SETTING_KEYS.SOCIAL_LINKS]: SETTING_GROUPS.CONTACT,
 	[SETTING_KEYS.TIMEZONE]: SETTING_GROUPS.REGIONAL,
+	[SETTING_KEYS.FAQS]: SETTING_GROUPS.FAQ,
 };
 
 // ============================================
@@ -51,6 +54,13 @@ export const socialLinkSchema = z.object({
 
 export type TSocialLink = z.infer<typeof socialLinkSchema>;
 
+export const faqItemSchema = z.object({
+	question: z.string().min(1, 'Question is required'),
+	answer: z.string().min(1, 'Answer is required'),
+});
+
+export type TFaqItem = z.infer<typeof faqItemSchema>;
+
 /**
  * Update settings request schema — a partial patch over the known setting keys.
  */
@@ -63,6 +73,7 @@ export const updateSettingSchema = z.object({
 	address: z.string().optional(),
 	social_links: z.array(socialLinkSchema).optional(),
 	timezone: z.string().optional(),
+	faqs: z.array(faqItemSchema).optional(),
 });
 
 export type TUpdateSettingRequest = z.infer<typeof updateSettingSchema>;
@@ -80,6 +91,7 @@ export const settingSchema = z.object({
 	address: z.string().nullable(),
 	social_links: z.array(socialLinkSchema),
 	timezone: z.string(),
+	faqs: z.array(faqItemSchema),
 });
 
 export type TSetting = z.infer<typeof settingSchema>;

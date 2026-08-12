@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Building2, Contact, Globe2, ImagePlus, Loader2 } from 'lucide-react';
+import { Building2, Contact, Globe2, HelpCircle, ImagePlus, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SocialLinksInput } from '@/components/social-links-input';
+import { FaqInput } from '@/components/faq-input';
 import { PageHeader } from '@/components/page-header';
 import { useSettings, useUpdateSettings } from '@/features/setting/hooks/use-setting';
 import { setAppTimezone } from '@/libs/dayjs';
@@ -37,22 +38,17 @@ async function uploadLogo(file: File): Promise<string> {
 
 // ─── Timezone options ───────────────────────────────────────────────────────────
 
-const PINNED_TIMEZONES = ['Asia/Jakarta', 'Asia/Makassar', 'Asia/Jayapura'];
-
-function useTimezoneOptions(): string[] {
-	return useMemo(() => {
-		const all = typeof Intl.supportedValuesOf === 'function' ? Intl.supportedValuesOf('timeZone') : PINNED_TIMEZONES;
-		const rest = all.filter((tz) => !PINNED_TIMEZONES.includes(tz));
-		return [...PINNED_TIMEZONES, ...rest];
-	}, []);
-}
+const TIMEZONE_OPTIONS = [
+	{ value: 'Asia/Jakarta', label: 'WIB — Asia/Jakarta' },
+	{ value: 'Asia/Makassar', label: 'WITA — Asia/Makassar' },
+	{ value: 'Asia/Jayapura', label: 'WIT — Asia/Jayapura' },
+];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function SettingWrapper() {
 	const { data: settingsRes, isLoading } = useSettings();
 	const settings = settingsRes?.data;
-	const timezoneOptions = useTimezoneOptions();
 
 	const [logoFile, setLogoFile] = useState<File | null>(null);
 	const [localLogoPreview, setLocalLogoPreview] = useState<string | null>(null);
@@ -74,6 +70,7 @@ export function SettingWrapper() {
 				address: settings.address ?? '',
 				social_links: settings.social_links,
 				timezone: settings.timezone,
+				faqs: settings.faqs,
 			}
 			: undefined,
 	});
@@ -163,6 +160,7 @@ export function SettingWrapper() {
 							<TabsTrigger value="general"><Building2 className="size-3.5 mr-1.5" />General</TabsTrigger>
 							<TabsTrigger value="contact"><Contact className="size-3.5 mr-1.5" />Contact</TabsTrigger>
 							<TabsTrigger value="regional"><Globe2 className="size-3.5 mr-1.5" />Regional</TabsTrigger>
+							<TabsTrigger value="faq"><HelpCircle className="size-3.5 mr-1.5" />FAQ</TabsTrigger>
 						</TabsList>
 
 						{/* ── General ── */}
@@ -267,11 +265,26 @@ export function SettingWrapper() {
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent>
-													{timezoneOptions.map((tz) => (
-														<SelectItem key={tz} value={tz}>{tz}</SelectItem>
+													{TIMEZONE_OPTIONS.map((tz) => (
+														<SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
 													))}
 												</SelectContent>
 											</Select>
+											<FormMessage />
+										</FormItem>
+									)} />
+								</CardContent>
+							</Card>
+						</TabsContent>
+
+						{/* ── FAQ ── */}
+						<TabsContent value="faq">
+							<Card>
+								<CardContent className="pt-6 space-y-4">
+									<FormField control={form.control} name="faqs" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Frequently Asked Questions</FormLabel>
+											<FaqInput value={field.value ?? []} onChange={field.onChange} />
 											<FormMessage />
 										</FormItem>
 									)} />

@@ -1,5 +1,5 @@
 import { settingRepository } from '@/server/repositories';
-import { SETTING_KEYS, SETTING_KEY_GROUP_MAP, type TSetting, type TSocialLink, type TUpdateSettingRequest } from '@/contracts/setting';
+import { SETTING_KEYS, SETTING_KEY_GROUP_MAP, type TFaqItem, type TSetting, type TSocialLink, type TUpdateSettingRequest } from '@/contracts/setting';
 
 const DEFAULTS: TSetting = {
 	app_name: 'My App',
@@ -10,6 +10,7 @@ const DEFAULTS: TSetting = {
 	address: null,
 	social_links: [],
 	timezone: 'Asia/Jakarta',
+	faqs: [],
 };
 
 export class SettingService {
@@ -29,6 +30,7 @@ export class SettingService {
 			address: (byKey.get(SETTING_KEYS.ADDRESS) as string | undefined) ?? DEFAULTS.address,
 			social_links: (byKey.get(SETTING_KEYS.SOCIAL_LINKS) as TSocialLink[] | undefined) ?? DEFAULTS.social_links,
 			timezone: (byKey.get(SETTING_KEYS.TIMEZONE) as string | undefined) ?? DEFAULTS.timezone,
+			faqs: (byKey.get(SETTING_KEYS.FAQS) as TFaqItem[] | undefined) ?? DEFAULTS.faqs,
 		};
 	}
 
