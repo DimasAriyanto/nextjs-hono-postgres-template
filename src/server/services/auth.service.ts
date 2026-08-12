@@ -1,10 +1,15 @@
 import { sign } from 'hono/jwt';
 import dayjs from 'dayjs';
 import { AuthError, NotFoundError, ConflictError, InternalError } from '@/server/errors';
-import { userRepository, roleRepository } from '@/server/repositories';
+import { userRepository, roleRepository, permissionRepository } from '@/server/repositories';
 import { emailService } from './email.service';
 import { generateVerificationToken, generateTokenExpiration, isTokenExpired, hashPassword, comparePassword } from '@/server/utils';
 import type { TInsertUser } from '@/server/databases/schemas/users.schema';
+import { MENU_PERMISSIONS } from '@/constants/permissions';
+
+async function resolvePermissions(userId: string, isAdmin: boolean): Promise<string[]> {
+	return isAdmin ? MENU_PERMISSIONS.map((p) => p.key) : permissionRepository.findKeysForUser(userId);
+}
 
 export class AuthService {
 	/**
@@ -31,12 +36,14 @@ export class AuthService {
 		// Resolve user roles to determine admin status
 		const userWithRoles = await userRepository.findByIdWithRoles(user.id);
 		const isAdmin = userWithRoles?.roles.some((r) => r.role.is_admin) ?? false;
+		const permissions = await resolvePermissions(user.id, isAdmin);
 
 		const payload = {
 			exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // expired in 24 hours
 			iat: dayjs().unix(), // issued at
 			auid: user.id,
 			aurl: isAdmin ? 'admin' : 'user',
+			aper: isAdmin || permissions.length > 0,
 			uenv: 'central',
 		};
 
@@ -45,7 +52,7 @@ export class AuthService {
 		return {
 			user: this.sanitizeUser(user),
 			token,
-			permissions: null,
+			permissions,
 			email_verified: user.email_verified_at !== null,
 			is_admin: isAdmin,
 		};
@@ -83,6 +90,7 @@ export class AuthService {
 		if (defaultRole) {
 			await userRepository.assignRole(user.id, defaultRole.id);
 		}
+		const isAdmin = defaultRole?.is_admin ?? false;
 
 		// Send verification email (non-blocking)
 		emailService.sendVerificationEmail({
@@ -93,12 +101,15 @@ export class AuthService {
 			console.error('Failed to send verification email:', err);
 		});
 
+		const permissions = await resolvePermissions(user.id, isAdmin);
+
 		// Generate token for auto-login after register
 		const payload = {
 			exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // expired in 24 hours
 			iat: dayjs().unix(), // issued at
 			auid: user.id,
-			aurl: 'admin',
+			aurl: isAdmin ? 'admin' : 'user',
+			aper: isAdmin || permissions.length > 0,
 			uenv: 'central',
 		};
 
@@ -107,9 +118,9 @@ export class AuthService {
 		return {
 			user: this.sanitizeUser(user),
 			token,
-			permissions: null,
+			permissions,
 			email_verified: false,
-			is_admin: false,
+			is_admin: isAdmin,
 			message: 'Please check your email to verify your account',
 		};
 	}
@@ -194,9 +205,12 @@ export class AuthService {
 			throw new NotFoundError('User');
 		}
 
+		const isAdmin = user.roles.some((r) => r.role.is_admin);
+
 		return {
 			...this.sanitizeUser(user),
 			roles: user.roles.map((r) => r.role),
+			permissions: await resolvePermissions(userId, isAdmin),
 			email_verified: user.email_verified_at !== null,
 		};
 	}
@@ -293,12 +307,14 @@ export class AuthService {
 
 		const userWithRoles = await userRepository.findByIdWithRoles(user.id);
 		const isAdmin = userWithRoles?.roles.some((r) => r.role.is_admin) ?? false;
+		const permissions = await resolvePermissions(user.id, isAdmin);
 
 		const payload = {
 			exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
 			iat: dayjs().unix(),
 			auid: user.id,
 			aurl: isAdmin ? 'admin' : 'user',
+			aper: isAdmin || permissions.length > 0,
 			uenv: 'central',
 		};
 
@@ -307,7 +323,7 @@ export class AuthService {
 		return {
 			user: this.sanitizeUser(user),
 			token,
-			permissions: null,
+			permissions,
 			email_verified: user.email_verified_at !== null,
 			is_admin: isAdmin,
 		};

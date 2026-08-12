@@ -2,7 +2,7 @@
 
 import { type LegacyColumnDef as ColumnDef } from '@tanstack/react-table/legacy';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, KeyRound, Trash2 } from 'lucide-react';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
 import { formatTZ } from '@/libs/dayjs';
@@ -11,11 +11,12 @@ import type { TRole } from '@/contracts';
 interface RoleColumnsProps {
 	onEdit: (role: TRole) => void;
 	onDelete: (roleId: string) => void;
+	onManagePermissions: (role: TRole) => void;
 	page: number;
 	limit: number;
 }
 
-export const createRoleColumns = ({ onEdit, onDelete, page, limit }: RoleColumnsProps): ColumnDef<TRole>[] => [
+export const createRoleColumns = ({ onEdit, onDelete, onManagePermissions, page, limit }: RoleColumnsProps): ColumnDef<TRole>[] => [
 	{
 		id: 'no',
 		header: 'No',
@@ -69,6 +70,9 @@ export const createRoleColumns = ({ onEdit, onDelete, page, limit }: RoleColumns
 			const role = row.original;
 			return (
 				<div className="flex items-center space-x-1">
+					<Button variant="ghost" size="sm" onClick={() => onManagePermissions(role)} className="h-8 w-8 p-0" title="Manage Permissions">
+						<KeyRound className="w-4 h-4" />
+					</Button>
 					<Button variant="ghost" size="sm" onClick={() => onEdit(role)} className="h-8 w-8 p-0" title="Edit Role">
 						<Edit className="w-4 h-4" />
 					</Button>

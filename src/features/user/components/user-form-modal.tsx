@@ -117,6 +117,7 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 
 		if (!email.trim()) { setError('Email is required'); return; }
 		if (mode === 'create' && !password.trim()) { setError('Password is required'); return; }
+		if (mode === 'create' && !roleId) { setError('Role is required'); return; }
 
 		try {
 			// Upload avatar if a new file was selected
@@ -138,7 +139,7 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 					email: email.trim(),
 					password: password.trim(),
 					name: name.trim() || undefined,
-					role_id: roleId || undefined,
+					role_id: roleId,
 					...(avatarUrl ? { avatar_url: avatarUrl } : {}),
 				});
 				toast.success('User created successfully');
@@ -253,7 +254,7 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 								disabled={isLoading}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder="Select role (optional)" />
+									<SelectValue placeholder="Select role" />
 								</SelectTrigger>
 								<SelectContent>
 									{roles.map((role) => (

@@ -6,13 +6,13 @@ import { AuthContextProvider } from './auth-provider';
 import { QueryProviders } from './query-provider';
 
 export const Providers = async ({ children }: { children: React.ReactNode }) => {
-	const { user, role, token /*permissions*/ } = await getAccount();
+	const { user, role, token, permissions } = await getAccount();
 
 	return (
 		<NextThemesProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange enableColorScheme>
 			<QueryProviders>
 				<NuqsAdapter>
-					<AuthContextProvider user={user} role={role as string} token={token as string}>
+					<AuthContextProvider user={user} role={role as string} token={token as string} permissions={permissions}>
 						{children}
 					</AuthContextProvider>
 				</NuqsAdapter>

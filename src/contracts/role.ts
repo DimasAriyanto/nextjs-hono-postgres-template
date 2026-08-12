@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { permissionSchema } from './permission';
 
 // ============================================
 // REQUEST SCHEMAS
@@ -68,7 +69,7 @@ export type TRoleWithUsers = z.infer<typeof roleWithUsersSchema>;
  * Role with permissions response
  */
 export const roleWithPermissionsSchema = roleSchema.extend({
-	permissions: z.array(z.unknown()),
+	permissions: z.array(permissionSchema),
 });
 
 export type TRoleWithPermissions = z.infer<typeof roleWithPermissionsSchema>;

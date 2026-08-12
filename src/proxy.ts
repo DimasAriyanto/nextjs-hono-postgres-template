@@ -5,6 +5,7 @@ import { verify } from 'hono/jwt';
 interface TokenPayload {
 	auid: string;
 	aurl: string; // 'admin' | 'user'
+	aper?: boolean; // has admin panel access (is_admin OR has at least one menu permission)
 	uenv: string;
 	exp: number;
 	iat: number;
@@ -38,7 +39,8 @@ export async function proxy(request: NextRequest) {
 
 	const payload = await getTokenPayload(request);
 	const isAuthenticated = payload !== null;
-	const isAdmin = payload?.aurl === 'admin';
+	// Admin-panel access: either the elevated is_admin role, or at least one menu permission granted to the user's role
+	const hasAdminAccess = payload?.aper === true;
 
 	const isAuthPage = pathname === '/login' || pathname === '/forgot-password' || pathname === '/register';
 	const isAdminRoute = pathname.startsWith('/gundala-admin');
@@ -50,14 +52,14 @@ export async function proxy(request: NextRequest) {
 		return response;
 	}
 
-	// Logged in but not admin → trying to access admin area
-	if (isAuthenticated && !isAdmin && isAdminRoute) {
+	// Logged in but no admin panel access → trying to access admin area
+	if (isAuthenticated && !hasAdminAccess && isAdminRoute) {
 		return NextResponse.redirect(new URL('/', request.url));
 	}
 
 	// Already logged in → trying to access auth pages
 	if (isAuthenticated && isAuthPage) {
-		const destination = isAdmin ? '/gundala-admin/d' : '/';
+		const destination = hasAdminAccess ? '/gundala-admin/d' : '/';
 		return NextResponse.redirect(new URL(destination, request.url));
 	}
 

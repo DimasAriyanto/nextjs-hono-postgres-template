@@ -59,7 +59,7 @@ export class UserService {
 	/**
 	 * Create new user
 	 */
-	async createUser(data: { email: string; password: string; name?: string; avatar_url?: string; role_id?: string; created_by?: string }) {
+	async createUser(data: { email: string; password: string; name?: string; avatar_url?: string; role_id: string; created_by?: string }) {
 		// Check if email already exists
 		const existingUser = await userRepository.findByEmail(data.email);
 		if (existingUser) {
@@ -79,10 +79,7 @@ export class UserService {
 
 		const user = await userRepository.create(userData);
 
-		// Assign role if provided
-		if (data.role_id) {
-			await userRepository.assignRole(user.id, data.role_id);
-		}
+		await userRepository.assignRole(user.id, data.role_id);
 
 		return this.sanitizeUser(user);
 	}

@@ -18,10 +18,12 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { useAuthContext } from "@/contexts/auth-context"
+import type { TMenuPermissionKey } from "@/constants/permissions"
 
 type MenuGroup = {
   label: string
-  items: NavItem[]
+  items: (NavItem & { permission: TMenuPermissionKey })[]
 }
 
 const menuGroups: MenuGroup[] = [
@@ -32,6 +34,7 @@ const menuGroups: MenuGroup[] = [
         title: "Dashboard",
         url: "/gundala-admin/d",
         icon: LayoutDashboard,
+        permission: "menu.dashboard.view",
       },
     ],
   },
@@ -42,11 +45,13 @@ const menuGroups: MenuGroup[] = [
         title: "User",
         url: "/gundala-admin/d/user",
         icon: Users,
+        permission: "menu.user.view",
       },
       {
         title: "Role",
         url: "/gundala-admin/d/role",
         icon: Shield,
+        permission: "menu.role.view",
       },
     ],
   },
@@ -57,6 +62,7 @@ const menuGroups: MenuGroup[] = [
         title: "Article",
         url: "/gundala-admin/d/article",
         icon: Newspaper,
+        permission: "menu.article.view",
       },
     ],
   },
@@ -67,6 +73,7 @@ const menuGroups: MenuGroup[] = [
         title: "Settings",
         url: "/gundala-admin/d/settings",
         icon: Settings,
+        permission: "menu.settings.view",
       },
     ],
   },
@@ -79,11 +86,18 @@ const userData = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { role, permissions } = useAuthContext()
+  const can = (key: TMenuPermissionKey) => role === "admin" || (permissions ?? []).includes(key)
+
+  const visibleGroups = menuGroups
+    .map((group) => ({ ...group, items: group.items.filter((item) => can(item.permission)) }))
+    .filter((group) => group.items.length > 0)
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader />
       <SidebarContent>
-        {menuGroups.map((group) => (
+        {visibleGroups.map((group) => (
           <NavMain key={group.label} label={group.label} items={group.items} />
         ))}
       </SidebarContent>

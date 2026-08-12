@@ -12,7 +12,7 @@ export const createUserSchema = z.object({
 	password: z.string().min(6, 'Password must be at least 6 characters'),
 	name: z.string().optional(),
 	avatar_url: z.string().optional(),
-	role_id: z.string().uuid('Invalid role ID').optional(),
+	role_id: z.string().uuid('Invalid role ID'),
 });
 
 export type TCreateUserRequest = z.infer<typeof createUserSchema>;

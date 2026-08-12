@@ -1,14 +1,18 @@
 import { Hono } from 'hono';
 import { usersController } from '../controllers';
 import { auth } from '@/server/http/middlewares/auth';
+import { checkPermission } from '@/server/http/middlewares/permission';
+
+const requireView = checkPermission('menu.user.view');
+const requireManage = checkPermission('menu.user.manage');
 
 export const usersRoutes = new Hono()
 	.use(auth)
-	.get('/', usersController.index)
-	.get('/:id', usersController.show)
-	.get('/:id/roles', usersController.showWithRoles)
-	.post('/', usersController.create)
-	.put('/:id', usersController.update)
-	.delete('/:id', usersController.delete)
-	.post('/:id/roles', usersController.assignRole)
-	.delete('/:id/roles/:roleId', usersController.removeRole);
+	.get('/', requireView, usersController.index)
+	.get('/:id', requireView, usersController.show)
+	.get('/:id/roles', requireView, usersController.showWithRoles)
+	.post('/', requireManage, usersController.create)
+	.put('/:id', requireManage, usersController.update)
+	.delete('/:id', requireManage, usersController.delete)
+	.post('/:id/roles', requireManage, usersController.assignRole)
+	.delete('/:id/roles/:roleId', requireManage, usersController.removeRole);

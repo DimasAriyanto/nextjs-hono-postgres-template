@@ -4,6 +4,7 @@ import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { eq } from 'drizzle-orm';
 import { hashPasswordSync } from '@/server/utils';
+import { MENU_PERMISSIONS } from '@/constants/permissions';
 
 loadEnvConfig(process.cwd());
 
@@ -49,8 +50,16 @@ export async function seed() {
 
 	console.log('roles: ', roles);
 
+	const permissions = await db
+		.insert(schema.PermissionsTable)
+		.values(MENU_PERMISSIONS.map((p) => ({ name: p.key })))
+		.onConflictDoNothing()
+		.returning();
+
+	console.log('permissions: ', permissions);
+
 	await db.transaction(async (tx) => {
-		const [user] = await tx
+		const [insertedUser] = await tx
 			.insert(schema.UsersTable)
 			.values({
 				email: 'admin@gmail.com',
@@ -58,6 +67,8 @@ export async function seed() {
 			})
 			.onConflictDoNothing()
 			.returning();
+
+		const user = insertedUser ?? (await tx.select().from(schema.UsersTable).where(eq(schema.UsersTable.email, 'admin@gmail.com')).limit(1))[0];
 
 		const [role] = await tx.select().from(schema.RolesTable).where(eq(schema.RolesTable.name, 'admin')).limit(1);
 

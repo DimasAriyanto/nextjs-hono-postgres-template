@@ -116,7 +116,7 @@ export type TAuthUser = z.infer<typeof authUserSchema>;
 export const loginResponseSchema = z.object({
 	user: authUserSchema,
 	token: z.string(),
-	permissions: z.unknown().nullable(),
+	permissions: z.array(z.string()),
 	email_verified: z.boolean(),
 	is_admin: z.boolean(),
 });
@@ -137,6 +137,7 @@ export type TRegisterResponse = z.infer<typeof registerResponseSchema>;
  */
 export const profileResponseSchema = authUserSchema.extend({
 	roles: z.array(z.object({ id: z.string(), name: z.string(), is_admin: z.boolean(), is_default: z.boolean() })).optional(),
+	permissions: z.array(z.string()).optional(),
 	email_verified: z.boolean(),
 });
 
@@ -154,6 +155,7 @@ export const tokenPayloadSchema = z.object({
 	iat: z.number(),
 	auid: z.string(),
 	aurl: z.string().nullable(),
+	aper: z.boolean().optional(),
 	uenv: z.string().optional(),
 	utid: z.string().optional(),
 	auem: z.string().optional(),

@@ -8,6 +8,7 @@ import { DataTable } from '@/components/data-table';
 import { DataTableFacetedFilter } from '@/components/data-table/data-table-faceted-filter';
 import { createRoleColumns } from './role-columns';
 import { RoleFormModal } from './role-form-modal';
+import { RolePermissionsModal } from './role-permissions-modal';
 import { PageHeader } from '@/components/page-header';
 import { useRoles, useDeleteRole } from '@/features/role/hooks/use-role';
 import {
@@ -33,6 +34,7 @@ export function RoleListWrapper() {
 	const [editingRole, setEditingRole] = useState<TRole | null>(null);
 	const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 	const [deleteId, setDeleteId] = useState<string | null>(null);
+	const [permissionsRole, setPermissionsRole] = useState<TRole | null>(null);
 	const [keywords] = useQueryState('keywords');
 	const [page] = useQueryState('page', parseAsInteger.withDefault(1));
 	const [limit] = useQueryState('limit', parseAsInteger.withDefault(10));
@@ -81,6 +83,7 @@ export function RoleListWrapper() {
 	const columns = createRoleColumns({
 		onEdit: handleEdit,
 		onDelete: (id) => setDeleteId(id),
+		onManagePermissions: (role) => setPermissionsRole(role),
 		page,
 		limit,
 	});
@@ -119,6 +122,12 @@ export function RoleListWrapper() {
 			/>
 
 			<RoleFormModal isOpen={showModal} onClose={handleCloseModal} role={editingRole} mode={modalMode} />
+
+			<RolePermissionsModal
+				isOpen={!!permissionsRole}
+				onClose={() => setPermissionsRole(null)}
+				role={permissionsRole}
+			/>
 
 			<AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
 				<AlertDialogContent>

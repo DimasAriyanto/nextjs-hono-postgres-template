@@ -55,10 +55,11 @@ export const usersController = {
 		const body = await c.req.json();
 		const { email, password, name, avatar_url, role_id } = body;
 
-		if (!email || !password) {
+		if (!email || !password || !role_id) {
 			throw new ValidationError('Validation failed', {
 				...((!email) && { email: ['Email is required'] }),
 				...((!password) && { password: ['Password is required'] }),
+				...((!role_id) && { role_id: ['Role is required'] }),
 			});
 		}
 
