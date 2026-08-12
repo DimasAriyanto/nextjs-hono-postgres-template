@@ -2,7 +2,18 @@
  * WhatsApp utilities for building URLs and messages
  */
 
-import { formatPhoneToWA } from './phone';
+/**
+ * Format a phone number for wa.me links (digits only — wa.me wants the country
+ * code + number with no "+"). Expects an E.164 string (e.g. "+6285259731651",
+ * "+14155552671") since that's what PhoneInput stores — stripping non-digits
+ * is enough regardless of country, no need to special-case "0" → "62" anymore.
+ * @param phone - E.164 phone number, e.g. "+6285259731651"
+ * @returns Digits-only phone number, e.g. "6285259731651"
+ */
+const formatPhoneToWA = (phone: string): string => {
+	if (!phone) return '';
+	return phone.replace(/\D/g, '');
+};
 
 /**
  * Build WhatsApp URL with formatted phone and encoded message
