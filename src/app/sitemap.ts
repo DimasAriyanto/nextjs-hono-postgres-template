@@ -1,6 +1,10 @@
 import type { MetadataRoute } from 'next';
 import { getPublicArticles } from '@/features/article/apis/article.api';
 
+// Fetches from the app's own API, which isn't reachable during `next build` —
+// force this to render at request time instead of being prerendered at build time.
+export const dynamic = 'force-dynamic';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
