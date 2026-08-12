@@ -8,7 +8,7 @@ const app = new Hono()
 	.basePath('/api')
 	.use(
 		cors({
-			origin: process.env.APP_URL as string,
+			origin: process.env.NEXT_PUBLIC_APP_URL as string,
 			allowMethods: ['GET', 'POST', 'PUT', 'OPTION', 'DELETE'],
 			credentials: true,
 		}),

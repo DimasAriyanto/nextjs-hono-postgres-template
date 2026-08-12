@@ -2,6 +2,7 @@
 
 import { useState, useEffect, forwardRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Menu, X, User, LogOut, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +14,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useProfile, useLogout } from '@/features/auth/hooks/use-auth';
+import type { TSetting } from '@/contracts';
 
 // ── Avatar trigger ─────────────────────────────────────────────────────────────
 
@@ -101,14 +103,33 @@ function UserMenu({ name, onLogout }: { name: string; onLogout: () => void }) {
 	);
 }
 
+// ── Brand ──────────────────────────────────────────────────────────────────────
+
+function Brand({ appName, logoUrl, className }: { appName: string; logoUrl?: string | null; className?: string }) {
+	return (
+		<span className={`flex items-center gap-2 font-bold text-lg tracking-tight ${className ?? ''}`}>
+			{logoUrl && (
+				<Image src={logoUrl} alt={appName} width={28} height={28} className="rounded object-contain" />
+			)}
+			{appName}
+		</span>
+	);
+}
+
 // ── Main header ────────────────────────────────────────────────────────────────
 
-export const AppHeader = () => {
+interface AppHeaderProps {
+	settings?: TSetting;
+}
+
+export const AppHeader = ({ settings }: AppHeaderProps) => {
 	const [mobileOpen, setMobileOpen] = useState(false);
 	const [menuAnimating, setMenuAnimating] = useState(false);
 
 	const { data: profileData } = useProfile();
 	const { mutate: logout } = useLogout();
+
+	const appName = settings?.app_name ?? 'App';
 
 	useEffect(() => {
 		if (mobileOpen) {
@@ -132,8 +153,8 @@ export const AppHeader = () => {
 			<div className="container mx-auto px-4 md:px-6 flex items-center justify-between h-16">
 
 				{/* Logo */}
-				<Link href="/" className="font-bold text-lg tracking-tight hover:opacity-80 transition-opacity">
-					App
+				<Link href="/" className="hover:opacity-80 transition-opacity">
+					<Brand appName={appName} logoUrl={settings?.logo_url} />
 				</Link>
 
 				{/* Desktop right */}
@@ -179,7 +200,7 @@ export const AppHeader = () => {
 							className={`fixed inset-y-0 right-0 w-full max-w-sm bg-background shadow-2xl pointer-events-auto transition-transform duration-300 ${menuAnimating ? 'translate-x-0' : 'translate-x-full'}`}
 						>
 							<div className="flex items-center justify-between px-6 py-5 border-b border-border">
-								<span className="font-bold text-lg">App</span>
+								<Brand appName={appName} logoUrl={settings?.logo_url} />
 								<Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)}>
 									<X className="size-5" />
 								</Button>

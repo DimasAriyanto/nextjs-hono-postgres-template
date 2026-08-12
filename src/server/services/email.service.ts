@@ -5,12 +5,14 @@ import {
 	resetPasswordEmailTemplate,
 	resetPasswordEmailText,
 } from '@/server/utils/templates/email';
+import { settingService } from '@/server/services/setting.service';
 
 interface SendEmailOptions {
 	to: string;
 	subject: string;
 	html: string;
 	text?: string;
+	appName?: string;
 }
 
 export class EmailService {
@@ -29,12 +31,23 @@ export class EmailService {
 	}
 
 	/**
+	 * Resolve the app name — settings value takes priority, falling back to
+	 * the APP_NAME env var, then a hardcoded default (see SettingService).
+	 */
+	private async getAppName(): Promise<string> {
+		const { app_name } = await settingService.getSettings();
+		return app_name;
+	}
+
+	/**
 	 * Send email
 	 */
 	async send(options: SendEmailOptions): Promise<boolean> {
 		try {
+			const appName = options.appName ?? await this.getAppName();
+
 			await this.transporter.sendMail({
-				from: `"${process.env.APP_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+				from: `"${appName}" <${process.env.MAIL_FROM_ADDRESS}>`,
 				to: options.to,
 				subject: options.subject,
 				html: options.html,
@@ -52,13 +65,14 @@ export class EmailService {
 	 */
 	async sendVerificationEmail(params: { to: string; token: string; userName?: string }): Promise<boolean> {
 		const { to, token, userName } = params;
-		const appName = process.env.APP_NAME || 'App';
-		const appUrl = process.env.APP_URL || 'http://localhost:3000';
+		const appName = await this.getAppName();
+		const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 		const verificationUrl = `${appUrl}/api/v1/auths/verify-email?token=${token}`;
 
 		return this.send({
 			to,
+			appName,
 			subject: `Verify your email - ${appName}`,
 			html: verificationEmailTemplate({ appName, verificationUrl, userName, expirationHours: 24 }),
 			text: verificationEmailText({ appName, verificationUrl, userName, expirationHours: 24 }),
@@ -70,13 +84,14 @@ export class EmailService {
 	 */
 	async sendPasswordResetEmail(params: { to: string; token: string; userName?: string }): Promise<boolean> {
 		const { to, token, userName } = params;
-		const appName = process.env.APP_NAME || 'App';
-		const appUrl = process.env.APP_URL || 'http://localhost:3000';
+		const appName = await this.getAppName();
+		const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 		const resetUrl = `${appUrl}/reset-password?token=${token}`;
 
 		return this.send({
 			to,
+			appName,
 			subject: `Reset your password - ${appName}`,
 			html: resetPasswordEmailTemplate({ appName, resetUrl, userName, expirationHours: 1 }),
 			text: resetPasswordEmailText({ appName, resetUrl, userName, expirationHours: 1 }),

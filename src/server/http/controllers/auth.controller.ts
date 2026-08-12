@@ -65,7 +65,7 @@ export const authController = {
 		await authService.verifyEmail(token);
 
 		// Redirect to success page
-		const redirectUrl = process.env.APP_URL + '/email-verified';
+		const redirectUrl = process.env.NEXT_PUBLIC_APP_URL + '/email-verified';
 		return c.redirect(redirectUrl);
 	},
 

@@ -2,7 +2,7 @@ import { settingRepository } from '@/server/repositories';
 import { SETTING_KEYS, SETTING_KEY_GROUP_MAP, type TFaqItem, type TSetting, type TSocialLink, type TUpdateSettingRequest } from '@/contracts/setting';
 
 const DEFAULTS: TSetting = {
-	app_name: 'My App',
+	app_name: process.env.APP_NAME || 'My App',
 	description: null,
 	logo_url: null,
 	contact_email: null,
