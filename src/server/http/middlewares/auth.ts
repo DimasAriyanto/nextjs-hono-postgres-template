@@ -30,6 +30,10 @@ export const auth = createMiddleware(async (c, next) => {
 		if (err instanceof AuthError) {
 			throw err;
 		}
+		// Distinguish an expired token (client should try refreshing) from any other verification failure
+		if (err instanceof Error && err.name === 'JwtTokenExpired') {
+			throw AuthError.tokenExpired();
+		}
 		throw AuthError.forbidden();
 	}
 });

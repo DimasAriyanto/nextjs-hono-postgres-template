@@ -36,7 +36,9 @@ export function useLogin(options?: { onError?: (error: Error) => void }) {
 		onSuccess: (result) => {
 			toast.success('Login successful', { description: 'Welcome back!' });
 			queryClient.invalidateQueries({ queryKey: authKeys.all });
-			router.push(result.data.is_admin ? '/gundala-admin/d' : '/');
+			const hasAdminAccess = result.data.is_admin || result.data.permissions.length > 0;
+			router.push(hasAdminAccess ? '/gundala-admin/d' : '/');
+			router.refresh();
 		},
 		onError: options?.onError,
 	});
@@ -55,6 +57,7 @@ export function useRegister(options?: { onError?: (error: Error) => void; onSucc
 			queryClient.invalidateQueries({ queryKey: authKeys.all });
 			options?.onSuccess?.();
 			router.push('/dashboard');
+			router.refresh();
 		},
 		onError: options?.onError,
 	});
@@ -73,6 +76,7 @@ export function useLogout() {
 			toast.success('Logged out', { description: 'You have been successfully logged out.' });
 			queryClient.clear();
 			router.push('/login');
+			router.refresh();
 		},
 		onError: () => {
 			toast.error('Logout failed', { description: 'An error occurred. Please try again.' });
@@ -179,7 +183,9 @@ export function useGoogleAuth() {
 		mutationFn: (data: { token: string }) => authApi.googleAuth(data),
 		onSuccess: (result) => {
 			queryClient.invalidateQueries({ queryKey: authKeys.all });
-			router.push(result.data.is_admin ? '/gundala-admin/d' : '/');
+			const hasAdminAccess = result.data.is_admin || result.data.permissions.length > 0;
+			router.push(hasAdminAccess ? '/gundala-admin/d' : '/');
+			router.refresh();
 		},
 		onError: (error: Error) => {
 			toast.error('Google Authentication Failed', { description: error.message });

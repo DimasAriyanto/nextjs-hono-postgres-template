@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 
 const SALT_ROUNDS = 10;
 
@@ -21,4 +22,12 @@ export const hashPasswordSync = (password: string): string => {
  */
 export const comparePassword = async (password: string, hash: string): Promise<boolean> => {
     return bcrypt.compare(password, hash);
+};
+
+/**
+ * Hash a high-entropy opaque token (e.g. refresh token) for storage.
+ * Uses sha256 instead of bcrypt since the input is already random, not a low-entropy secret.
+ */
+export const hashRefreshToken = (token: string): string => {
+    return crypto.createHash('sha256').update(token).digest('hex');
 };

@@ -1,5 +1,5 @@
 import { Context } from 'hono';
-import { setSignedCookie, deleteCookie } from 'hono/cookie';
+import { setSignedCookie, getSignedCookie, deleteCookie } from 'hono/cookie';
 import { authService } from '@/server/services';
 import { AuthError, ValidationError } from '@/server/errors';
 import { response } from '@/server/http/response';
@@ -13,9 +13,12 @@ export const authController = {
 		const body = await c.req.json();
 		const result = await authService.login(body);
 
-		// Set cookie
+		// Set cookies
 		const cookieConfig = authService.getCookieConfig();
 		await setSignedCookie(c, cookieConfig.name, result.token, cookieConfig.secret, cookieConfig.options);
+
+		const refreshCookieConfig = authService.getRefreshCookieConfig();
+		await setSignedCookie(c, refreshCookieConfig.name, result.refreshToken, refreshCookieConfig.secret, refreshCookieConfig.options);
 
 		return response.ok(c, result, 'Login successful');
 	},
@@ -28,9 +31,12 @@ export const authController = {
 		const body = await c.req.json();
 		const result = await authService.register(body);
 
-		// Set cookie for auto-login
+		// Set cookies for auto-login
 		const cookieConfig = authService.getCookieConfig();
 		await setSignedCookie(c, cookieConfig.name, result.token, cookieConfig.secret, cookieConfig.options);
+
+		const refreshCookieConfig = authService.getRefreshCookieConfig();
+		await setSignedCookie(c, refreshCookieConfig.name, result.refreshToken, refreshCookieConfig.secret, refreshCookieConfig.options);
 
 		return response.created(c, result, 'Registration successful');
 	},
@@ -96,7 +102,31 @@ export const authController = {
 		const cookieConfig = authService.getCookieConfig();
 		await setSignedCookie(c, cookieConfig.name, result.token, cookieConfig.secret, cookieConfig.options);
 
+		const refreshCookieConfig = authService.getRefreshCookieConfig();
+		await setSignedCookie(c, refreshCookieConfig.name, result.refreshToken, refreshCookieConfig.secret, refreshCookieConfig.options);
+
 		return response.ok(c, result, 'Google authentication successful');
+	},
+
+	/**
+	 * POST /auths/refresh
+	 * Refresh access token using a valid refresh token cookie
+	 */
+	async refresh(c: Context) {
+		const refreshCookieConfig = authService.getRefreshCookieConfig();
+		const refreshToken = await getSignedCookie(c, refreshCookieConfig.secret, refreshCookieConfig.name);
+
+		if (!refreshToken) {
+			throw AuthError.unauthorized();
+		}
+
+		const result = await authService.refresh(refreshToken as string);
+
+		const cookieConfig = authService.getCookieConfig();
+		await setSignedCookie(c, cookieConfig.name, result.token, cookieConfig.secret, cookieConfig.options);
+		await setSignedCookie(c, refreshCookieConfig.name, result.refreshToken, refreshCookieConfig.secret, refreshCookieConfig.options);
+
+		return response.ok(c, result, 'Token refreshed');
 	},
 
 	/**
@@ -162,6 +192,9 @@ export const authController = {
 		const cookieConfig = authService.getCookieConfig();
 		deleteCookie(c, cookieConfig.name);
 
+		const refreshCookieConfig = authService.getRefreshCookieConfig();
+		deleteCookie(c, refreshCookieConfig.name);
+
 		return response.success(c, result.message);
 	},
 
@@ -170,8 +203,16 @@ export const authController = {
 	 * Sign out user
 	 */
 	async signout(c: Context) {
+		const refreshCookieConfig = authService.getRefreshCookieConfig();
+		const refreshToken = await getSignedCookie(c, refreshCookieConfig.secret, refreshCookieConfig.name);
+
+		if (refreshToken) {
+			await authService.revokeRefreshToken(refreshToken as string);
+		}
+
 		const cookieConfig = authService.getCookieConfig();
 		deleteCookie(c, cookieConfig.name);
+		deleteCookie(c, refreshCookieConfig.name);
 
 		return response.success(c, 'Logged out successfully');
 	},

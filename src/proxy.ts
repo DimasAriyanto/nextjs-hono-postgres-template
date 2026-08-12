@@ -19,8 +19,7 @@ function extractJwtFromSignedCookie(cookieValue: string): string | null {
 	return cookieValue.slice(0, lastDot);
 }
 
-async function getTokenPayload(request: NextRequest): Promise<TokenPayload | null> {
-	const cookieValue = request.cookies.get('__x')?.value;
+async function getTokenPayload(cookieValue: string | undefined): Promise<TokenPayload | null> {
 	if (!cookieValue) return null;
 
 	const jwt = extractJwtFromSignedCookie(cookieValue);
@@ -34,10 +33,52 @@ async function getTokenPayload(request: NextRequest): Promise<TokenPayload | nul
 	}
 }
 
+// Calls the refresh endpoint server-to-server using the refresh cookie off the incoming request.
+// Returns the backend's response headers (containing rotated Set-Cookie values) on success, or null.
+async function tryRefresh(request: NextRequest): Promise<Headers | null> {
+	const refreshCookie = request.cookies.get('__rx')?.value;
+	if (!refreshCookie) return null;
+
+	try {
+		const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/v1/auths/refresh`, {
+			method: 'POST',
+			headers: { cookie: `__rx=${refreshCookie}` },
+		});
+		return res.ok ? res.headers : null;
+	} catch {
+		return null;
+	}
+}
+
+// Re-applies rotated Set-Cookie headers (if any) onto an outgoing response
+function withRefreshedCookies(response: NextResponse, refreshedHeaders: Headers | null): NextResponse {
+	if (refreshedHeaders) {
+		for (const setCookie of refreshedHeaders.getSetCookie()) {
+			response.headers.append('Set-Cookie', setCookie);
+		}
+	}
+	return response;
+}
+
 export async function proxy(request: NextRequest) {
 	const pathname = request.nextUrl.pathname;
 
-	const payload = await getTokenPayload(request);
+	let payload = await getTokenPayload(request.cookies.get('__x')?.value);
+
+	// Access token missing/expired — try a transparent refresh before making any auth decisions
+	let refreshedHeaders: Headers | null = null;
+	if (!payload) {
+		refreshedHeaders = await tryRefresh(request);
+		if (refreshedHeaders) {
+			for (const setCookie of refreshedHeaders.getSetCookie()) {
+				const [nameValue] = setCookie.split(';');
+				const eqIdx = nameValue.indexOf('=');
+				request.cookies.set(nameValue.slice(0, eqIdx), nameValue.slice(eqIdx + 1));
+			}
+			payload = await getTokenPayload(request.cookies.get('__x')?.value);
+		}
+	}
+
 	const isAuthenticated = payload !== null;
 	// Admin-panel access: either the elevated is_admin role, or at least one menu permission granted to the user's role
 	const hasAdminAccess = payload?.aper === true;
@@ -49,23 +90,23 @@ export async function proxy(request: NextRequest) {
 	if (!isAuthenticated && isAdminRoute) {
 		const response = NextResponse.redirect(new URL('/login', request.url));
 		response.cookies.delete('__x');
-		return response;
+		return withRefreshedCookies(response, refreshedHeaders);
 	}
 
 	// Logged in but no admin panel access → trying to access admin area
 	if (isAuthenticated && !hasAdminAccess && isAdminRoute) {
-		return NextResponse.redirect(new URL('/', request.url));
+		return withRefreshedCookies(NextResponse.redirect(new URL('/', request.url)), refreshedHeaders);
 	}
 
 	// Already logged in → trying to access auth pages
 	if (isAuthenticated && isAuthPage) {
 		const destination = hasAdminAccess ? '/gundala-admin/d' : '/';
-		return NextResponse.redirect(new URL(destination, request.url));
+		return withRefreshedCookies(NextResponse.redirect(new URL(destination, request.url)), refreshedHeaders);
 	}
 
-	return NextResponse.next();
+	return withRefreshedCookies(NextResponse.next({ request }), refreshedHeaders);
 }
 
 export const config = {
-	matcher: ['/gundala-admin/:path*', '/login', '/register', '/forgot-password'],
+	matcher: ['/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)'],
 };

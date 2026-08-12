@@ -1,17 +1,42 @@
 import { sign } from 'hono/jwt';
 import dayjs from 'dayjs';
 import { AuthError, NotFoundError, ConflictError, InternalError } from '@/server/errors';
-import { userRepository, roleRepository, permissionRepository } from '@/server/repositories';
+import { userRepository, roleRepository, permissionRepository, refreshTokenRepository } from '@/server/repositories';
 import { emailService } from './email.service';
-import { generateVerificationToken, generateTokenExpiration, isTokenExpired, hashPassword, comparePassword } from '@/server/utils';
-import type { TInsertUser } from '@/server/databases/schemas/users.schema';
+import { generateVerificationToken, generateTokenExpiration, isTokenExpired, hashPassword, comparePassword, hashRefreshToken } from '@/server/utils';
+import type { TInsertUser, TSelectUser } from '@/server/databases/schemas/users.schema';
 import { MENU_PERMISSIONS } from '@/constants/permissions';
+
+const ACCESS_TOKEN_TTL_SECONDS = Number(process.env.ACCESS_TOKEN_TTL) || 60 * 15; // default: 15 minutes
+const REFRESH_TOKEN_TTL_SECONDS = Number(process.env.REFRESH_TOKEN_TTL) || 60 * 60 * 24 * 30; // default: 30 days
 
 async function resolvePermissions(userId: string, isAdmin: boolean): Promise<string[]> {
 	return isAdmin ? MENU_PERMISSIONS.map((p) => p.key) : permissionRepository.findKeysForUser(userId);
 }
 
 export class AuthService {
+	/**
+	 * Build a signed access token and a rotating DB-backed refresh token for a user
+	 */
+	private async issueTokens(user: TSelectUser, isAdmin: boolean, permissions: string[]) {
+		const payload = {
+			exp: Math.floor(Date.now() / 1000) + ACCESS_TOKEN_TTL_SECONDS,
+			iat: dayjs().unix(), // issued at
+			auid: user.id,
+			aurl: isAdmin ? 'admin' : 'user',
+			aper: isAdmin || permissions.length > 0,
+			uenv: 'central',
+		};
+
+		const token = await sign(payload, process.env.APP_KEY as string);
+
+		const refreshToken = generateVerificationToken();
+		const refreshExpiresAt = generateTokenExpiration(REFRESH_TOKEN_TTL_SECONDS / 3600);
+		await refreshTokenRepository.create(user.id, hashRefreshToken(refreshToken), refreshExpiresAt.toISOString());
+
+		return { token, refreshToken };
+	}
+
 	/**
 	 * Sign in user with email and password
 	 */
@@ -38,20 +63,12 @@ export class AuthService {
 		const isAdmin = userWithRoles?.roles.some((r) => r.role.is_admin) ?? false;
 		const permissions = await resolvePermissions(user.id, isAdmin);
 
-		const payload = {
-			exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // expired in 24 hours
-			iat: dayjs().unix(), // issued at
-			auid: user.id,
-			aurl: isAdmin ? 'admin' : 'user',
-			aper: isAdmin || permissions.length > 0,
-			uenv: 'central',
-		};
-
-		const token = await sign(payload, process.env.APP_KEY as string);
+		const { token, refreshToken } = await this.issueTokens(user, isAdmin, permissions);
 
 		return {
 			user: this.sanitizeUser(user),
 			token,
+			refreshToken,
 			permissions,
 			email_verified: user.email_verified_at !== null,
 			is_admin: isAdmin,
@@ -103,21 +120,13 @@ export class AuthService {
 
 		const permissions = await resolvePermissions(user.id, isAdmin);
 
-		// Generate token for auto-login after register
-		const payload = {
-			exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // expired in 24 hours
-			iat: dayjs().unix(), // issued at
-			auid: user.id,
-			aurl: isAdmin ? 'admin' : 'user',
-			aper: isAdmin || permissions.length > 0,
-			uenv: 'central',
-		};
-
-		const token = await sign(payload, process.env.APP_KEY as string);
+		// Generate tokens for auto-login after register
+		const { token, refreshToken } = await this.issueTokens(user, isAdmin, permissions);
 
 		return {
 			user: this.sanitizeUser(user),
 			token,
+			refreshToken,
 			permissions,
 			email_verified: false,
 			is_admin: isAdmin,
@@ -309,24 +318,71 @@ export class AuthService {
 		const isAdmin = userWithRoles?.roles.some((r) => r.role.is_admin) ?? false;
 		const permissions = await resolvePermissions(user.id, isAdmin);
 
-		const payload = {
-			exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
-			iat: dayjs().unix(),
-			auid: user.id,
-			aurl: isAdmin ? 'admin' : 'user',
-			aper: isAdmin || permissions.length > 0,
-			uenv: 'central',
-		};
-
-		const token = await sign(payload, process.env.APP_KEY as string);
+		const { token, refreshToken } = await this.issueTokens(user, isAdmin, permissions);
 
 		return {
 			user: this.sanitizeUser(user),
 			token,
+			refreshToken,
 			permissions,
 			email_verified: user.email_verified_at !== null,
 			is_admin: isAdmin,
 		};
+	}
+
+	/**
+	 * Refresh an access token using a valid refresh token, rotating it in the process
+	 */
+	async refresh(rawRefreshToken: string) {
+		const hash = hashRefreshToken(rawRefreshToken);
+		const row = await refreshTokenRepository.findByHash(hash);
+
+		if (!row) {
+			throw AuthError.tokenInvalid();
+		}
+
+		if (row.revoked_at) {
+			// Reuse of an already-rotated/revoked token — treat as compromised
+			await refreshTokenRepository.revokeAllForUser(row.user_id);
+			throw AuthError.tokenInvalid();
+		}
+
+		if (isTokenExpired(row.expires_at)) {
+			throw AuthError.tokenExpired();
+		}
+
+		await refreshTokenRepository.revoke(row.id);
+
+		const user = await userRepository.findByIdWithRoles(row.user_id);
+		if (!user) {
+			throw new NotFoundError('User');
+		}
+
+		const isAdmin = user.roles.some((r) => r.role.is_admin);
+		const permissions = await resolvePermissions(user.id, isAdmin);
+
+		const { token, refreshToken } = await this.issueTokens(user, isAdmin, permissions);
+
+		return {
+			user: this.sanitizeUser(user),
+			token,
+			refreshToken,
+			permissions,
+			email_verified: user.email_verified_at !== null,
+			is_admin: isAdmin,
+		};
+	}
+
+	/**
+	 * Revoke a refresh token (used on sign out)
+	 */
+	async revokeRefreshToken(rawRefreshToken: string) {
+		const hash = hashRefreshToken(rawRefreshToken);
+		const row = await refreshTokenRepository.findByHash(hash);
+
+		if (row && !row.revoked_at) {
+			await refreshTokenRepository.revoke(row.id);
+		}
 	}
 
 	/**
@@ -379,7 +435,7 @@ export class AuthService {
 	}
 
 	/**
-	 * Get cookie configuration
+	 * Get access token cookie configuration
 	 */
 	getCookieConfig() {
 		return {
@@ -389,7 +445,25 @@ export class AuthService {
 				path: '/',
 				secure: true,
 				httpOnly: true,
-				maxAge: 60 * 60 * 24, // 1 day in seconds
+				maxAge: ACCESS_TOKEN_TTL_SECONDS,
+				sameSite: 'Strict' as const,
+			},
+		};
+	}
+
+	/**
+	 * Get refresh token cookie configuration.
+	 * Path must stay '/' (not scoped to the auth API) so it's present on ordinary page navigations too.
+	 */
+	getRefreshCookieConfig() {
+		return {
+			name: '__rx',
+			secret: process.env.APP_COOKIE_KEY as string,
+			options: {
+				path: '/',
+				secure: true,
+				httpOnly: true,
+				maxAge: REFRESH_TOKEN_TTL_SECONDS,
 				sameSite: 'Strict' as const,
 			},
 		};
