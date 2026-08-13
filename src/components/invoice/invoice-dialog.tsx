@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Download, Eye, Printer, X } from 'lucide-react';
+import { Download, Printer } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -74,48 +74,11 @@ export function InvoiceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] p-0 gap-0">
         <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
-          <DialogTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Invoice - {invoiceData.invoiceNumber}
-            </div>
-            <div className="flex items-center gap-2">
-              {onPrint !== undefined && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                  onClick={handlePrint}
-                  title="Print"
-                >
-                  <Printer className="h-4 w-4" />
-                </Button>
-              )}
-              {onDownload !== undefined && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                  onClick={handleDownload}
-                  title="Download"
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9"
-                onClick={() => onOpenChange(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </DialogTitle>
+          <DialogTitle className="pr-6">Invoice - {invoiceData.invoiceNumber}</DialogTitle>
         </DialogHeader>
-        
+
         <ScrollArea className="overflow-auto flex-1">
-          <div ref={invoiceRef}>
+          <div ref={invoiceRef} className="p-6">
             <Invoice {...invoiceData} />
           </div>
         </ScrollArea>

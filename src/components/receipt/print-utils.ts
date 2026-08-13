@@ -4,7 +4,7 @@ import { formatCurrency } from '@/libs/currency';
 import { formatTZ, getAppCurrency, getAppLocale } from '@/libs/dayjs';
 
 export function printReceipt(receiptData: ReceiptProps) {
-  const printWindow = window.open('', '_blank', 'width=400,height=600');
+  const printWindow = window.open('', '_blank');
   
   if (!printWindow) {
     alert('Pop-up blocked! Please allow pop-ups to print.');
@@ -124,11 +124,15 @@ export function printReceipt(receiptData: ReceiptProps) {
             margin-top: 12px;
             font-size: 10px;
           }
+          @page {
+            size: 58mm auto; /* Thermal receipt roll width — printed page shrinks to fit instead of defaulting to A4/Letter */
+            margin: 0;
+          }
           @media print {
-            body { 
-              padding: 0; 
+            body {
+              padding: 4px;
               max-width: none;
-              width: 58mm; /* Thermal printer width */
+              width: 58mm;
             }
           }
         </style>

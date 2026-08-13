@@ -24,7 +24,7 @@ export interface InvoiceProps {
   invoiceNumber: string;
   invoiceDate: string;
   dueDate?: string;
-  type: 'consignment' | 'pickup' | 'settlement';
+  type: 'sale' | 'consignment' | 'pickup' | 'settlement';
   
   // Parties
   from: InvoiceParty;

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Download, Eye, Printer, X } from 'lucide-react';
+import { Download, Printer } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -72,54 +72,17 @@ export function ReceiptDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md w-[95vw] max-h-[90vh] p-0 gap-0">
-        <DialogHeader className="px-4 pt-4 pb-2 border-b shrink-0">
-          <DialogTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              Payment Receipt
-            </div>
-            <div className="flex items-center gap-1">
-              {onPrint !== undefined && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={handlePrint}
-                  title="Print"
-                >
-                  <Printer className="h-4 w-4" />
-                </Button>
-              )}
-              {onDownload !== undefined && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={handleDownload}
-                  title="Download"
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => onOpenChange(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </DialogTitle>
+        <DialogHeader className="px-5 pt-5 pb-4 border-b shrink-0">
+          <DialogTitle className="pr-6">Payment Receipt</DialogTitle>
         </DialogHeader>
-        
-        <div className="overflow-auto flex-1">
+
+        <div className="overflow-auto flex-1 px-5 py-5">
           <div ref={receiptRef}>
             <Receipt {...receiptData} />
           </div>
         </div>
 
-        <div className="border-t px-4 py-3 flex gap-2 shrink-0">
+        <div className="border-t px-5 py-4 flex gap-2 shrink-0">
           <Button
             variant="outline"
             size="sm"
