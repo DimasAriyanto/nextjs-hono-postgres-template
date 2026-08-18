@@ -88,6 +88,22 @@ export function SettingWrapper() {
 
 	const form = useForm<TUpdateSettingRequest>({
 		resolver: zodResolver(updateSettingSchema),
+		defaultValues: {
+			app_name: '',
+			description: '',
+			logo_url: '',
+			contact_email: '',
+			contact_phone: '',
+			address: '',
+			social_links: [],
+			timezone: '',
+			locale: '',
+			currency: '',
+			faqs: [],
+			terms_of_service: '',
+			privacy_policy: '',
+			primary_color: '',
+		},
 		values: settings
 			? {
 				app_name: settings.app_name,
