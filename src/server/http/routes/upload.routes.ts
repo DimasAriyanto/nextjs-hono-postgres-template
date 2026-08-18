@@ -4,4 +4,5 @@ import { auth } from '@/server/http/middlewares/auth';
 
 export const uploadRoutes = new Hono()
 	.use(auth)
-	.post('/image', uploadController.image);
+	.post('/image', uploadController.image)
+	.post('/document', uploadController.document);

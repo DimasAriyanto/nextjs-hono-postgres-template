@@ -5,7 +5,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import { eq } from 'drizzle-orm';
 import { hashPasswordSync } from '@/server/utils';
 import { MENU_PERMISSIONS } from '@/constants/permissions';
-import { SETTING_KEYS, SETTING_KEY_GROUP_MAP, type TFaqItem } from '@/contracts/setting';
+import { SETTING_KEYS, SETTING_KEY_GROUP_MAP, type TBannerItem, type TFaqItem } from '@/contracts/setting';
 import { slugify } from '@/libs/string';
 
 loadEnvConfig(process.cwd());
@@ -153,10 +153,38 @@ export async function seed() {
 <p>If you have any questions about this Privacy Policy, please contact us through the details provided on our contact page.</p>
 `.trim();
 
+	const banners: TBannerItem[] = [
+		{
+			image_url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1600&q=80',
+			title: 'Build Faster, Ship Sooner',
+			subtitle: 'A production-ready Next.js + Hono + Postgres starter',
+			button_label: 'Get Started',
+			button_link: '/register',
+			text_align: 'center',
+		},
+		{
+			image_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1600&q=80',
+			title: 'Modern Admin Dashboard',
+			subtitle: 'Manage users, roles and content with ease',
+			button_label: 'Explore Features',
+			button_link: '/articles',
+			text_align: 'left',
+		},
+		{
+			image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80',
+			title: 'Secure & Scalable',
+			subtitle: 'Authentication, permissions and more, built in',
+			button_label: 'Learn More',
+			button_link: '/terms-of-service',
+			text_align: 'right',
+		},
+	];
+
 	const settingsSeed: { key: string; value: unknown }[] = [
 		{ key: SETTING_KEYS.FAQS, value: faqs },
 		{ key: SETTING_KEYS.TERMS_OF_SERVICE, value: termsOfServiceHtml },
 		{ key: SETTING_KEYS.PRIVACY_POLICY, value: privacyPolicyHtml },
+		{ key: SETTING_KEYS.BANNERS, value: banners },
 	];
 
 	const insertedSettings = await db
@@ -172,6 +200,7 @@ export async function seed() {
 	const articlesSeed = [
 		{
 			title: 'Getting Started with This Template',
+			thumbnail_url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80',
 			excerpt: 'A quick tour of the stack — Next.js, Hono, Drizzle ORM, and PostgreSQL — and how the pieces fit together.',
 			content: `
 <p>This template is a starting point for building full-stack applications with a modern, type-safe stack. On the frontend, it uses Next.js with the App Router. On the backend, API routes are handled by Hono, a small and fast web framework, with Drizzle ORM providing type-safe access to a PostgreSQL database.</p>
@@ -184,6 +213,7 @@ export async function seed() {
 		},
 		{
 			title: 'Why We Use Hono for the API Layer',
+			thumbnail_url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
 			excerpt: 'A look at why this template pairs Next.js with Hono instead of relying solely on Next.js route handlers.',
 			content: `
 <p>Hono is a lightweight, fast web framework that works well in a wide range of JavaScript runtimes. In this template, it powers the API layer, giving us a clean separation between HTTP routing and the Next.js application itself.</p>
@@ -199,6 +229,7 @@ export async function seed() {
 		},
 		{
 			title: 'Understanding Authentication & Refresh Tokens',
+			thumbnail_url: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=1200&q=80',
 			excerpt: 'How login sessions stay secure in this template using short-lived access tokens and rotating refresh tokens.',
 			content: `
 <p>This template ships with a complete authentication flow: email/password login, role-based permissions, and secure refresh token rotation.</p>
@@ -220,6 +251,7 @@ export async function seed() {
 					slug: slugify(article.title),
 					excerpt: article.excerpt,
 					content: article.content,
+					thumbnail_url: article.thumbnail_url,
 					status: article.status,
 					published_at: new Date().toISOString(),
 					author_id: adminUser.id,

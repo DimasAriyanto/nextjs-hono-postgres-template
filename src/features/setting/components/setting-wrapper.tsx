@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Building2, Contact, Globe2, HelpCircle, Loader2, Palette, Scale, X } from 'lucide-react';
+import { Building2, Contact, GalleryHorizontal, Globe2, HelpCircle, Loader2, Palette, Scale, X } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SocialLinksInput } from '@/components/social-links-input';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { FaqInput } from '@/components/faq-input';
+import { BannerInput } from '@/components/banner-input';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { PageHeader } from '@/components/page-header';
 import { useSettings, useUpdateSettings } from '@/features/setting/hooks/use-setting';
@@ -103,6 +104,7 @@ export function SettingWrapper() {
 			terms_of_service: '',
 			privacy_policy: '',
 			primary_color: '',
+			banners: [],
 		},
 		values: settings
 			? {
@@ -120,6 +122,7 @@ export function SettingWrapper() {
 				terms_of_service: settings.terms_of_service ?? '',
 				privacy_policy: settings.privacy_policy ?? '',
 				primary_color: settings.primary_color ?? '',
+				banners: settings.banners,
 			}
 			: undefined,
 	});
@@ -190,6 +193,7 @@ export function SettingWrapper() {
 							<TabsTrigger value="contact"><Contact className="size-3.5 mr-1.5" />Contact</TabsTrigger>
 							<TabsTrigger value="regional"><Globe2 className="size-3.5 mr-1.5" />Regional</TabsTrigger>
 							<TabsTrigger value="appearance"><Palette className="size-3.5 mr-1.5" />Appearance</TabsTrigger>
+							<TabsTrigger value="banner"><GalleryHorizontal className="size-3.5 mr-1.5" />Banner</TabsTrigger>
 							<TabsTrigger value="faq"><HelpCircle className="size-3.5 mr-1.5" />FAQ</TabsTrigger>
 							<TabsTrigger value="legal"><Scale className="size-3.5 mr-1.5" />Legal</TabsTrigger>
 						</TabsList>
@@ -382,6 +386,21 @@ export function SettingWrapper() {
 												</Button>
 											</div>
 											<p className="text-sm text-muted-foreground">Accent color used across buttons, links and highlights throughout the app.</p>
+											<FormMessage />
+										</FormItem>
+									)} />
+								</CardContent>
+							</Card>
+						</TabsContent>
+
+						{/* ── Banner ── */}
+						<TabsContent value="banner">
+							<Card>
+								<CardContent className="pt-6 space-y-4">
+									<FormField control={form.control} name="banners" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Home Page Banners</FormLabel>
+											<BannerInput value={field.value ?? []} onChange={field.onChange} disabled={isSaving} />
 											<FormMessage />
 										</FormItem>
 									)} />

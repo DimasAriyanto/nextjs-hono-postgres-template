@@ -14,6 +14,7 @@ export const SETTING_GROUPS = {
 	FAQ: 'faq',
 	LEGAL: 'legal',
 	APPEARANCE: 'appearance',
+	BANNER: 'banner',
 } as const;
 
 export type TSettingGroup = (typeof SETTING_GROUPS)[keyof typeof SETTING_GROUPS];
@@ -33,6 +34,7 @@ export const SETTING_KEYS = {
 	TERMS_OF_SERVICE: 'terms_of_service',
 	PRIVACY_POLICY: 'privacy_policy',
 	PRIMARY_COLOR: 'primary_color',
+	BANNERS: 'banners',
 } as const;
 
 export type TSettingKey = (typeof SETTING_KEYS)[keyof typeof SETTING_KEYS];
@@ -53,6 +55,7 @@ export const SETTING_KEY_GROUP_MAP: Record<TSettingKey, TSettingGroup> = {
 	[SETTING_KEYS.TERMS_OF_SERVICE]: SETTING_GROUPS.LEGAL,
 	[SETTING_KEYS.PRIVACY_POLICY]: SETTING_GROUPS.LEGAL,
 	[SETTING_KEYS.PRIMARY_COLOR]: SETTING_GROUPS.APPEARANCE,
+	[SETTING_KEYS.BANNERS]: SETTING_GROUPS.BANNER,
 };
 
 // ============================================
@@ -73,6 +76,21 @@ export const faqItemSchema = z.object({
 
 export type TFaqItem = z.infer<typeof faqItemSchema>;
 
+export const BANNER_TEXT_ALIGNS = ['left', 'center', 'right'] as const;
+
+export type TBannerTextAlign = (typeof BANNER_TEXT_ALIGNS)[number];
+
+export const bannerItemSchema = z.object({
+	image_url: z.string().min(1, 'Image is required'),
+	title: z.string().optional(),
+	subtitle: z.string().optional(),
+	button_label: z.string().optional(),
+	button_link: z.string().optional(),
+	text_align: z.enum(BANNER_TEXT_ALIGNS).optional(),
+});
+
+export type TBannerItem = z.infer<typeof bannerItemSchema>;
+
 /**
  * Update settings request schema — a partial patch over the known setting keys.
  */
@@ -91,6 +109,7 @@ export const updateSettingSchema = z.object({
 	terms_of_service: z.string().optional(),
 	privacy_policy: z.string().optional(),
 	primary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color (e.g. #171717)').optional().or(z.literal('')),
+	banners: z.array(bannerItemSchema).optional(),
 });
 
 export type TUpdateSettingRequest = z.infer<typeof updateSettingSchema>;
@@ -114,6 +133,7 @@ export const settingSchema = z.object({
 	terms_of_service: z.string().nullable(),
 	privacy_policy: z.string().nullable(),
 	primary_color: z.string().nullable(),
+	banners: z.array(bannerItemSchema),
 });
 
 export type TSetting = z.infer<typeof settingSchema>;

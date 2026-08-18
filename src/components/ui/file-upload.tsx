@@ -339,7 +339,7 @@ export function FileUpload({
               )}
             >
               {isCompressing ? <Loader2 className={cn(iconSize, 'animate-spin')} /> : <UploadCloud className={iconSize} />}
-              {isRect && <span className="text-xs">{description ?? 'Click to upload image'}</span>}
+              {isRect && <span className="text-xs">{description ?? 'Click to upload'}</span>}
             </div>
           )}
           {hiddenInput}

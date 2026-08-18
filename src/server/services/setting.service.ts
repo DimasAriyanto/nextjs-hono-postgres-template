@@ -1,5 +1,5 @@
 import { settingRepository } from '@/server/repositories';
-import { SETTING_KEYS, SETTING_KEY_GROUP_MAP, type TFaqItem, type TSetting, type TSocialLink, type TUpdateSettingRequest } from '@/contracts/setting';
+import { SETTING_KEYS, SETTING_KEY_GROUP_MAP, type TBannerItem, type TFaqItem, type TSetting, type TSocialLink, type TUpdateSettingRequest } from '@/contracts/setting';
 
 const DEFAULTS: TSetting = {
 	app_name: process.env.APP_NAME || 'My App',
@@ -16,6 +16,7 @@ const DEFAULTS: TSetting = {
 	terms_of_service: null,
 	privacy_policy: null,
 	primary_color: null,
+	banners: [],
 };
 
 export class SettingService {
@@ -41,6 +42,7 @@ export class SettingService {
 			terms_of_service: (byKey.get(SETTING_KEYS.TERMS_OF_SERVICE) as string | undefined) ?? DEFAULTS.terms_of_service,
 			privacy_policy: (byKey.get(SETTING_KEYS.PRIVACY_POLICY) as string | undefined) ?? DEFAULTS.privacy_policy,
 			primary_color: (byKey.get(SETTING_KEYS.PRIMARY_COLOR) as string | undefined) || DEFAULTS.primary_color,
+			banners: (byKey.get(SETTING_KEYS.BANNERS) as TBannerItem[] | undefined) ?? DEFAULTS.banners,
 		};
 	}
 

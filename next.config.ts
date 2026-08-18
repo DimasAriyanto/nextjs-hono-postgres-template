@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
 				protocol: 'https',
 				hostname: '*.gravatar.com',
 			},
+			// Unsplash (seeded banner images)
+			{
+				protocol: 'https',
+				hostname: 'images.unsplash.com',
+			},
 		],
 	},
 };
