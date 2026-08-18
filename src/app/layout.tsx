@@ -44,14 +44,34 @@ export async function generateMetadata(): Promise<Metadata> {
 	};
 }
 
-export default function RootLayout({
+/** Picks a readable foreground (near-black or near-white) for a given hex background, by relative luminance. */
+function getReadableForeground(hex: string): string {
+	const r = parseInt(hex.slice(1, 3), 16);
+	const g = parseInt(hex.slice(3, 5), 16);
+	const b = parseInt(hex.slice(5, 7), 16);
+	const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+	return luminance > 0.6 ? 'oklch(0.145 0 0)' : 'oklch(0.985 0 0)';
+}
+
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const { data } = await getSettings();
+	const primaryColor = data.primary_color;
+
 	return (
 		<html lang="id" suppressHydrationWarning>
 			<body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+				{primaryColor && (
+					<style dangerouslySetInnerHTML={{
+						__html: `:root,.dark{--primary:${primaryColor};--primary-foreground:${getReadableForeground(primaryColor)};}`,
+					}}
+					/>
+				)}
+
 				<Providers>
 					{children}
 				</Providers>

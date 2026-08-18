@@ -13,6 +13,7 @@ export const SETTING_GROUPS = {
 	REGIONAL: 'regional',
 	FAQ: 'faq',
 	LEGAL: 'legal',
+	APPEARANCE: 'appearance',
 } as const;
 
 export type TSettingGroup = (typeof SETTING_GROUPS)[keyof typeof SETTING_GROUPS];
@@ -31,6 +32,7 @@ export const SETTING_KEYS = {
 	FAQS: 'faqs',
 	TERMS_OF_SERVICE: 'terms_of_service',
 	PRIVACY_POLICY: 'privacy_policy',
+	PRIMARY_COLOR: 'primary_color',
 } as const;
 
 export type TSettingKey = (typeof SETTING_KEYS)[keyof typeof SETTING_KEYS];
@@ -50,6 +52,7 @@ export const SETTING_KEY_GROUP_MAP: Record<TSettingKey, TSettingGroup> = {
 	[SETTING_KEYS.FAQS]: SETTING_GROUPS.FAQ,
 	[SETTING_KEYS.TERMS_OF_SERVICE]: SETTING_GROUPS.LEGAL,
 	[SETTING_KEYS.PRIVACY_POLICY]: SETTING_GROUPS.LEGAL,
+	[SETTING_KEYS.PRIMARY_COLOR]: SETTING_GROUPS.APPEARANCE,
 };
 
 // ============================================
@@ -87,6 +90,7 @@ export const updateSettingSchema = z.object({
 	faqs: z.array(faqItemSchema).optional(),
 	terms_of_service: z.string().optional(),
 	privacy_policy: z.string().optional(),
+	primary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color (e.g. #171717)').optional().or(z.literal('')),
 });
 
 export type TUpdateSettingRequest = z.infer<typeof updateSettingSchema>;
@@ -109,6 +113,7 @@ export const settingSchema = z.object({
 	faqs: z.array(faqItemSchema),
 	terms_of_service: z.string().nullable(),
 	privacy_policy: z.string().nullable(),
+	primary_color: z.string().nullable(),
 });
 
 export type TSetting = z.infer<typeof settingSchema>;

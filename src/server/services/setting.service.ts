@@ -15,6 +15,7 @@ const DEFAULTS: TSetting = {
 	faqs: [],
 	terms_of_service: null,
 	privacy_policy: null,
+	primary_color: null,
 };
 
 export class SettingService {
@@ -39,6 +40,7 @@ export class SettingService {
 			faqs: (byKey.get(SETTING_KEYS.FAQS) as TFaqItem[] | undefined) ?? DEFAULTS.faqs,
 			terms_of_service: (byKey.get(SETTING_KEYS.TERMS_OF_SERVICE) as string | undefined) ?? DEFAULTS.terms_of_service,
 			privacy_policy: (byKey.get(SETTING_KEYS.PRIVACY_POLICY) as string | undefined) ?? DEFAULTS.privacy_policy,
+			primary_color: (byKey.get(SETTING_KEYS.PRIMARY_COLOR) as string | undefined) || DEFAULTS.primary_color,
 		};
 	}
 

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Building2, Contact, Globe2, HelpCircle, ImagePlus, Loader2, Scale } from 'lucide-react';
+import { Building2, Contact, Globe2, HelpCircle, ImagePlus, Loader2, Palette, Scale } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -83,6 +83,10 @@ const CURRENCY_OPTIONS = [
 	{ value: 'AED', label: 'AED — UAE Dirham' },
 ];
 
+// ─── Appearance ─────────────────────────────────────────────────────────────────
+
+const DEFAULT_PRIMARY_COLOR = '#171717';
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function SettingWrapper() {
@@ -114,6 +118,7 @@ export function SettingWrapper() {
 				faqs: settings.faqs,
 				terms_of_service: settings.terms_of_service ?? '',
 				privacy_policy: settings.privacy_policy ?? '',
+				primary_color: settings.primary_color ?? '',
 			}
 			: undefined,
 	});
@@ -205,6 +210,7 @@ export function SettingWrapper() {
 							<TabsTrigger value="general"><Building2 className="size-3.5 mr-1.5" />General</TabsTrigger>
 							<TabsTrigger value="contact"><Contact className="size-3.5 mr-1.5" />Contact</TabsTrigger>
 							<TabsTrigger value="regional"><Globe2 className="size-3.5 mr-1.5" />Regional</TabsTrigger>
+							<TabsTrigger value="appearance"><Palette className="size-3.5 mr-1.5" />Appearance</TabsTrigger>
 							<TabsTrigger value="faq"><HelpCircle className="size-3.5 mr-1.5" />FAQ</TabsTrigger>
 							<TabsTrigger value="legal"><Scale className="size-3.5 mr-1.5" />Legal</TabsTrigger>
 						</TabsList>
@@ -354,6 +360,43 @@ export function SettingWrapper() {
 													))}
 												</SelectContent>
 											</Select>
+											<FormMessage />
+										</FormItem>
+									)} />
+								</CardContent>
+							</Card>
+						</TabsContent>
+
+						{/* ── Appearance ── */}
+						<TabsContent value="appearance">
+							<Card>
+								<CardContent className="pt-6 space-y-4">
+									<FormField control={form.control} name="primary_color" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Primary Color</FormLabel>
+											<div className="flex items-center gap-2">
+												<FormControl>
+													<input
+														type="color"
+														value={field.value || DEFAULT_PRIMARY_COLOR}
+														onChange={(e) => field.onChange(e.target.value)}
+														disabled={isSaving}
+														className="h-9 w-12 cursor-pointer rounded-md border border-input p-1"
+													/>
+												</FormControl>
+												<Input
+													value={field.value ?? ''}
+													onChange={(e) => field.onChange(e.target.value)}
+													placeholder={DEFAULT_PRIMARY_COLOR}
+													disabled={isSaving}
+													className="w-32 font-mono uppercase"
+													maxLength={7}
+												/>
+												<Button type="button" variant="ghost" size="sm" onClick={() => field.onChange('')} disabled={isSaving}>
+													Reset to default
+												</Button>
+											</div>
+											<p className="text-sm text-muted-foreground">Accent color used across buttons, links and highlights throughout the app.</p>
 											<FormMessage />
 										</FormItem>
 									)} />
