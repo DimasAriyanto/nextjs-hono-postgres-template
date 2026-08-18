@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Camera, Loader2, User } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -72,7 +72,9 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 	const createMutation = useCreateUser({ onSuccess: () => onClose() });
 	const updateMutation = useUpdateUser({ onSuccess: () => onClose() });
 
-	useEffect(() => {
+	const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+	if (isOpen !== prevIsOpen) {
+		setPrevIsOpen(isOpen);
 		if (user && mode === 'edit') {
 			setEmail(user.email);
 			setName(user.name || '');
@@ -90,7 +92,7 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 		}
 		setAvatarFile(null);
 		setError('');
-	}, [user, mode, isOpen]);
+	}
 
 	const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Icon } from '@/components/icon';
 import { GoogleAuth } from '@/libs/google-auth';
 import { toast } from 'sonner';
@@ -35,14 +35,51 @@ interface GoogleAuthButtonProps {
 	disabled?: boolean;
 }
 
-export const GoogleAuthButton = ({ mode = 'login', onSuccess, onError, className = '', disabled = false }: GoogleAuthButtonProps) => {
+export const GoogleAuthButton = ({ mode = 'login', onSuccess, onError, className = '' }: GoogleAuthButtonProps) => {
 	const [isLoading, setIsLoading] = useState(false);
-	const [googleAuth, setGoogleAuth] = useState<GoogleAuth | null>(null);
 	const [isReady, setIsReady] = useState(false);
+	const googleAuthRef = useRef<GoogleAuth | null>(null);
 	const googleButtonRef = useRef<HTMLDivElement>(null);
 
 	// Get Google Client ID from environment
 	const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+
+	const handleGoogleCallback = useCallback(async (response: { credential: string }) => {
+		if (!response.credential) {
+			toast.error('Google Authentication Failed', {
+				description: 'No credential received from Google',
+			});
+			if (onError) {
+				onError('No credential received from Google');
+			}
+			return;
+		}
+
+		try {
+			setIsLoading(true);
+
+			// Parse the JWT token to get user info
+			const userInfo = googleAuthRef.current?.parseJwtPayload(response.credential);
+
+			toast.success('Google Authentication Successful', {
+				description: `Welcome, ${userInfo?.name}!`,
+			});
+
+			if (onSuccess) {
+				onSuccess(response.credential);
+			}
+		} catch (error) {
+			console.error('Google authentication error:', error);
+			toast.error('Google Authentication Failed', {
+				description: error instanceof Error ? error.message : 'Failed to parse Google credential',
+			});
+			if (onError) {
+				onError(error instanceof Error ? error.message : 'Authentication failed');
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	}, [onSuccess, onError]);
 
 	// Initialize Google Auth
 	useEffect(() => {
@@ -52,7 +89,7 @@ export const GoogleAuthButton = ({ mode = 'login', onSuccess, onError, className
 		}
 
 		const auth = new GoogleAuth();
-		setGoogleAuth(auth);
+		googleAuthRef.current = auth;
 
 		auth.loadGoogleScript()
 			.then(() => {
@@ -71,7 +108,7 @@ export const GoogleAuthButton = ({ mode = 'login', onSuccess, onError, className
 
 	// Setup Google Button
 	useEffect(() => {
-		if (isReady && googleAuth && googleButtonRef.current && window.google?.accounts?.id) {
+		if (isReady && googleAuthRef.current && googleButtonRef.current && window.google?.accounts?.id) {
 			// Clear previous content
 			googleButtonRef.current.innerHTML = '';
 
@@ -176,44 +213,7 @@ export const GoogleAuthButton = ({ mode = 'login', onSuccess, onError, className
 				}
 			}, 100);
 		}
-	}, [isReady, googleAuth, mode, googleClientId]);
-
-	const handleGoogleCallback = async (response: { credential: string }) => {
-		if (!response.credential) {
-			toast.error('Google Authentication Failed', {
-				description: 'No credential received from Google',
-			});
-			if (onError) {
-				onError('No credential received from Google');
-			}
-			return;
-		}
-
-		try {
-			setIsLoading(true);
-
-			// Parse the JWT token to get user info
-			const userInfo = googleAuth?.parseJwtPayload(response.credential);
-
-			toast.success('Google Authentication Successful', {
-				description: `Welcome, ${userInfo?.name}!`,
-			});
-
-			if (onSuccess) {
-				onSuccess(response.credential);
-			}
-		} catch (error) {
-			console.error('Google authentication error:', error);
-			toast.error('Google Authentication Failed', {
-				description: error instanceof Error ? error.message : 'Failed to parse Google credential',
-			});
-			if (onError) {
-				onError(error instanceof Error ? error.message : 'Authentication failed');
-			}
-		} finally {
-			setIsLoading(false);
-		}
-	};
+	}, [isReady, mode, googleClientId, handleGoogleCallback]);
 
 	// Loading state
 	if (!isReady) {

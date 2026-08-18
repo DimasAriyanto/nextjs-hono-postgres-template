@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Icon } from '@/components/icon';
 import { DataTableViewOptions } from './data-table-view-options';
 import { useQueryState } from 'nuqs';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { type LegacyReactTable as Table } from '@tanstack/react-table/legacy';
 import type { RowData } from '@tanstack/react-table';
 
@@ -17,12 +17,14 @@ interface DataTableToolbarProps<TData extends RowData> {
 }
 
 export const DataTableToolbar = <TData extends RowData,>({ table, FilterComp, CreateComp, ExportComp }: DataTableToolbarProps<TData>) => {
-	const [searchInput, setSearchInput] = useState('');
 	const [keywords, setKeywords] = useQueryState('keywords', { shallow: false });
+	const [searchInput, setSearchInput] = useState(keywords ?? '');
+	const [prevKeywords, setPrevKeywords] = useState(keywords);
 
-	useEffect(() => {
+	if (keywords !== prevKeywords) {
+		setPrevKeywords(keywords);
 		setSearchInput(keywords ?? '');
-	}, [keywords]);
+	}
 
 	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();

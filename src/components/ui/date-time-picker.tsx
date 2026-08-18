@@ -55,15 +55,18 @@ export function DateTimePicker({
 	const [pickerYear, setPickerYear] = React.useState(() => dayjs(initialMonth).year());
 
 	// Sync displayMonth: when value set → follow value; when no value but minDate changes → follow minDate
-	React.useEffect(() => {
+	const [prevValue, setPrevValue] = React.useState(value);
+	const [prevMinDate, setPrevMinDate] = React.useState(minDate);
+	if (value !== prevValue || minDate !== prevMinDate) {
+		setPrevValue(value);
+		setPrevMinDate(minDate);
 		if (parsed?.isValid()) {
 			setDisplayMonth(parsed.toDate());
 		} else if (minDate) {
 			const m = dayjs(minDate);
 			if (m.isValid()) setDisplayMonth(m.toDate());
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [value, minDate]);
+	}
 
 	const displayMonthDayjs = dayjs(displayMonth);
 	const currentDisplayMonth = displayMonthDayjs.month(); // 0-11

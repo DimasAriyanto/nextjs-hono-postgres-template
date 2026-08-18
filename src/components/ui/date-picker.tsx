@@ -58,15 +58,18 @@ export function DatePicker({
 	const [displayMonth, setDisplayMonth] = React.useState<Date>(initialMonth);
 	const [pickerYear, setPickerYear] = React.useState(() => dayjs(initialMonth).year());
 
-	React.useEffect(() => {
+	const [prevValue, setPrevValue] = React.useState(value);
+	const [prevMinDate, setPrevMinDate] = React.useState(minDate);
+	if (value !== prevValue || minDate !== prevMinDate) {
+		setPrevValue(value);
+		setPrevMinDate(minDate);
 		if (parsed?.isValid()) {
 			setDisplayMonth(parsed.toDate());
 		} else if (minDate) {
 			const m = dayjs(minDate);
 			if (m.isValid()) setDisplayMonth(m.toDate());
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [value, minDate]);
+	}
 
 	const displayMonthDayjs = dayjs(displayMonth);
 	const currentDisplayMonth = displayMonthDayjs.month();

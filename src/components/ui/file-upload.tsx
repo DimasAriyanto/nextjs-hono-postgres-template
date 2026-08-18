@@ -115,36 +115,37 @@ export function FileUpload({
   const [isCompressing, setIsCompressing] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Stable map: File → objectURL (created once per File instance)
-  const previewsRef = React.useRef<Map<File, string>>(new Map());
+  // Stable map: File → objectURL (created once per File instance).
+  // Held via useState (never replaced through its setter) rather than useRef,
+  // since reading/writing a ref's `current` during render is disallowed.
+  const [previews] = React.useState<Map<File, string>>(() => new Map());
 
   React.useEffect(() => {
-    const map = previewsRef.current;
     return () => {
-      map.forEach((url) => URL.revokeObjectURL(url));
-      map.clear();
+      previews.forEach((url) => URL.revokeObjectURL(url));
+      previews.clear();
     };
-  }, []);
+  }, [previews]);
 
   // When controlled value resets to [] — clear previews
   const prevLengthRef = React.useRef(0);
   React.useEffect(() => {
     const len = isControlled ? value.length : internalFiles.length;
     if (isControlled && value.length === 0 && prevLengthRef.current > 0) {
-      previewsRef.current.forEach((url) => URL.revokeObjectURL(url));
-      previewsRef.current.clear();
+      previews.forEach((url) => URL.revokeObjectURL(url));
+      previews.clear();
     }
     prevLengthRef.current = len;
-  }, [isControlled, value, internalFiles.length]);
+  }, [isControlled, value, internalFiles.length, previews]);
 
   const files = isControlled ? value : internalFiles;
 
   function getPreview(file: File): string | undefined {
     if (!file.type.startsWith('image/')) return undefined;
-    if (!previewsRef.current.has(file)) {
-      previewsRef.current.set(file, URL.createObjectURL(file));
+    if (!previews.has(file)) {
+      previews.set(file, URL.createObjectURL(file));
     }
-    return previewsRef.current.get(file);
+    return previews.get(file);
   }
 
   function validateFile(file: File): string | null {
@@ -202,8 +203,8 @@ export function FileUpload({
   }
 
   function removeFile(target: File) {
-    const preview = previewsRef.current.get(target);
-    if (preview) { URL.revokeObjectURL(preview); previewsRef.current.delete(target); }
+    const preview = previews.get(target);
+    if (preview) { URL.revokeObjectURL(preview); previews.delete(target); }
     const next = files.filter((f) => f !== target);
     if (!isControlled) setInternalFiles(next);
     onChange?.(next);

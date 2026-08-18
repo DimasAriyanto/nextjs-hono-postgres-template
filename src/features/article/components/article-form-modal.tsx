@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { ImagePlus, Loader2, X } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -73,7 +73,9 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 	const createMutation = useCreateArticle({ onSuccess: () => onClose() });
 	const updateMutation = useUpdateArticle({ onSuccess: () => onClose() });
 
-	useEffect(() => {
+	const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+	if (isOpen !== prevIsOpen) {
+		setPrevIsOpen(isOpen);
 		if (article && mode === 'edit') {
 			setTitle(article.title);
 			setSlug(article.slug);
@@ -93,7 +95,7 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 		}
 		setThumbnailFile(null);
 		setError('');
-	}, [article, mode, isOpen]);
+	}
 
 	const handleTitleChange = (value: string) => {
 		setTitle(value);

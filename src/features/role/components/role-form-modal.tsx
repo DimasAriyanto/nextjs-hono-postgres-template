@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -39,7 +39,9 @@ export function RoleFormModal({ isOpen, onClose, role, mode }: RoleFormModalProp
 		onSuccess: () => onClose(),
 	});
 
-	useEffect(() => {
+	const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+	if (isOpen !== prevIsOpen) {
+		setPrevIsOpen(isOpen);
 		if (role && mode === 'edit') {
 			setName(role.name);
 			setIsAdmin(role.is_admin ?? false);
@@ -50,7 +52,7 @@ export function RoleFormModal({ isOpen, onClose, role, mode }: RoleFormModalProp
 			setIsDefault(false);
 		}
 		setError('');
-	}, [role, mode, isOpen]);
+	}
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();

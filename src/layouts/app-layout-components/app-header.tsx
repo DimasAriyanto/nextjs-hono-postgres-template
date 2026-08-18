@@ -164,17 +164,22 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 
 	const appName = settings?.app_name ?? 'App';
 
+	const [prevMobileOpen, setPrevMobileOpen] = useState(mobileOpen);
+	if (mobileOpen !== prevMobileOpen) {
+		setPrevMobileOpen(mobileOpen);
+		if (!mobileOpen) setMenuAnimating(false);
+	}
+
 	useEffect(() => {
 		if (mobileOpen) {
 			document.body.style.overflow = 'hidden';
-			setTimeout(() => setMenuAnimating(true), 10);
-		} else {
-			document.body.style.overflow = 'unset';
-			setMenuAnimating(false);
+			const timer = setTimeout(() => setMenuAnimating(true), 10);
+			return () => {
+				clearTimeout(timer);
+				document.body.style.overflow = 'unset';
+			};
 		}
-		return () => {
-			document.body.style.overflow = 'unset';
-		};
+		document.body.style.overflow = 'unset';
 	}, [mobileOpen]);
 
 	const user = profileData?.data;
