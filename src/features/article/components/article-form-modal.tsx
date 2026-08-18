@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { ImagePlus, Loader2, X } from 'lucide-react';
+import { useState } from 'react';
+import { Loader2, X } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
+import { FileUpload } from '@/components/ui/file-upload';
 import {
 	Dialog,
 	DialogContent,
@@ -25,24 +26,10 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { useCreateArticle, useUpdateArticle } from '@/features/article/hooks/use-article';
+import { useUploadImage } from '@/features/upload/hooks/use-upload';
 import { slugify } from '@/libs/string';
 import { ApiError } from '@/libs/api';
 import type { TArticleStatus, TArticleWithAuthor } from '@/contracts';
-
-// ─── Upload helper ─────────────────────────────────────────────────────────────
-
-async function uploadThumbnail(file: File): Promise<string> {
-	const fd = new FormData();
-	fd.append('file', file);
-	fd.append('folder', 'articles');
-	const res = await fetch('/api/v1/uploads/image', { method: 'POST', body: fd });
-	if (!res.ok) {
-		const json = await res.json() as { message?: string };
-		throw new Error(json.message ?? 'Failed to upload thumbnail');
-	}
-	const json = await res.json() as { data: { url: string } };
-	return json.data.url;
-}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -65,13 +52,12 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 	const [error, setError] = useState('');
 
 	// Thumbnail state — queued until form is submitted
-	const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-	const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-	const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
-	const thumbnailInputRef = useRef<HTMLInputElement>(null);
+	const [thumbnailFiles, setThumbnailFiles] = useState<File[]>([]);
+	const [existingThumbnailUrl, setExistingThumbnailUrl] = useState<string | null>(null);
 
 	const createMutation = useCreateArticle({ onSuccess: () => onClose() });
 	const updateMutation = useUpdateArticle({ onSuccess: () => onClose() });
+	const uploadImageMutation = useUploadImage();
 
 	const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
 	if (isOpen !== prevIsOpen) {
@@ -83,7 +69,7 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 			setExcerpt(article.excerpt || '');
 			setContent(article.content);
 			setStatus(article.status);
-			setThumbnailPreview(article.thumbnail_url || null);
+			setExistingThumbnailUrl(article.thumbnail_url || null);
 		} else {
 			setTitle('');
 			setSlug('');
@@ -91,9 +77,9 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 			setExcerpt('');
 			setContent('');
 			setStatus('draft');
-			setThumbnailPreview(null);
+			setExistingThumbnailUrl(null);
 		}
-		setThumbnailFile(null);
+		setThumbnailFiles([]);
 		setError('');
 	}
 
@@ -101,31 +87,6 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 		setTitle(value);
 		if (!slugTouched) setSlug(slugify(value));
 		if (error) setError('');
-	};
-
-	const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
-
-		if (!file.type.startsWith('image/')) {
-			toast.error('Invalid file', { description: 'Please select an image file' });
-			return;
-		}
-		if (file.size > 5 * 1024 * 1024) {
-			toast.error('File too large', { description: 'Image must be less than 5 MB' });
-			return;
-		}
-
-		setThumbnailFile(file);
-		const reader = new FileReader();
-		reader.onloadend = () => setThumbnailPreview(reader.result as string);
-		reader.readAsDataURL(file);
-		e.target.value = '';
-	};
-
-	const handleRemoveThumbnail = () => {
-		setThumbnailFile(null);
-		setThumbnailPreview(null);
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -136,16 +97,14 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 
 		try {
 			let thumbnailUrl: string | undefined;
-			if (thumbnailFile) {
-				setIsUploadingThumbnail(true);
+			if (thumbnailFiles[0]) {
 				try {
-					thumbnailUrl = await uploadThumbnail(thumbnailFile);
+					const res = await uploadImageMutation.mutateAsync({ file: thumbnailFiles[0], folder: 'articles' });
+					thumbnailUrl = res.data.url;
 				} catch (err) {
 					toast.error('Upload failed', { description: err instanceof Error ? err.message : 'Failed to upload thumbnail' });
-					setIsUploadingThumbnail(false);
 					return;
 				}
-				setIsUploadingThumbnail(false);
 			}
 
 			if (mode === 'create') {
@@ -183,7 +142,7 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 		}
 	};
 
-	const isLoading = createMutation.isPending || updateMutation.isPending || isUploadingThumbnail;
+	const isLoading = createMutation.isPending || updateMutation.isPending || uploadImageMutation.isPending;
 
 	return (
 		<Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -199,36 +158,32 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 						{/* Thumbnail picker */}
 						<div className="grid gap-2">
 							<Label>Thumbnail</Label>
-							{thumbnailPreview ? (
+							{existingThumbnailUrl && thumbnailFiles.length === 0 && (
 								<div className="relative h-40 w-full overflow-hidden rounded-md ring-1 ring-border">
-									<Image src={thumbnailPreview} alt="Thumbnail" fill className="object-cover" />
+									<Image src={existingThumbnailUrl} alt="Thumbnail" fill className="object-cover" />
 									<button
 										type="button"
-										onClick={handleRemoveThumbnail}
+										onClick={() => setExistingThumbnailUrl(null)}
 										disabled={isLoading}
 										className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-background hover:bg-foreground/80 transition-colors disabled:opacity-50"
 									>
 										<X className="size-4" />
 									</button>
 								</div>
-							) : (
-								<button
-									type="button"
-									onClick={() => thumbnailInputRef.current?.click()}
-									disabled={isLoading}
-									className="flex h-40 w-full flex-col items-center justify-center gap-1 rounded-md border border-dashed border-input text-muted-foreground hover:bg-muted/50 transition-colors disabled:opacity-50"
-								>
-									{isUploadingThumbnail ? <Loader2 className="size-5 animate-spin" /> : <ImagePlus className="size-5" />}
-									<span className="text-xs">Click to upload image</span>
-								</button>
 							)}
-							<input
-								ref={thumbnailInputRef}
-								type="file"
-								accept="image/*"
-								className="sr-only"
-								onChange={handleThumbnailChange}
-							/>
+							{(!existingThumbnailUrl || thumbnailFiles.length > 0) && (
+								<FileUpload
+									compact
+									compactShape="rect"
+									compactSize={160}
+									accept="image/*"
+									maxSize={5 * 1024 * 1024}
+									value={thumbnailFiles}
+									onChange={setThumbnailFiles}
+									disabled={isLoading}
+									description="Drag & drop or click to upload an image"
+								/>
+							)}
 						</div>
 
 						<div className="grid gap-2">
@@ -290,7 +245,7 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 						</Button>
 						<Button type="submit" disabled={isLoading}>
 							{isLoading
-								? <><Loader2 className="size-4 mr-1.5 animate-spin" />{isUploadingThumbnail ? 'Uploading...' : mode === 'create' ? 'Creating...' : 'Updating...'}</>
+								? <><Loader2 className="size-4 mr-1.5 animate-spin" />{uploadImageMutation.isPending ? 'Uploading...' : mode === 'create' ? 'Creating...' : 'Updating...'}</>
 								: mode === 'create' ? 'Create' : 'Update'
 							}
 						</Button>

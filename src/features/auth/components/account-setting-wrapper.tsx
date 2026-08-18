@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
-	User, Mail, Shield, Key, Pencil, Check, X, BadgeCheck, Camera, Loader2,
+	User, Mail, Shield, Key, Pencil, Check, X, BadgeCheck, Loader2,
 } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -14,10 +14,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FileUpload } from '@/components/ui/file-upload';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/page-header';
 import { useProfile, useUpdateProfile, useChangePassword } from '@/features/auth/hooks/use-auth';
+import { useUploadImage } from '@/features/upload/hooks/use-upload';
 import { formatTZ } from '@/libs/dayjs';
 import { changePasswordSchema } from '@/contracts';
 
@@ -29,21 +31,6 @@ const profileEditSchema = z.object({
 
 type TProfileEdit = z.infer<typeof profileEditSchema>;
 type TChangePassword = z.infer<typeof changePasswordSchema>;
-
-// ─── Upload helper ─────────────────────────────────────────────────────────────
-
-async function uploadAvatar(file: File): Promise<string> {
-	const fd = new FormData();
-	fd.append('file', file);
-	fd.append('folder', 'avatars');
-	const res = await fetch('/api/v1/uploads/image', { method: 'POST', body: fd });
-	if (!res.ok) {
-		const json = await res.json() as { message?: string };
-		throw new Error(json.message ?? 'Failed to upload avatar');
-	}
-	const json = await res.json() as { data: { url: string } };
-	return json.data.url;
-}
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
@@ -88,16 +75,15 @@ export function AccountSettingWrapper() {
 	const [editingPassword, setEditingPassword] = useState(false);
 
 	// Avatar state — file queued until Save is clicked
-	const [avatarFile, setAvatarFile] = useState<File | null>(null);
-	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-	const avatarInputRef = useRef<HTMLInputElement>(null);
+	const [avatarFiles, setAvatarFiles] = useState<File[]>([]);
+	const [replacingAvatar, setReplacingAvatar] = useState(false);
 
 	const { data: profileRes, isLoading } = useProfile();
 	const user = profileRes?.data;
 
 	const { mutate: updateProfile, isPending: updatingProfile } = useUpdateProfile();
 	const { mutate: changePassword, isPending: changingPassword } = useChangePassword();
+	const uploadImageMutation = useUploadImage();
 
 	const profileForm = useForm<TProfileEdit>({
 		resolver: zodResolver(profileEditSchema),
@@ -115,40 +101,17 @@ export function AccountSettingWrapper() {
 		},
 	});
 
-	const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
-
-		if (!file.type.startsWith('image/')) {
-			toast.error('Invalid file', { description: 'Please select an image file' });
-			return;
-		}
-		if (file.size > 5 * 1024 * 1024) {
-			toast.error('File too large', { description: 'Image must be less than 5 MB' });
-			return;
-		}
-
-		setAvatarFile(file);
-		const reader = new FileReader();
-		reader.onloadend = () => setAvatarPreview(reader.result as string);
-		reader.readAsDataURL(file);
-
-		e.target.value = '';
-	};
-
 	const onSubmitProfile = async (values: TProfileEdit) => {
 		let avatarUrl: string | undefined;
 
-		if (avatarFile) {
-			setIsUploadingAvatar(true);
+		if (avatarFiles[0]) {
 			try {
-				avatarUrl = await uploadAvatar(avatarFile);
+				const res = await uploadImageMutation.mutateAsync({ file: avatarFiles[0], folder: 'avatars' });
+				avatarUrl = res.data.url;
 			} catch (err) {
 				toast.error('Upload failed', { description: err instanceof Error ? err.message : 'Failed to upload avatar' });
-				setIsUploadingAvatar(false);
 				return;
 			}
-			setIsUploadingAvatar(false);
 		}
 
 		updateProfile(
@@ -156,7 +119,8 @@ export function AccountSettingWrapper() {
 			{
 				onSuccess: () => {
 					setEditingProfile(false);
-					setAvatarFile(null);
+					setAvatarFiles([]);
+					setReplacingAvatar(false);
 				},
 			},
 		);
@@ -177,9 +141,8 @@ export function AccountSettingWrapper() {
 		.map((w: string) => w[0]?.toUpperCase() ?? '')
 		.join('');
 
-	const currentAvatar = avatarPreview ?? user?.avatar_url ?? null;
 	const adminRole = user?.roles?.find((r) => r.is_admin);
-	const isSavingProfile = updatingProfile || isUploadingAvatar;
+	const isSavingProfile = updatingProfile || uploadImageMutation.isPending;
 
 	if (isLoading) return (
 		<>
@@ -202,31 +165,12 @@ export function AccountSettingWrapper() {
 			<div className="space-y-6">
 				{/* Avatar + identity */}
 				<div className="flex items-center gap-4">
-					<div className="relative shrink-0">
-						<div className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background text-lg font-bold overflow-hidden">
-							{currentAvatar ? (
-								<Image src={currentAvatar} alt="Avatar" fill className="object-cover rounded-full" />
-							) : (
-								initials || <User className="size-5" />
-							)}
-						</div>
-						{editingProfile && (
-							<button
-								type="button"
-								onClick={() => avatarInputRef.current?.click()}
-								disabled={isSavingProfile}
-								className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-background hover:bg-foreground/80 transition-colors disabled:opacity-50"
-							>
-								{isUploadingAvatar ? <Loader2 className="size-3 animate-spin" /> : <Camera className="size-3" />}
-							</button>
+					<div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-foreground text-background text-lg font-bold overflow-hidden relative">
+						{user?.avatar_url ? (
+							<Image src={user.avatar_url} alt="Avatar" fill className="object-cover rounded-full" />
+						) : (
+							initials || <User className="size-5" />
 						)}
-						<input
-							ref={avatarInputRef}
-							type="file"
-							accept="image/*"
-							className="sr-only"
-							onChange={handleAvatarChange}
-						/>
 					</div>
 
 					<div>
@@ -241,9 +185,6 @@ export function AccountSettingWrapper() {
 							)}
 						</div>
 						<p className="text-sm text-muted-foreground">{user?.email}</p>
-						{avatarFile && !isUploadingAvatar && (
-							<p className="text-xs text-muted-foreground mt-0.5">New photo selected — will be uploaded on Save</p>
-						)}
 					</div>
 				</div>
 
@@ -267,6 +208,35 @@ export function AccountSettingWrapper() {
 						{editingProfile ? (
 							<Form {...profileForm}>
 								<form onSubmit={profileForm.handleSubmit(onSubmitProfile)} className="space-y-4">
+									<div className="grid gap-2">
+										<FormLabel>Avatar</FormLabel>
+										{user?.avatar_url && !replacingAvatar && avatarFiles.length === 0 ? (
+											<div className="relative h-20 w-20">
+												<div className="h-20 w-20 overflow-hidden rounded-full ring-1 ring-border relative">
+													<Image src={user.avatar_url} alt="Avatar" fill className="object-cover" />
+												</div>
+												<button
+													type="button"
+													onClick={() => setReplacingAvatar(true)}
+													disabled={isSavingProfile}
+													className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-background hover:bg-foreground/80 transition-colors disabled:opacity-50"
+												>
+													<X className="size-3.5" />
+												</button>
+											</div>
+										) : (
+											<FileUpload
+												compact
+												compactShape="circle"
+												compactSize={80}
+												accept="image/*"
+												maxSize={5 * 1024 * 1024}
+												value={avatarFiles}
+												onChange={setAvatarFiles}
+												disabled={isSavingProfile}
+											/>
+										)}
+									</div>
 									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<FormField control={profileForm.control} name="name" render={({ field }) => (
 											<FormItem>
@@ -289,8 +259,8 @@ export function AccountSettingWrapper() {
 											onClick={() => {
 												profileForm.reset();
 												setEditingProfile(false);
-												setAvatarFile(null);
-												setAvatarPreview(null);
+												setAvatarFiles([]);
+												setReplacingAvatar(false);
 											}}
 											disabled={isSavingProfile}
 										>

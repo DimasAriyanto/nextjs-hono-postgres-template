@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Building2, Contact, Globe2, HelpCircle, ImagePlus, Loader2, Palette, Scale } from 'lucide-react';
+import { Building2, Contact, Globe2, HelpCircle, Loader2, Palette, Scale, X } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FileUpload } from '@/components/ui/file-upload';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SocialLinksInput } from '@/components/social-links-input';
 import { PhoneInput } from '@/components/ui/phone-input';
@@ -20,23 +21,9 @@ import { FaqInput } from '@/components/faq-input';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { PageHeader } from '@/components/page-header';
 import { useSettings, useUpdateSettings } from '@/features/setting/hooks/use-setting';
+import { useUploadImage } from '@/features/upload/hooks/use-upload';
 import { LOCALE_OPTIONS, setAppCurrency, setAppLocale, setAppTimezone } from '@/libs/dayjs';
 import { updateSettingSchema, type TUpdateSettingRequest } from '@/contracts';
-
-// ─── Upload helper ─────────────────────────────────────────────────────────────
-
-async function uploadLogo(file: File): Promise<string> {
-	const fd = new FormData();
-	fd.append('file', file);
-	fd.append('folder', 'settings');
-	const res = await fetch('/api/v1/uploads/image', { method: 'POST', body: fd });
-	if (!res.ok) {
-		const json = await res.json() as { message?: string };
-		throw new Error(json.message ?? 'Failed to upload logo');
-	}
-	const json = await res.json() as { data: { url: string } };
-	return json.data.url;
-}
 
 // ─── Timezone options ───────────────────────────────────────────────────────────
 
@@ -93,13 +80,11 @@ export function SettingWrapper() {
 	const { data: settingsRes, isLoading } = useSettings();
 	const settings = settingsRes?.data;
 
-	const [logoFile, setLogoFile] = useState<File | null>(null);
-	const [localLogoPreview, setLocalLogoPreview] = useState<string | null>(null);
-	const [isUploadingLogo, setIsUploadingLogo] = useState(false);
-	const logoInputRef = useRef<HTMLInputElement>(null);
-	const logoPreview = localLogoPreview ?? settings?.logo_url ?? null;
+	const [logoFiles, setLogoFiles] = useState<File[]>([]);
+	const [replacingLogo, setReplacingLogo] = useState(false);
 
 	const updateMutation = useUpdateSettings();
+	const uploadImageMutation = useUploadImage();
 
 	const form = useForm<TUpdateSettingRequest>({
 		resolver: zodResolver(updateSettingSchema),
@@ -130,47 +115,25 @@ export function SettingWrapper() {
 		if (settings?.currency) setAppCurrency(settings.currency);
 	}, [settings?.timezone, settings?.locale, settings?.currency]);
 
-	const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
-
-		if (!file.type.startsWith('image/')) {
-			toast.error('Invalid file', { description: 'Please select an image file' });
-			return;
-		}
-		if (file.size > 5 * 1024 * 1024) {
-			toast.error('File too large', { description: 'Image must be less than 5 MB' });
-			return;
-		}
-
-		setLogoFile(file);
-		const reader = new FileReader();
-		reader.onloadend = () => setLocalLogoPreview(reader.result as string);
-		reader.readAsDataURL(file);
-		e.target.value = '';
-	};
-
 	const onSubmit = async (values: TUpdateSettingRequest) => {
 		let logoUrl = values.logo_url;
 
-		if (logoFile) {
-			setIsUploadingLogo(true);
+		if (logoFiles[0]) {
 			try {
-				logoUrl = await uploadLogo(logoFile);
+				const res = await uploadImageMutation.mutateAsync({ file: logoFiles[0], folder: 'settings' });
+				logoUrl = res.data.url;
 			} catch (err) {
 				toast.error('Upload failed', { description: err instanceof Error ? err.message : 'Failed to upload logo' });
-				setIsUploadingLogo(false);
 				return;
 			}
-			setIsUploadingLogo(false);
 		}
 
 		updateMutation.mutate(
 			{ ...values, logo_url: logoUrl },
 			{
 				onSuccess: () => {
-					setLogoFile(null);
-					setLocalLogoPreview(null);
+					setLogoFiles([]);
+					setReplacingLogo(false);
 					toast.success('Settings updated', { description: 'Your settings have been updated successfully.' });
 				},
 				onError: (err) => toast.error('Failed to update settings', { description: err.message }),
@@ -178,7 +141,7 @@ export function SettingWrapper() {
 		);
 	};
 
-	const isSaving = updateMutation.isPending || isUploadingLogo;
+	const isSaving = updateMutation.isPending || uploadImageMutation.isPending;
 
 	if (isLoading) {
 		return (
@@ -221,26 +184,32 @@ export function SettingWrapper() {
 								<CardContent className="pt-6 space-y-4">
 									<div className="grid gap-2">
 										<FormLabel>Logo</FormLabel>
-										{logoPreview ? (
-											<div className="relative h-24 w-24 overflow-hidden rounded-md ring-1 ring-border bg-muted">
-												<Image src={logoPreview} alt="Logo" fill className="object-contain" />
+										{settings?.logo_url && !replacingLogo && logoFiles.length === 0 ? (
+											<div className="relative h-24 w-24">
+												<div className="h-24 w-24 overflow-hidden rounded-md ring-1 ring-border bg-muted relative">
+													<Image src={settings.logo_url} alt="Logo" fill className="object-contain" />
+												</div>
+												<button
+													type="button"
+													onClick={() => setReplacingLogo(true)}
+													disabled={isSaving}
+													className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-background hover:bg-foreground/80 transition-colors disabled:opacity-50"
+												>
+													<X className="size-3.5" />
+												</button>
 											</div>
 										) : (
-											<button
-												type="button"
-												onClick={() => logoInputRef.current?.click()}
+											<FileUpload
+												compact
+												compactShape="square"
+												compactSize={96}
+												accept="image/*"
+												maxSize={5 * 1024 * 1024}
+												value={logoFiles}
+												onChange={setLogoFiles}
 												disabled={isSaving}
-												className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-input text-muted-foreground hover:bg-muted/50 transition-colors disabled:opacity-50"
-											>
-												{isUploadingLogo ? <Loader2 className="size-5 animate-spin" /> : <ImagePlus className="size-5" />}
-											</button>
+											/>
 										)}
-										<div>
-											<Button type="button" variant="outline" size="sm" onClick={() => logoInputRef.current?.click()} disabled={isSaving}>
-												{logoPreview ? 'Change Logo' : 'Upload Logo'}
-											</Button>
-										</div>
-										<input ref={logoInputRef} type="file" accept="image/*" className="sr-only" onChange={handleLogoChange} />
 									</div>
 
 									<FormField control={form.control} name="app_name" render={({ field }) => (
@@ -446,7 +415,7 @@ export function SettingWrapper() {
 					<div className="flex justify-end">
 						<Button type="submit" size="sm" disabled={isSaving}>
 							{isSaving
-								? <><Loader2 className="size-4 mr-1.5 animate-spin" />{isUploadingLogo ? 'Uploading...' : 'Saving...'}</>
+								? <><Loader2 className="size-4 mr-1.5 animate-spin" />{uploadImageMutation.isPending ? 'Uploading...' : 'Saving...'}</>
 								: 'Save Changes'
 							}
 						</Button>

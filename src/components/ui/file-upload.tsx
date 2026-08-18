@@ -88,6 +88,24 @@ export interface FileUploadProps {
   compressQuality?: number;
   /** Max width/height in px before resizing (default 1920). Only used when compress=true */
   compressMaxDimension?: number;
+  /**
+   * Render a fixed-size single-image picker instead of the full-width bar +
+   * file-list — suited to a single avatar/logo/thumbnail. Implies
+   * single-file behavior regardless of `multiple`.
+   */
+  compact?: boolean;
+  /**
+   * Shape of the compact box (default 'square'). 'rect' spans the full
+   * container width with a fixed height — good for a banner-style
+   * thumbnail; 'square'/'circle' are fixed width and height.
+   */
+  compactShape?: 'square' | 'circle' | 'rect';
+  /**
+   * Size in px of the compact box, only used when compact=true (default 96).
+   * For 'square'/'circle' this is both width and height; for 'rect' it's
+   * just the height (width is always 100%).
+   */
+  compactSize?: number;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -107,6 +125,9 @@ export function FileUpload({
   compress = false,
   compressQuality = 0.8,
   compressMaxDimension = 1920,
+  compact = false,
+  compactShape = 'square',
+  compactSize = 96,
 }: FileUploadProps) {
   const isControlled = value !== undefined;
   const [internalFiles, setInternalFiles] = React.useState<File[]>([]);
@@ -115,38 +136,41 @@ export function FileUpload({
   const [isCompressing, setIsCompressing] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Stable map: File → objectURL (created once per File instance).
-  // Held via useState (never replaced through its setter) rather than useRef,
-  // since reading/writing a ref's `current` during render is disallowed.
-  const [previews] = React.useState<Map<File, string>>(() => new Map());
+  const files = isControlled ? value : internalFiles;
 
+  // File → objectURL, kept in sync with `files`. Recomputed during render
+  // (mirroring the `files` prop/state it derives from) rather than in an
+  // effect, so the preview for a newly added file is available immediately.
+  const [previews, setPreviews] = React.useState<Map<File, string>>(() => new Map());
+  const [previewedFiles, setPreviewedFiles] = React.useState(files);
+  if (files !== previewedFiles) {
+    setPreviewedFiles(files);
+    setPreviews((prev) => {
+      let changed = false;
+      const next = new Map(prev);
+      for (const [file, url] of next) {
+        if (!files.includes(file)) {
+          URL.revokeObjectURL(url);
+          next.delete(file);
+          changed = true;
+        }
+      }
+      for (const file of files) {
+        if (file.type.startsWith('image/') && !next.has(file)) {
+          next.set(file, URL.createObjectURL(file));
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }
+
+  // Revoke whatever's left when the component unmounts
   React.useEffect(() => {
     return () => {
       previews.forEach((url) => URL.revokeObjectURL(url));
-      previews.clear();
     };
   }, [previews]);
-
-  // When controlled value resets to [] — clear previews
-  const prevLengthRef = React.useRef(0);
-  React.useEffect(() => {
-    const len = isControlled ? value.length : internalFiles.length;
-    if (isControlled && value.length === 0 && prevLengthRef.current > 0) {
-      previews.forEach((url) => URL.revokeObjectURL(url));
-      previews.clear();
-    }
-    prevLengthRef.current = len;
-  }, [isControlled, value, internalFiles.length, previews]);
-
-  const files = isControlled ? value : internalFiles;
-
-  function getPreview(file: File): string | undefined {
-    if (!file.type.startsWith('image/')) return undefined;
-    if (!previews.has(file)) {
-      previews.set(file, URL.createObjectURL(file));
-    }
-    return previews.get(file);
-  }
 
   function validateFile(file: File): string | null {
     if (maxSize && file.size > maxSize) {
@@ -198,13 +222,15 @@ export function FileUpload({
       ? [...files, ...processed].slice(0, maxFiles)
       : [processed[0]];
 
+    if (multiple && files.length + processed.length > maxFiles) {
+      setFieldError(`Only ${maxFiles} file(s) allowed — extra file(s) were not added.`);
+    }
+
     if (!isControlled) setInternalFiles(next);
     onChange?.(next);
   }
 
   function removeFile(target: File) {
-    const preview = previews.get(target);
-    if (preview) { URL.revokeObjectURL(preview); previews.delete(target); }
     const next = files.filter((f) => f !== target);
     if (!isControlled) setInternalFiles(next);
     onChange?.(next);
@@ -216,6 +242,113 @@ export function FileUpload({
   const canAddMore = multiple ? files.length < maxFiles : files.length === 0;
   const isDisabled = disabled || isCompressing;
 
+  function openPicker() {
+    if (!isDisabled) inputRef.current?.click();
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if ((e.key === 'Enter' || e.key === ' ') && !isDisabled) {
+      e.preventDefault();
+      openPicker();
+    }
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    if (!isDisabled) setIsDragging(true);
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
+    if (!isDisabled) processFiles(Array.from(e.dataTransfer.files));
+  }
+
+  const hiddenInput = (
+    <input
+      ref={inputRef}
+      type="file"
+      className="sr-only"
+      accept={accept}
+      multiple={multiple}
+      disabled={isDisabled}
+      onChange={(e) => {
+        if (e.target.files) processFiles(Array.from(e.target.files));
+        e.target.value = '';
+      }}
+    />
+  );
+
+  // ── Compact single-image picker (avatar, logo, banner thumbnail, …) ──
+  if (compact) {
+    const file = files[0];
+    const preview = file ? previews.get(file) : undefined;
+    const isRect = compactShape === 'rect';
+    const shapeClass = compactShape === 'circle' ? 'rounded-full' : 'rounded-md';
+    const boxStyle = isRect ? { width: '100%', height: compactSize } : { width: compactSize, height: compactSize };
+    const iconSize = isRect ? 'size-6' : 'size-5';
+
+    return (
+      <div className={cn('space-y-1.5', className)}>
+        <div className="relative" style={boxStyle}>
+          {file ? (
+            <>
+              <div className={cn('h-full w-full overflow-hidden bg-muted ring-1 ring-border', shapeClass)}>
+                {preview ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- blob: preview URL, next/image can't optimize it
+                  <img src={preview} alt={file.name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <FileText className="size-5 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+              {!disabled && (
+                <button
+                  type="button"
+                  onClick={() => removeFile(file)}
+                  className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-background transition-colors hover:bg-foreground/80"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
+            </>
+          ) : (
+            <div
+              role="button"
+              tabIndex={isDisabled ? -1 : 0}
+              aria-label={label ?? 'Upload file'}
+              onClick={openPicker}
+              onKeyDown={handleKeyDown}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={cn(
+                'flex h-full w-full flex-col items-center justify-center gap-1 border-2 border-dashed text-muted-foreground cursor-pointer transition-colors select-none',
+                shapeClass,
+                isDragging
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-primary/50 hover:bg-muted/40',
+                isDisabled && 'pointer-events-none opacity-50',
+                displayError && 'border-destructive'
+              )}
+            >
+              {isCompressing ? <Loader2 className={cn(iconSize, 'animate-spin')} /> : <UploadCloud className={iconSize} />}
+              {isRect && <span className="text-xs">{description ?? 'Click to upload image'}</span>}
+            </div>
+          )}
+          {hiddenInput}
+        </div>
+        {displayError && <p className="text-xs text-destructive">{displayError}</p>}
+      </div>
+    );
+  }
+
   return (
     <div className={cn('space-y-2', className)}>
       {/* ── Drop zone — only shown when more files can be added ── */}
@@ -224,15 +357,11 @@ export function FileUpload({
           role="button"
           tabIndex={isDisabled ? -1 : 0}
           aria-label={label ?? 'Upload file'}
-          onClick={() => !isDisabled && inputRef.current?.click()}
-          onKeyDown={(e) => e.key === 'Enter' && !isDisabled && inputRef.current?.click()}
-          onDragOver={(e) => { e.preventDefault(); if (!isDisabled) setIsDragging(true); }}
-          onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
-          onDrop={(e) => {
-            e.preventDefault();
-            setIsDragging(false);
-            if (!isDisabled) processFiles(Array.from(e.dataTransfer.files));
-          }}
+          onClick={openPicker}
+          onKeyDown={handleKeyDown}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
           className={cn(
             'flex items-center justify-center gap-2.5 rounded-lg border-2 border-dashed px-4 py-3.5 text-sm cursor-pointer transition-colors select-none',
             isDragging
@@ -264,18 +393,7 @@ export function FileUpload({
               </span>
             </>
           )}
-          <input
-            ref={inputRef}
-            type="file"
-            className="sr-only"
-            accept={accept}
-            multiple={multiple}
-            disabled={isDisabled}
-            onChange={(e) => {
-              if (e.target.files) processFiles(Array.from(e.target.files));
-              e.target.value = '';
-            }}
-          />
+          {hiddenInput}
         </div>
       )}
 
@@ -288,7 +406,7 @@ export function FileUpload({
       {files.length > 0 && (
         <div className="space-y-1.5">
           {files.map((file, i) => {
-            const preview = getPreview(file);
+            const preview = previews.get(file);
             return (
               <div
                 key={`${file.name}-${file.size}-${i}`}
