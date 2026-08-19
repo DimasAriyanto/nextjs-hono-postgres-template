@@ -49,7 +49,7 @@ export function BannerSection({ banners }: BannerSectionProps) {
 				<CarouselContent className="ml-0">
 					{banners.map((banner, index) => (
 						<CarouselItem key={index} className="pl-0">
-							<div className="relative h-[320px] w-full overflow-hidden sm:h-[420px] md:h-[520px]">
+							<div className="relative h-[320px] w-full overflow-hidden sm:h-[420px] md:h-[520px] xl:h-[600px]">
 								<Image
 									src={banner.image_url}
 									alt={banner.title || 'Banner'}

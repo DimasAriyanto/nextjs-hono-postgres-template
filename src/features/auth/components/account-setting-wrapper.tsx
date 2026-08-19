@@ -276,7 +276,7 @@ export function AccountSettingWrapper() {
 								</form>
 							</Form>
 						) : (
-							<div className="grid grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 								<InfoRow label="Name" value={user?.name} />
 								<InfoRow label="Email" value={user?.email} />
 								<InfoRow label="Email Verified" value={user?.email_verified ? 'Verified' : 'Not verified'} />
@@ -358,7 +358,7 @@ export function AccountSettingWrapper() {
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="grid grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 							<InfoRow
 								label="Created"
 								value={user?.created_at ? formatTZ(user.created_at, 'D MMMM YYYY') : undefined}
