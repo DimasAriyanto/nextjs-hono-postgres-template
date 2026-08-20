@@ -1,27 +1,6 @@
 import type { Context } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
-
-/**
- * Pagination metadata
- */
-export interface PaginationMeta {
-	page: number;
-	limit: number;
-	total: number;
-	totalPages: number;
-}
-
-/**
- * Standard API response structure
- */
-export interface ApiSuccessResponse<T = unknown> {
-	success: true;
-	message: string;
-	data: T;
-	meta?: {
-		pagination?: PaginationMeta;
-	};
-}
+import type { PaginationMeta, ApiSuccessResponse } from '@/types/api-response';
 
 /**
  * Response helper for controllers

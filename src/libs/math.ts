@@ -50,33 +50,6 @@ export const calculateRemaining = (total: number, paid: number): number => {
 };
 
 /**
- * Generate random OTP
- */
-export const generateOTP = (length = 6): string => {
-  const digits = '0123456789';
-  let otp = '';
-  for (let i = 0; i < length; i++) {
-    otp += digits[Math.floor(Math.random() * digits.length)];
-  }
-  return otp;
-};
-
-/**
- * Round to nearest decimal places
- */
-export const roundTo = (value: number, decimals = 2): number => {
-  const multiplier = Math.pow(10, decimals);
-  return Math.round(value * multiplier) / multiplier;
-};
-
-/**
- * Clamp value between min and max
- */
-export const clamp = (value: number, min: number, max: number): number => {
-  return Math.min(max, Math.max(min, value));
-};
-
-/**
  * Calculate availability percentage
  */
 export const calculateAvailabilityRate = (totalDays: number, rentedDays: number): number => {

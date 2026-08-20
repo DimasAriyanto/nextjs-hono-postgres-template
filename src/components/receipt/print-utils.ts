@@ -1,7 +1,7 @@
 import { ReceiptProps } from './receipt';
 import { InvoiceProps } from '../invoice';
 import { formatCurrency } from '@/libs/currency';
-import { formatTZ, getAppCurrency, getAppLocale } from '@/libs/dayjs';
+import { formatTZ } from '@/libs/dayjs';
 
 export function printReceipt(receiptData: ReceiptProps) {
   const printWindow = window.open('', '_blank');
@@ -248,15 +248,6 @@ export function printReceipt(receiptData: ReceiptProps) {
         </div>
 
         <script>
-          function formatCurrency(amount) {
-            return new Intl.NumberFormat(${JSON.stringify(getAppLocale())}, {
-              style: 'currency',
-              currency: ${JSON.stringify(getAppCurrency())},
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0
-            }).format(amount);
-          }
-
           // Auto print when page loads
           window.onload = function() {
             setTimeout(function() {
