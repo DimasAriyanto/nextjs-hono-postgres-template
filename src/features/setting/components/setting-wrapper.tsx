@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Building2, Contact, GalleryHorizontal, Globe2, HelpCircle, Loader2, Palette, Scale, X } from 'lucide-react';
+import { Building2, Contact, GalleryHorizontal, Globe2, HelpCircle, Info, Loader2, Palette, Scale, X } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -94,6 +94,7 @@ export function SettingWrapper() {
 			app_name: '',
 			description: '',
 			logo_url: '',
+			about_content: '',
 			contact_email: '',
 			contact_phone: '',
 			address: '',
@@ -114,6 +115,7 @@ export function SettingWrapper() {
 				app_name: settings.app_name,
 				description: settings.description ?? '',
 				logo_url: settings.logo_url ?? '',
+				about_content: settings.about_content ?? '',
 				contact_email: settings.contact_email ?? '',
 				contact_phone: settings.contact_phone ?? '',
 				address: settings.address ?? '',
@@ -195,6 +197,7 @@ export function SettingWrapper() {
 					<Tabs defaultValue="general">
 						<TabsList>
 							<TabsTrigger value="general"><Building2 className="size-3.5 mr-1.5" />General</TabsTrigger>
+							<TabsTrigger value="about"><Info className="size-3.5 mr-1.5" />About</TabsTrigger>
 							<TabsTrigger value="contact"><Contact className="size-3.5 mr-1.5" />Contact</TabsTrigger>
 							<TabsTrigger value="regional"><Globe2 className="size-3.5 mr-1.5" />Regional</TabsTrigger>
 							<TabsTrigger value="appearance"><Palette className="size-3.5 mr-1.5" />Appearance</TabsTrigger>
@@ -249,6 +252,21 @@ export function SettingWrapper() {
 										<FormItem>
 											<FormLabel>Description</FormLabel>
 											<FormControl><Textarea {...field} placeholder="Short description of your application" disabled={isSaving} rows={3} /></FormControl>
+											<FormMessage />
+										</FormItem>
+									)} />
+								</CardContent>
+							</Card>
+						</TabsContent>
+
+						{/* ── About ── */}
+						<TabsContent value="about">
+							<Card>
+								<CardContent className="pt-6 space-y-4">
+									<FormField control={form.control} name="about_content" render={({ field }) => (
+										<FormItem>
+											<FormLabel>About Us</FormLabel>
+											<RichTextEditor content={field.value ?? ''} onChange={field.onChange} placeholder="Tell visitors about your company..." />
 											<FormMessage />
 										</FormItem>
 									)} />

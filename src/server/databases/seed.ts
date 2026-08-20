@@ -117,6 +117,21 @@ export async function seed() {
 		},
 	];
 
+	const aboutContentHtml = `
+<h2>Who We Are</h2>
+<p>We're a small team building tools that help businesses launch faster without reinventing the basics. This application started as an internal starter kit and grew into a product we're proud to share.</p>
+<h2>Our Mission</h2>
+<p>We believe teams should spend their time solving problems unique to their business — not rebuilding authentication, admin panels, and content management from scratch every time. Our mission is to give you a solid, production-ready foundation so you can focus on what makes your product different.</p>
+<h2>What We Value</h2>
+<ul>
+<li><strong>Simplicity</strong> — clear, predictable code over clever abstractions.</li>
+<li><strong>Reliability</strong> — every feature is built to be dependable in production, not just a demo.</li>
+<li><strong>Transparency</strong> — no hidden magic; you can read and understand every part of the stack.</li>
+</ul>
+<h2>Get in Touch</h2>
+<p>Have questions about what we do or how we can help? Visit our <a href="/contact">contact page</a> — we'd love to hear from you.</p>
+`.trim();
+
 	const termsOfServiceHtml = `
 <h2>1. Acceptance of Terms</h2>
 <p>By accessing or using this application, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, please do not use the application.</p>
@@ -182,6 +197,7 @@ export async function seed() {
 
 	const settingsSeed: { key: string; value: unknown }[] = [
 		{ key: SETTING_KEYS.FAQS, value: faqs },
+		{ key: SETTING_KEYS.ABOUT_CONTENT, value: aboutContentHtml },
 		{ key: SETTING_KEYS.TERMS_OF_SERVICE, value: termsOfServiceHtml },
 		{ key: SETTING_KEYS.PRIVACY_POLICY, value: privacyPolicyHtml },
 		{ key: SETTING_KEYS.BANNERS, value: banners },

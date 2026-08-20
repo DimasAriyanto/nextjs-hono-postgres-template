@@ -3,7 +3,7 @@ import type { TSetting } from '@/contracts';
 
 interface LegalPageWrapperProps {
 	title: string;
-	field: Extract<keyof TSetting, 'terms_of_service' | 'privacy_policy'>;
+	field: Extract<keyof TSetting, 'terms_of_service' | 'privacy_policy' | 'about_content'>;
 }
 
 export async function LegalPageWrapper({ title, field }: LegalPageWrapperProps) {
