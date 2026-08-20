@@ -90,6 +90,12 @@ export function useLogout() {
 export function useResendVerification() {
 	return useMutation({
 		mutationFn: authApi.resendVerification,
+		onSuccess: () => {
+			toast.success('Verification email sent', { description: 'Please check your inbox for the verification link.' });
+		},
+		onError: (error: Error) => {
+			toast.error('Failed to send verification email', { description: error.message });
+		},
 	});
 }
 

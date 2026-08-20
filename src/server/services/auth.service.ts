@@ -431,6 +431,9 @@ export class AuthService {
 		await userRepository.update(user.id, { password: hashedPassword });
 		await userRepository.updateForgotPasswordToken(user.id, null, null);
 
+		// Force re-login everywhere — a password reset likely means the old password was compromised
+		await refreshTokenRepository.revokeAllForUser(user.id);
+
 		return { message: 'Password has been reset successfully' };
 	}
 

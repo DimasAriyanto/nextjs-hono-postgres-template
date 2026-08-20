@@ -1,7 +1,7 @@
 import { Context } from 'hono';
 import { setSignedCookie, getSignedCookie, deleteCookie } from 'hono/cookie';
 import { authService } from '@/server/services';
-import { AuthError, ValidationError } from '@/server/errors';
+import { AuthError } from '@/server/errors';
 import { response } from '@/server/http/response';
 
 export const authController = {
@@ -59,20 +59,29 @@ export const authController = {
 
 	/**
 	 * GET /auths/verify-email
-	 * Verify email with token
+	 * Verify email with token — redirects to /email-verified with a status so the
+	 * frontend can show a friendly message instead of a raw JSON error response.
 	 */
 	async verifyEmail(c: Context) {
 		const token = c.req.query('token');
+		const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 		if (!token) {
-			throw new ValidationError('Verification token is required', { token: ['Token is required'] });
+			return c.redirect(`${appUrl}/email-verified?status=invalid`);
 		}
 
-		await authService.verifyEmail(token);
-
-		// Redirect to success page
-		const redirectUrl = process.env.NEXT_PUBLIC_APP_URL + '/email-verified';
-		return c.redirect(redirectUrl);
+		try {
+			await authService.verifyEmail(token);
+			return c.redirect(`${appUrl}/email-verified?status=success`);
+		} catch (err) {
+			if (err instanceof AuthError && err.code === 'AUTH_TOKEN_EXPIRED') {
+				return c.redirect(`${appUrl}/email-verified?status=expired`);
+			}
+			if (err instanceof AuthError && err.code === 'AUTH_EMAIL_ALREADY_VERIFIED') {
+				return c.redirect(`${appUrl}/email-verified?status=already-verified`);
+			}
+			return c.redirect(`${appUrl}/email-verified?status=invalid`);
+		}
 	},
 
 	/**

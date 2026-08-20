@@ -18,7 +18,7 @@ import { FileUpload } from '@/components/ui/file-upload';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/page-header';
-import { useProfile, useUpdateProfile, useChangePassword } from '@/features/auth/hooks/use-auth';
+import { useProfile, useUpdateProfile, useChangePassword, useResendVerification } from '@/features/auth/hooks/use-auth';
 import { useUploadImage } from '@/features/upload/hooks/use-upload';
 import { formatTZ } from '@/libs/dayjs';
 import { changePasswordSchema } from '@/contracts';
@@ -83,6 +83,7 @@ export function AccountSettingWrapper() {
 
 	const { mutate: updateProfile, isPending: updatingProfile } = useUpdateProfile();
 	const { mutate: changePassword, isPending: changingPassword } = useChangePassword();
+	const { mutate: resendVerification, isPending: resendingVerification } = useResendVerification();
 	const uploadImageMutation = useUploadImage();
 
 	const profileForm = useForm<TProfileEdit>({
@@ -177,14 +178,33 @@ export function AccountSettingWrapper() {
 						<div className="flex items-center gap-2 flex-wrap">
 							<h2 className="text-lg font-bold">{user?.name || user?.email}</h2>
 							{adminRole && <Badge variant="default">Admin</Badge>}
-							{user?.email_verified && (
+							{user?.email_verified ? (
 								<Badge variant="secondary" className="flex items-center gap-1">
 									<BadgeCheck className="size-3" />
 									Verified
 								</Badge>
+							) : (
+								user && (
+									<Badge variant="outline" className="flex items-center gap-1 border-amber-600/30 text-amber-600">
+										<Mail className="size-3" />
+										Not verified
+									</Badge>
+								)
 							)}
 						</div>
 						<p className="text-sm text-muted-foreground">{user?.email}</p>
+						{user && !user.email_verified && (
+							<Button
+								type="button"
+								variant="link"
+								size="sm"
+								className="h-auto p-0 text-xs"
+								disabled={resendingVerification}
+								onClick={() => resendVerification()}
+							>
+								{resendingVerification ? 'Sending...' : 'Resend verification email'}
+							</Button>
+						)}
 					</div>
 				</div>
 
