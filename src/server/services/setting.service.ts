@@ -1,5 +1,17 @@
 import { settingRepository } from '@/server/repositories';
-import { SETTING_KEYS, SETTING_KEY_GROUP_MAP, type TBannerItem, type TFaqItem, type TSetting, type TSocialLink, type TUpdateSettingRequest } from '@/contracts/setting';
+import { extractMapsEmbedUrl, SETTING_KEYS, SETTING_KEY_GROUP_MAP, WEEKDAYS, type TBannerItem, type TBusinessHour, type TFaqItem, type TSetting, type TSocialLink, type TUpdateSettingRequest } from '@/contracts/setting';
+
+/**
+ * Fill in any weekday missing from a partially-configured business hours list (defaulting to
+ * open 09:00–18:00), and return all 7 days sorted Monday–Sunday. An empty list — business hours
+ * never configured at all — is left as-is so the section can stay hidden on the public page.
+ */
+function normalizeBusinessHours(rows: TBusinessHour[]): TBusinessHour[] {
+	if (rows.length === 0) return rows;
+	return WEEKDAYS.map(
+		(day) => rows.find((row) => row.day === day) ?? { day, is_closed: false, open_time: '09:00', close_time: '18:00' },
+	);
+}
 
 const DEFAULTS: TSetting = {
 	app_name: process.env.APP_NAME || 'My App',
@@ -9,6 +21,8 @@ const DEFAULTS: TSetting = {
 	contact_phone: null,
 	address: null,
 	social_links: [],
+	maps_url: null,
+	business_hours: [],
 	timezone: 'Asia/Jakarta',
 	locale: 'en-US',
 	currency: 'IDR',
@@ -35,6 +49,8 @@ export class SettingService {
 			contact_phone: (byKey.get(SETTING_KEYS.CONTACT_PHONE) as string | undefined) ?? DEFAULTS.contact_phone,
 			address: (byKey.get(SETTING_KEYS.ADDRESS) as string | undefined) ?? DEFAULTS.address,
 			social_links: (byKey.get(SETTING_KEYS.SOCIAL_LINKS) as TSocialLink[] | undefined) ?? DEFAULTS.social_links,
+			maps_url: (byKey.get(SETTING_KEYS.MAPS_URL) as string | undefined) ?? DEFAULTS.maps_url,
+			business_hours: normalizeBusinessHours((byKey.get(SETTING_KEYS.BUSINESS_HOURS) as TBusinessHour[] | undefined) ?? DEFAULTS.business_hours),
 			timezone: (byKey.get(SETTING_KEYS.TIMEZONE) as string | undefined) ?? DEFAULTS.timezone,
 			locale: (byKey.get(SETTING_KEYS.LOCALE) as string | undefined) ?? DEFAULTS.locale,
 			currency: (byKey.get(SETTING_KEYS.CURRENCY) as string | undefined) ?? DEFAULTS.currency,
@@ -54,7 +70,8 @@ export class SettingService {
 
 		for (const [key, value] of entries) {
 			if (value === undefined) continue;
-			await settingRepository.upsert(key, SETTING_KEY_GROUP_MAP[key], value, actorId);
+			const normalizedValue = key === SETTING_KEYS.MAPS_URL && typeof value === 'string' ? extractMapsEmbedUrl(value) : value;
+			await settingRepository.upsert(key, SETTING_KEY_GROUP_MAP[key], normalizedValue, actorId);
 		}
 
 		return this.getSettings();

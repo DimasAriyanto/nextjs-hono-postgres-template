@@ -27,6 +27,8 @@ export const SETTING_KEYS = {
 	CONTACT_PHONE: 'contact_phone',
 	ADDRESS: 'address',
 	SOCIAL_LINKS: 'social_links',
+	MAPS_URL: 'maps_url',
+	BUSINESS_HOURS: 'business_hours',
 	TIMEZONE: 'timezone',
 	LOCALE: 'locale',
 	CURRENCY: 'currency',
@@ -48,6 +50,8 @@ export const SETTING_KEY_GROUP_MAP: Record<TSettingKey, TSettingGroup> = {
 	[SETTING_KEYS.CONTACT_PHONE]: SETTING_GROUPS.CONTACT,
 	[SETTING_KEYS.ADDRESS]: SETTING_GROUPS.CONTACT,
 	[SETTING_KEYS.SOCIAL_LINKS]: SETTING_GROUPS.CONTACT,
+	[SETTING_KEYS.MAPS_URL]: SETTING_GROUPS.CONTACT,
+	[SETTING_KEYS.BUSINESS_HOURS]: SETTING_GROUPS.CONTACT,
 	[SETTING_KEYS.TIMEZONE]: SETTING_GROUPS.REGIONAL,
 	[SETTING_KEYS.LOCALE]: SETTING_GROUPS.REGIONAL,
 	[SETTING_KEYS.CURRENCY]: SETTING_GROUPS.REGIONAL,
@@ -91,6 +95,25 @@ export const bannerItemSchema = z.object({
 
 export type TBannerItem = z.infer<typeof bannerItemSchema>;
 
+export const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
+
+export type TWeekday = (typeof WEEKDAYS)[number];
+
+export const businessHourSchema = z.object({
+	day: z.enum(WEEKDAYS),
+	is_closed: z.boolean(),
+	open_time: z.string().optional(),
+	close_time: z.string().optional(),
+});
+
+export type TBusinessHour = z.infer<typeof businessHourSchema>;
+
+/** Accepts either a raw Maps embed URL or a full `<iframe>` snippet copy-pasted from Google Maps and returns just the URL. */
+export function extractMapsEmbedUrl(value: string): string {
+	const match = value.match(/src=["']([^"']+)["']/i);
+	return (match ? match[1] : value).trim();
+}
+
 /**
  * Update settings request schema — a partial patch over the known setting keys.
  */
@@ -102,6 +125,8 @@ export const updateSettingSchema = z.object({
 	contact_phone: z.string().optional(),
 	address: z.string().optional(),
 	social_links: z.array(socialLinkSchema).optional(),
+	maps_url: z.string().optional(),
+	business_hours: z.array(businessHourSchema).optional(),
 	timezone: z.string().optional(),
 	locale: z.string().optional(),
 	currency: z.string().optional(),
@@ -126,6 +151,8 @@ export const settingSchema = z.object({
 	contact_phone: z.string().nullable(),
 	address: z.string().nullable(),
 	social_links: z.array(socialLinkSchema),
+	maps_url: z.string().nullable(),
+	business_hours: z.array(businessHourSchema),
 	timezone: z.string(),
 	locale: z.string(),
 	currency: z.string(),

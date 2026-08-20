@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { FileUpload } from '@/components/ui/file-upload';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SocialLinksInput } from '@/components/social-links-input';
+import { BusinessHoursInput } from '@/components/business-hours-input';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { FaqInput } from '@/components/faq-input';
 import { BannerInput } from '@/components/banner-input';
@@ -97,6 +98,8 @@ export function SettingWrapper() {
 			contact_phone: '',
 			address: '',
 			social_links: [],
+			maps_url: '',
+			business_hours: [],
 			timezone: '',
 			locale: '',
 			currency: '',
@@ -115,6 +118,8 @@ export function SettingWrapper() {
 				contact_phone: settings.contact_phone ?? '',
 				address: settings.address ?? '',
 				social_links: settings.social_links,
+				maps_url: settings.maps_url ?? '',
+				business_hours: settings.business_hours,
 				timezone: settings.timezone,
 				locale: settings.locale,
 				currency: settings.currency,
@@ -254,7 +259,7 @@ export function SettingWrapper() {
 						{/* ── Contact ── */}
 						<TabsContent value="contact">
 							<Card>
-								<CardContent className="pt-6 space-y-4">
+								<CardContent className="pt-6 space-y-6">
 									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<FormField control={form.control} name="contact_email" render={({ field }) => (
 											<FormItem>
@@ -281,10 +286,31 @@ export function SettingWrapper() {
 										</FormItem>
 									)} />
 
+									<FormField control={form.control} name="maps_url" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Maps Embed URL</FormLabel>
+											<FormControl>
+												<Input {...field} placeholder="https://www.google.com/maps/embed?pb=..." disabled={isSaving} />
+											</FormControl>
+											<p className="text-sm text-muted-foreground">
+												From Google Maps: Share → Embed a map → copy the src URL.
+											</p>
+											<FormMessage />
+										</FormItem>
+									)} />
+
 									<FormField control={form.control} name="social_links" render={({ field }) => (
 										<FormItem>
 											<FormLabel>Social Media</FormLabel>
 											<SocialLinksInput value={field.value ?? []} onChange={field.onChange} />
+											<FormMessage />
+										</FormItem>
+									)} />
+
+									<FormField control={form.control} name="business_hours" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Business Hours</FormLabel>
+											<BusinessHoursInput value={field.value ?? []} onChange={field.onChange} disabled={isSaving} />
 											<FormMessage />
 										</FormItem>
 									)} />

@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import { Icon } from '@/components/icon';
-import { getSocialPlatform } from '@/components/social-links-input';
+import { getSocialPlatform } from '@/components/social-platforms';
 import type { TSetting } from '@/contracts';
 
 interface AppFooterProps {
@@ -88,6 +88,7 @@ export const AppFooter = ({ settings }: AppFooterProps) => {
 					© {year} {appName}. All rights reserved.
 				</p>
 				<div className="flex items-center gap-4 text-xs text-muted-foreground">
+					<a href="/contact" className="hover:text-foreground transition-colors">Contact Us</a>
 					<a href="/terms-of-service" className="hover:text-foreground transition-colors">Terms of Service</a>
 					<a href="/privacy-policy" className="hover:text-foreground transition-colors">Privacy Policy</a>
 				</div>
