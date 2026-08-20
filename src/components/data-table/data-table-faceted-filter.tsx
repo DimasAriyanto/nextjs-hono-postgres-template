@@ -19,9 +19,10 @@ interface DataTableFacetedFilterProps<TData extends RowData, TValue> {
 		value: string;
 		icon?: ComponentType<{ className?: string }>;
 	}[];
+	disabled?: boolean;
 }
 
-export const DataTableFacetedFilter = <TData extends RowData, TValue>({ column, paramName, title, options }: DataTableFacetedFilterProps<TData, TValue>) => {
+export const DataTableFacetedFilter = <TData extends RowData, TValue>({ column, paramName, title, options, disabled }: DataTableFacetedFilterProps<TData, TValue>) => {
 	// Server-side filtering with nuqs
 	const [serverValue, setServerValue] = useQueryState(
 		paramName || 'filter',
@@ -42,7 +43,7 @@ export const DataTableFacetedFilter = <TData extends RowData, TValue>({ column, 
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
-				<Button variant="outline" size="sm" className="h-8 border-dashed">
+				<Button variant="outline" size="sm" className="h-8 border-dashed" disabled={disabled}>
 					<Icon name="PlusCircle" />
 					{title}
 					{hasSelection && (

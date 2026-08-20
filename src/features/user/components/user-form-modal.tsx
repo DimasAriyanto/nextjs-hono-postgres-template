@@ -51,7 +51,7 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 	const [avatarFiles, setAvatarFiles] = useState<File[]>([]);
 	const [existingAvatarUrl, setExistingAvatarUrl] = useState<string | null>(null);
 
-	const { data: rolesData } = useRoles({ limit: 100 });
+	const { data: rolesData, isLoading: isLoadingRoles } = useRoles({ limit: 100 });
 	const roles = rolesData?.data || [];
 
 	const createMutation = useCreateUser({ onSuccess: () => onClose() });
@@ -216,10 +216,10 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 							<Select
 								value={roleId}
 								onValueChange={(value) => { setRoleId(value); if (error) setError(''); }}
-								disabled={isLoading}
+								disabled={isLoading || isLoadingRoles}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder="Select role" />
+									<SelectValue placeholder={isLoadingRoles ? 'Loading roles...' : 'Select role'} />
 								</SelectTrigger>
 								<SelectContent>
 									{roles.map((role) => (

@@ -53,7 +53,7 @@ export function UserListWrapper() {
 	const users = usersData?.data || [];
 	const total = usersData?.meta?.pagination?.total ?? 0;
 
-	const { data: rolesData } = useRoles({ limit: 100 });
+	const { data: rolesData, isLoading: isLoadingRoles } = useRoles({ limit: 100 });
 	const roleOptions = (rolesData?.data ?? []).map((role) => ({ label: role.name, value: role.id }));
 
 	const deleteMutation = useDeleteUser({
@@ -97,8 +97,8 @@ export function UserListWrapper() {
 	const UserFilter = () => (
 		<>
 			<DataTableFacetedFilter paramName="verified" title="Verified" options={USER_VERIFIED_OPTIONS} />
-			{roleOptions.length > 0 && (
-				<DataTableFacetedFilter paramName="role_id" title="Role" options={roleOptions} />
+			{(isLoadingRoles || roleOptions.length > 0) && (
+				<DataTableFacetedFilter paramName="role_id" title="Role" options={roleOptions} disabled={isLoadingRoles} />
 			)}
 		</>
 	);
