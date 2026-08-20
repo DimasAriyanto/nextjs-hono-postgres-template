@@ -6,16 +6,16 @@ import { LatestArticlesSection } from './latest-articles-section';
 import { FaqSection } from './faq-section';
 
 export function HomeWrapper() {
-	const { data: settingsRes } = useSettings();
+	const { data: settingsRes, isLoading } = useSettings();
 	const settings = settingsRes?.data;
 
 	return (
 		<>
-			<BannerSection banners={settings?.banners ?? []} />
+			<BannerSection banners={settings?.banners ?? []} isLoading={isLoading} />
 
 			<LatestArticlesSection />
 
-			<FaqSection faqs={settings?.faqs ?? []} />
+			<FaqSection faqs={settings?.faqs ?? []} isLoading={isLoading} />
 		</>
 	);
 }

@@ -2,6 +2,7 @@
 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
 	Dialog,
 	DialogContent,
@@ -67,7 +68,17 @@ export function RolePermissionsModal({ isOpen, onClose, role }: RolePermissionsM
 						This role has full access to all menus and does not use individual permissions.
 					</p>
 				) : isLoading ? (
-					<p className="py-4 text-sm text-muted-foreground">Loading...</p>
+					<div className="grid gap-3 py-4">
+						{Array.from({ length: 4 }).map((_, i) => (
+							<div key={i} className="flex items-center justify-between gap-4 border-b pb-3 last:border-0 last:pb-0">
+								<Skeleton className="h-4 w-24" />
+								<div className="flex gap-4">
+									<Skeleton className="h-4 w-16" />
+									<Skeleton className="h-4 w-16" />
+								</div>
+							</div>
+						))}
+					</div>
 				) : (
 					<div className="grid gap-3 py-4">
 						{menus.map((menu) => {

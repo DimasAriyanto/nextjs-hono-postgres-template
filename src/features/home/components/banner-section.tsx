@@ -11,6 +11,7 @@ import {
 	CarouselPrevious,
 	type CarouselApi,
 } from '@/components/ui/carousel';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { TBannerItem } from '@/contracts';
 
 const ALIGN_CLASSES: Record<NonNullable<TBannerItem['text_align']>, string> = {
@@ -21,9 +22,10 @@ const ALIGN_CLASSES: Record<NonNullable<TBannerItem['text_align']>, string> = {
 
 interface BannerSectionProps {
 	banners: TBannerItem[];
+	isLoading?: boolean;
 }
 
-export function BannerSection({ banners }: BannerSectionProps) {
+export function BannerSection({ banners, isLoading }: BannerSectionProps) {
 	const [api, setApi] = useState<CarouselApi>();
 	const [selected, setSelected] = useState(0);
 
@@ -40,6 +42,10 @@ export function BannerSection({ banners }: BannerSectionProps) {
 			api.off('select', onSelect);
 		};
 	}, [api, onSelect]);
+
+	if (isLoading) {
+		return <Skeleton className="h-[320px] w-full rounded-none sm:h-[420px] md:h-[520px] xl:h-[600px]" />;
+	}
 
 	if (banners.length === 0) return null;
 

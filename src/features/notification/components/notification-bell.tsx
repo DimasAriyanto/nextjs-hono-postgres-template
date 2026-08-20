@@ -10,6 +10,7 @@ import {
 	DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useUnreadNotifications, useMarkAsRead, useMarkAllAsRead } from '../hooks/use-notification';
 import type { TNotification, TNotificationType } from '@/contracts/notification';
 
@@ -83,7 +84,7 @@ function NotificationItem({
 // ── Notification menu ─────────────────────────────────────────────────────────
 
 export function NotificationMenu() {
-	const { data } = useUnreadNotifications();
+	const { data, isLoading } = useUnreadNotifications();
 	const { mutate: markAsRead } = useMarkAsRead();
 	const { mutate: markAllAsRead, isPending } = useMarkAllAsRead();
 
@@ -130,7 +131,19 @@ export function NotificationMenu() {
 
 				{/* List */}
 				<div className="max-h-80 overflow-y-auto">
-					{notifications.length === 0 ? (
+					{isLoading ? (
+						<div className="p-2 space-y-1">
+							{Array.from({ length: 3 }).map((_, i) => (
+								<div key={i} className="flex gap-3 p-3">
+									<Skeleton className="size-8 shrink-0 rounded-full" />
+									<div className="flex-1 space-y-2">
+										<Skeleton className="h-3.5 w-3/4" />
+										<Skeleton className="h-3 w-full" />
+									</div>
+								</div>
+							))}
+						</div>
+					) : notifications.length === 0 ? (
 						<div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
 							<Bell className="size-8 mb-2 opacity-40" />
 							<p className="text-sm">No notifications</p>
