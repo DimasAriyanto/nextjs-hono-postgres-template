@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/libs/utils';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,8 @@ import { ApiError } from '@/libs/api';
 export const RegisterWrapper = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const t = useTranslations('auth');
+	const tRegister = useTranslations('auth.register');
 
 	const {
 		register,
@@ -38,8 +41,8 @@ export const RegisterWrapper = () => {
 
 	const { mutate, isPending } = useRegister({
 		onSuccess: () => {
-			toast.success('Register successful', {
-				description: 'Your account has been created successfully.',
+			toast.success(tRegister('successTitle'), {
+				description: tRegister('successDescription'),
 			});
 		},
 		onError: (error) => {
@@ -63,15 +66,19 @@ export const RegisterWrapper = () => {
 						setError('password_confirmation', { message: confirmErrors[0] });
 					}
 				} else {
-					toast.error('Register Error', { description: error.message });
+					toast.error(tRegister('errorTitle'), { description: error.message });
 				}
 			} else {
-				toast.error('Register Error', { description: 'An error occurred during registration.' });
+				toast.error(tRegister('errorTitle'), { description: tRegister('genericError') });
 			}
 		},
 	});
 
-	const { mutate: googleAuthMutate } = useGoogleAuth();
+	const { mutate: googleAuthMutate } = useGoogleAuth({
+		onError: (error) => {
+			toast.error(t('googleErrorTitle'), { description: error.message });
+		},
+	});
 
 	const onSubmit = (values: TRegisterRequest) => {
 		mutate(values);
@@ -82,45 +89,45 @@ export const RegisterWrapper = () => {
 	};
 
 	const handleGoogleError = (error: string) => {
-		toast.error('Google Authentication Failed', { description: error });
+		toast.error(t('googleErrorTitle'), { description: error });
 	};
 
 	return (
 		<div className={cn('flex flex-col gap-6')}>
 			<Link href="/" className="flex w-fit items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
 				<ArrowLeft size={16} />
-				Back to home
+				{t('backToHome')}
 			</Link>
 			<Card className="overflow-hidden p-0">
 				<CardContent className="grid p-0 md:grid-cols-2">
 					<form className="p-6 md:p-8" onSubmit={handleSubmit(onSubmit)}>
 						<FieldGroup>
 							<div className="flex flex-col items-center gap-2 text-center">
-								<h1 className="text-2xl font-bold">Create your account</h1>
+								<h1 className="text-2xl font-bold">{tRegister('heading')}</h1>
 								<p className="text-muted-foreground text-sm text-balance">
-									Enter your details below to create your account
+									{tRegister('subtitle')}
 								</p>
 							</div>
 
 							<Field>
-								<FieldLabel htmlFor="title">Full Name</FieldLabel>
+								<FieldLabel htmlFor="title">{tRegister('fullName')}</FieldLabel>
 								<Input id="title" type="text" placeholder="John Doe" {...register('title')} />
 								<FieldError errors={[errors.title]} />
 							</Field>
 
 							<Field>
-								<FieldLabel htmlFor="email">Email</FieldLabel>
+								<FieldLabel htmlFor="email">{tRegister('email')}</FieldLabel>
 								<Input id="email" type="email" placeholder="m@example.com" {...register('email')} />
 								<FieldError errors={[errors.email]} />
 								<FieldDescription>
-									We&apos;ll use this to contact you. We will not share your email with any other.
+									{tRegister('emailHint')}
 								</FieldDescription>
 							</Field>
 
 							<Field>
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 									<Field>
-										<FieldLabel htmlFor="password">Password</FieldLabel>
+										<FieldLabel htmlFor="password">{tRegister('password')}</FieldLabel>
 										<div className="relative">
 											<Input id="password" type={showPassword ? 'text' : 'password'} className="pr-10" {...register('password')} />
 											<button
@@ -135,7 +142,7 @@ export const RegisterWrapper = () => {
 										<FieldError errors={[errors.password]} />
 									</Field>
 									<Field>
-										<FieldLabel htmlFor="password_confirmation">Confirm Password</FieldLabel>
+										<FieldLabel htmlFor="password_confirmation">{tRegister('confirmPassword')}</FieldLabel>
 										<div className="relative">
 											<Input id="password_confirmation" type={showConfirmPassword ? 'text' : 'password'} className="pr-10" {...register('password_confirmation')} />
 											<button
@@ -150,21 +157,21 @@ export const RegisterWrapper = () => {
 										<FieldError errors={[errors.password_confirmation]} />
 									</Field>
 								</div>
-								<FieldDescription>Must be at least 6 characters long.</FieldDescription>
+								<FieldDescription>{tRegister('passwordHint')}</FieldDescription>
 							</Field>
 
 							<Button type="submit" disabled={isPending} className="w-full">
-								{isPending ? 'Creating account...' : 'Create Account'}
+								{isPending ? tRegister('submitting') : tRegister('submit')}
 							</Button>
 
-							<FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">Or continue with</FieldSeparator>
+							<FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">{t('orContinueWith')}</FieldSeparator>
 
 							<GoogleAuthButton mode="register" onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
 
 							<div className="text-center text-sm">
-								Already have an account?{' '}
+								{tRegister('haveAccount')}{' '}
 								<a href="/login" className="underline underline-offset-4">
-									Sign in
+									{tRegister('signIn')}
 								</a>
 							</div>
 						</FieldGroup>
@@ -179,7 +186,10 @@ export const RegisterWrapper = () => {
 				</CardContent>
 			</Card>
 			<FieldDescription className="px-6 text-center">
-				By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+				{t.rich('termsAgreement', {
+					terms: (chunks) => <a href="/terms-of-service">{chunks}</a>,
+					privacy: (chunks) => <a href="/privacy-policy">{chunks}</a>,
+				})}
 			</FieldDescription>
 		</div>
 	);

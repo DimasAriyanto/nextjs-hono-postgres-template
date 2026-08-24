@@ -1,0 +1,172 @@
+{
+	"nav": {
+		"articles": "Artikel",
+		"login": "Masuk",
+		"register": "Daftar",
+		"dashboard": "Dasbor",
+		"logout": "Keluar",
+		"admin": "Admin",
+		"loggedInAs": "Masuk sebagai",
+		"logoutSuccessTitle": "Berhasil keluar",
+		"logoutSuccessDescription": "Anda telah berhasil keluar.",
+		"logoutErrorTitle": "Gagal keluar",
+		"logoutGenericError": "Terjadi kesalahan. Silakan coba lagi."
+	},
+	"footer": {
+		"contact": "Kontak",
+		"socialMedia": "Media Sosial",
+		"rights": "Seluruh hak cipta dilindungi.",
+		"about": "Tentang Kami",
+		"contactUs": "Hubungi Kami",
+		"terms": "Syarat & Ketentuan",
+		"privacy": "Kebijakan Privasi"
+	},
+	"home": {
+		"faqTitle": "Pertanyaan yang Sering Diajukan"
+	},
+	"banner": {
+		"goToSlide": "Ke slide {number}"
+	},
+	"contact": {
+		"title": "Hubungi Kami",
+		"haveQuestion": "Ada pertanyaan atau butuh bantuan? Berikut cara menghubungi {appName}.",
+		"email": "Email",
+		"phone": "Telepon",
+		"address": "Alamat",
+		"businessHours": "Jam Operasional",
+		"closed": "Tutup",
+		"viewOnMaps": "Lihat lokasi di Google Maps",
+		"followUs": "Ikuti kami",
+		"noContactInfo": "Informasi kontak belum ditambahkan.",
+		"days": {
+			"monday": "Senin",
+			"tuesday": "Selasa",
+			"wednesday": "Rabu",
+			"thursday": "Kamis",
+			"friday": "Jumat",
+			"saturday": "Sabtu",
+			"sunday": "Minggu"
+		}
+	},
+	"articles": {
+		"title": "Artikel",
+		"description": "Berita dan wawasan terbaru dari kami.",
+		"empty": "Belum ada artikel.",
+		"previous": "Sebelumnya",
+		"next": "Selanjutnya",
+		"page": "Halaman {page} dari {totalPages}",
+		"backToArticles": "Kembali ke Artikel",
+		"relatedArticles": "Artikel Terkait",
+		"latestArticles": "Artikel Terbaru",
+		"viewAll": "Lihat Semua"
+	},
+	"legal": {
+		"noContent": "Konten belum ditambahkan.",
+		"titles": {
+			"about_content": "Tentang Kami",
+			"terms_of_service": "Syarat & Ketentuan",
+			"privacy_policy": "Kebijakan Privasi"
+		}
+	},
+	"language": {
+		"label": "Bahasa",
+		"id": "Indonesia",
+		"en": "Inggris"
+	},
+	"auth": {
+		"backToHome": "Kembali ke beranda",
+		"orContinueWith": "Atau lanjutkan dengan",
+		"termsAgreement": "Dengan melanjutkan, Anda menyetujui <terms>Syarat & Ketentuan</terms> dan <privacy>Kebijakan Privasi</privacy> kami.",
+		"googleErrorTitle": "Autentikasi Google Gagal",
+		"login": {
+			"title": "Masuk",
+			"welcomeBack": "Selamat datang kembali",
+			"subtitle": "Masuk ke akun Anda",
+			"email": "Email",
+			"password": "Kata Sandi",
+			"forgotPassword": "Lupa kata sandi?",
+			"submit": "Masuk",
+			"submitting": "Sedang masuk...",
+			"noAccount": "Belum punya akun?",
+			"signUp": "Daftar",
+			"successTitle": "Berhasil masuk",
+			"successDescription": "Selamat datang kembali!",
+			"errorTitle": "Gagal Masuk",
+			"genericError": "Terjadi kesalahan saat masuk"
+		},
+		"register": {
+			"title": "Daftar",
+			"heading": "Buat akun Anda",
+			"subtitle": "Masukkan detail Anda di bawah untuk membuat akun",
+			"fullName": "Nama Lengkap",
+			"email": "Email",
+			"emailHint": "Kami akan menggunakan ini untuk menghubungi Anda. Email Anda tidak akan dibagikan ke pihak lain.",
+			"password": "Kata Sandi",
+			"confirmPassword": "Konfirmasi Kata Sandi",
+			"passwordHint": "Minimal 6 karakter.",
+			"submit": "Buat Akun",
+			"submitting": "Membuat akun...",
+			"haveAccount": "Sudah punya akun?",
+			"signIn": "Masuk",
+			"successTitle": "Pendaftaran berhasil",
+			"successDescription": "Akun Anda telah berhasil dibuat.",
+			"errorTitle": "Gagal Mendaftar",
+			"genericError": "Terjadi kesalahan saat mendaftar."
+		},
+		"forgotPassword": {
+			"title": "Lupa Kata Sandi",
+			"heading": "Lupa kata sandi Anda?",
+			"subtitle": "Masukkan email Anda dan kami akan mengirimkan tautan reset",
+			"email": "Email",
+			"submit": "Kirim Tautan Reset",
+			"submitting": "Mengirim...",
+			"rememberPassword": "Ingat kata sandi Anda?",
+			"signIn": "Masuk",
+			"errorTitle": "Gagal mengirim email reset",
+			"genericError": "Terjadi kesalahan, silakan coba lagi.",
+			"checkEmailHeading": "Periksa email Anda",
+			"checkEmailSubtitle": "Kami telah mengirim tautan reset ke",
+			"checkEmailExpiry": "Tautan ini akan kedaluwarsa dalam 1 jam.",
+			"backToLogin": "Kembali ke Halaman Masuk"
+		},
+		"resetPassword": {
+			"title": "Reset Kata Sandi",
+			"heading": "Reset kata sandi Anda",
+			"subtitle": "Masukkan kata sandi baru yang kuat untuk akun Anda",
+			"newPassword": "Kata Sandi Baru",
+			"confirmPassword": "Konfirmasi Kata Sandi",
+			"passwordPlaceholder": "min. 6 karakter",
+			"confirmPlaceholder": "ulangi kata sandi baru",
+			"submit": "Reset Kata Sandi",
+			"submitting": "Mereset...",
+			"rememberPassword": "Ingat kata sandi Anda?",
+			"signIn": "Masuk",
+			"successTitle": "Kata sandi berhasil direset",
+			"successDescription": "Silakan masuk dengan kata sandi baru Anda.",
+			"errorTitle": "Gagal Reset",
+			"genericError": "Terjadi kesalahan, silakan coba lagi."
+		},
+		"emailVerified": {
+			"title": "Email Terverifikasi",
+			"signIn": "Masuk",
+			"status": {
+				"success": {
+					"title": "Email terverifikasi",
+					"description": "Email Anda telah berhasil diverifikasi. Anda sekarang dapat masuk ke akun Anda."
+				},
+				"alreadyVerified": {
+					"title": "Sudah terverifikasi",
+					"description": "Alamat email ini sudah diverifikasi sebelumnya. Anda dapat masuk ke akun Anda."
+				},
+				"expired": {
+					"title": "Tautan kedaluwarsa",
+					"description": "Tautan verifikasi ini sudah kedaluwarsa. Masuk dan minta tautan baru dari pengaturan akun Anda."
+				},
+				"invalid": {
+					"title": "Tautan tidak valid",
+					"description": "Tautan verifikasi ini tidak valid. Masuk dan minta tautan baru dari pengaturan akun Anda."
+				}
+			}
+		}
+	}
+}

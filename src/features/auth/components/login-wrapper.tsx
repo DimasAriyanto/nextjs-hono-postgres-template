@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/libs/utils';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,8 @@ import { ApiError } from '@/libs/api';
 
 export const LoginWrapper = () => {
 	const [showPassword, setShowPassword] = useState(false);
+	const t = useTranslations('auth');
+	const tLogin = useTranslations('auth.login');
 
 	const {
 		register,
@@ -34,6 +37,9 @@ export const LoginWrapper = () => {
 	});
 
 	const { mutate, isPending } = useLogin({
+		onSuccess: () => {
+			toast.success(tLogin('successTitle'), { description: tLogin('successDescription') });
+		},
 		onError: (error) => {
 			if (error instanceof ApiError) {
 				if (error.isValidationError()) {
@@ -47,15 +53,19 @@ export const LoginWrapper = () => {
 						setError('password', { message: passwordErrors[0] });
 					}
 				} else {
-					toast.error('Login Error', { description: error.message });
+					toast.error(tLogin('errorTitle'), { description: error.message });
 				}
 			} else {
-				toast.error('Login Error', { description: 'An error occurred during login' });
+				toast.error(tLogin('errorTitle'), { description: tLogin('genericError') });
 			}
 		},
 	});
 
-	const { mutate: googleAuthMutate } = useGoogleAuth();
+	const { mutate: googleAuthMutate } = useGoogleAuth({
+		onError: (error) => {
+			toast.error(t('googleErrorTitle'), { description: error.message });
+		},
+	});
 
 	const onSubmit = (values: TLoginRequest) => {
 		mutate(values);
@@ -66,35 +76,35 @@ export const LoginWrapper = () => {
 	};
 
 	const handleGoogleError = (error: string) => {
-		toast.error('Google Authentication Failed', { description: error });
+		toast.error(t('googleErrorTitle'), { description: error });
 	};
 
 	return (
 		<div className={cn('flex flex-col gap-6')}>
 			<Link href="/" className="flex w-fit items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
 				<ArrowLeft size={16} />
-				Back to home
+				{t('backToHome')}
 			</Link>
 			<Card className="overflow-hidden p-0">
 				<CardContent className="grid p-0 md:grid-cols-2">
 					<form className="p-6 md:p-8" onSubmit={handleSubmit(onSubmit)}>
 						<FieldGroup>
 							<div className="flex flex-col items-center gap-2 text-center">
-								<h1 className="text-2xl font-bold">Welcome back</h1>
-								<p className="text-muted-foreground text-balance">Login to your account</p>
+								<h1 className="text-2xl font-bold">{tLogin('welcomeBack')}</h1>
+								<p className="text-muted-foreground text-balance">{tLogin('subtitle')}</p>
 							</div>
 
 							<Field>
-								<FieldLabel htmlFor="email">Email</FieldLabel>
+								<FieldLabel htmlFor="email">{tLogin('email')}</FieldLabel>
 								<Input id="email" type="email" placeholder="m@example.com" {...register('email')} />
 								<FieldError errors={[errors.email]} />
 							</Field>
 
 							<Field>
 								<div className="flex items-center">
-									<FieldLabel htmlFor="password">Password</FieldLabel>
+									<FieldLabel htmlFor="password">{tLogin('password')}</FieldLabel>
 									<a href="/forgot-password" className="ml-auto text-sm underline-offset-2 hover:underline">
-										Forgot your password?
+										{tLogin('forgotPassword')}
 									</a>
 								</div>
 								<div className="relative">
@@ -112,17 +122,17 @@ export const LoginWrapper = () => {
 							</Field>
 
 							<Button type="submit" disabled={isPending} className="w-full">
-								{isPending ? 'Logging in...' : 'Login'}
+								{isPending ? tLogin('submitting') : tLogin('submit')}
 							</Button>
 
-							<FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">Or continue with</FieldSeparator>
+							<FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">{t('orContinueWith')}</FieldSeparator>
 
 							<GoogleAuthButton mode="login" onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
 
 							<FieldDescription className="text-center">
-								Don&apos;t have an account?{' '}
+								{tLogin('noAccount')}{' '}
 								<a href="/register" className="underline underline-offset-4">
-									Sign up
+									{tLogin('signUp')}
 								</a>
 							</FieldDescription>
 						</FieldGroup>
@@ -137,7 +147,10 @@ export const LoginWrapper = () => {
 				</CardContent>
 			</Card>
 			<FieldDescription className="px-6 text-center">
-				By clicking continue, you agree to our <a href="/terms-of-service">Terms of Service</a> and <a href="/privacy-policy">Privacy Policy</a>.
+				{t.rich('termsAgreement', {
+					terms: (chunks) => <a href="/terms-of-service">{chunks}</a>,
+					privacy: (chunks) => <a href="/privacy-policy">{chunks}</a>,
+				})}
 			</FieldDescription>
 		</div>
 	);

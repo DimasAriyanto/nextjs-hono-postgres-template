@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArticleCard } from '@/components/article-card';
@@ -9,6 +10,7 @@ import { usePublicArticles } from '@/features/article/hooks/use-article';
 
 export function LatestArticlesSection() {
 	const { data, isLoading } = usePublicArticles({ page: 1, limit: 3 });
+	const t = useTranslations('articles');
 	const articles = data?.data ?? [];
 
 	if (!isLoading && articles.length === 0) return null;
@@ -17,12 +19,12 @@ export function LatestArticlesSection() {
 		<section className="container mx-auto px-4 md:px-6 py-16">
 			<div className="flex items-end justify-between gap-4 mb-8">
 				<div>
-					<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Latest Articles</h2>
-					<p className="text-muted-foreground mt-1">The latest news and insights from us.</p>
+					<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{t('latestArticles')}</h2>
+					<p className="text-muted-foreground mt-1">{t('description')}</p>
 				</div>
 				<Button variant="outline" asChild className="shrink-0">
 					<Link href="/articles">
-						View All
+						{t('viewAll')}
 						<ArrowRight className="size-4" />
 					</Link>
 				</Button>

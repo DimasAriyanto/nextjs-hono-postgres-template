@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
+import { getLocale } from 'next-intl/server';
 import { Toaster } from '@/components/ui/sonner';
 import { Providers } from '@/providers';
 import { getSettings } from '@/features/setting/apis/setting.api';
@@ -59,11 +60,11 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const { data } = await getSettings();
+	const [{ data }, locale] = await Promise.all([getSettings(), getLocale()]);
 	const primaryColor = data.primary_color;
 
 	return (
-		<html lang="id" suppressHydrationWarning>
+		<html lang={locale} suppressHydrationWarning>
 			<body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
 				{primaryColor && (
 					<style dangerouslySetInnerHTML={{

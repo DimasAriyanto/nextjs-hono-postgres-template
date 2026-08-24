@@ -26,7 +26,7 @@ import {
 import { useCreateUser, useUpdateUser } from '@/features/user/hooks/use-user';
 import { useRoles } from '@/features/role/hooks/use-role';
 import { useUploadImage } from '@/features/upload/hooks/use-upload';
-import { ApiError } from '@/libs/api';
+import { getErrorMessage, toastMutationError, toastUploadError } from '@/libs/toast';
 import type { TUserWithRoles } from '@/contracts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -95,7 +95,7 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 					const res = await uploadImageMutation.mutateAsync({ file: avatarFiles[0], folder: 'avatars' });
 					avatarUrl = res.data.url;
 				} catch (err) {
-					toast.error('Upload failed', { description: err instanceof Error ? err.message : 'Failed to upload avatar' });
+					toastUploadError(err, 'avatar');
 					return;
 				}
 			}
@@ -123,13 +123,8 @@ export function UserFormModal({ isOpen, onClose, user, mode }: UserFormModalProp
 				toast.success('User updated', { description: 'The user has been updated successfully.' });
 			}
 		} catch (err) {
-			if (err instanceof ApiError) {
-				setError(err.message);
-				toast.error('Failed', { description: err.message });
-			} else {
-				setError('An error occurred');
-				toast.error('Something went wrong', { description: 'An error occurred. Please try again.' });
-			}
+			setError(getErrorMessage(err));
+			toastMutationError(err);
 		}
 	};
 

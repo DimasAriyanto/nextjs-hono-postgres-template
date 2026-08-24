@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { LegalPageWrapper } from '@/features/setting';
 
-export const metadata: Metadata = {
-	title: 'Privacy Policy',
-};
+export async function generateMetadata(): Promise<Metadata> {
+	const t = await getTranslations('legal');
+	return { title: t('titles.privacy_policy') };
+}
 
 export default function PrivacyPolicyPage() {
-	return <LegalPageWrapper title="Privacy Policy" field="privacy_policy" />;
+	return <LegalPageWrapper field="privacy_policy" />;
 }

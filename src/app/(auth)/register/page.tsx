@@ -1,9 +1,11 @@
-import { RegisterWrapper } from '@/features/auth';
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import { RegisterWrapper } from '@/features/auth';
 
-export const metadata: Metadata = {
-  robots: 'noindex, nofollow',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('auth.register');
+  return { robots: 'noindex, nofollow', title: t('title') };
+}
 
 export default function Page() {
   return (

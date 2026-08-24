@@ -1,48 +1,45 @@
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import { cn } from '@/libs/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 type TVerificationStatus = 'success' | 'already-verified' | 'expired' | 'invalid';
 
-const STATUS_CONTENT: Record<TVerificationStatus, { icon: typeof CheckCircle2; title: string; description: string }> = {
-	success: {
-		icon: CheckCircle2,
-		title: 'Email verified',
-		description: 'Your email has been verified successfully. You can now sign in to your account.',
-	},
-	'already-verified': {
-		icon: CheckCircle2,
-		title: 'Already verified',
-		description: 'This email address has already been verified. You can sign in to your account.',
-	},
-	expired: {
-		icon: Clock,
-		title: 'Link expired',
-		description: 'This verification link has expired. Sign in and request a new one from your account settings.',
-	},
-	invalid: {
-		icon: XCircle,
-		title: 'Invalid link',
-		description: 'This verification link is invalid. Sign in and request a new one from your account settings.',
-	},
+const STATUS_ICONS: Record<TVerificationStatus, typeof CheckCircle2> = {
+	success: CheckCircle2,
+	'already-verified': CheckCircle2,
+	expired: Clock,
+	invalid: XCircle,
+};
+
+const STATUS_MESSAGE_KEYS: Record<TVerificationStatus, string> = {
+	success: 'success',
+	'already-verified': 'alreadyVerified',
+	expired: 'expired',
+	invalid: 'invalid',
 };
 
 interface EmailVerifiedWrapperProps {
 	status?: string;
 }
 
-export const EmailVerifiedWrapper = ({ status }: EmailVerifiedWrapperProps) => {
-	const content = STATUS_CONTENT[status as TVerificationStatus] ?? STATUS_CONTENT.invalid;
-	const Icon = content.icon;
-	const isSuccess = content === STATUS_CONTENT.success || content === STATUS_CONTENT['already-verified'];
+export const EmailVerifiedWrapper = async ({ status }: EmailVerifiedWrapperProps) => {
+	const verificationStatus: TVerificationStatus = (status as TVerificationStatus) in STATUS_ICONS ? (status as TVerificationStatus) : 'invalid';
+	const Icon = STATUS_ICONS[verificationStatus];
+	const isSuccess = verificationStatus === 'success' || verificationStatus === 'already-verified';
+
+	const [t, tStatus] = await Promise.all([
+		getTranslations('auth'),
+		getTranslations(`auth.emailVerified.status.${STATUS_MESSAGE_KEYS[verificationStatus]}`),
+	]);
 
 	return (
 		<div className={cn('flex flex-col gap-6')}>
 			<Link href="/" className="flex w-fit items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
 				<ArrowLeft size={16} />
-				Back to home
+				{t('backToHome')}
 			</Link>
 			<Card className="overflow-hidden p-0">
 				<CardContent className="p-6 md:p-8">
@@ -55,12 +52,12 @@ export const EmailVerifiedWrapper = ({ status }: EmailVerifiedWrapperProps) => {
 						>
 							<Icon className="size-6" />
 						</span>
-						<h1 className="text-2xl font-bold">{content.title}</h1>
-						<p className="text-balance text-sm text-muted-foreground">{content.description}</p>
+						<h1 className="text-2xl font-bold">{tStatus('title')}</h1>
+						<p className="text-balance text-sm text-muted-foreground">{tStatus('description')}</p>
 					</div>
 
 					<Button asChild className="mt-6 w-full">
-						<Link href="/login">Sign in</Link>
+						<Link href="/login">{t('emailVerified.signIn')}</Link>
 					</Button>
 				</CardContent>
 			</Card>

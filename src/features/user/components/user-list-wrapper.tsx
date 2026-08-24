@@ -14,6 +14,7 @@ import { useUsers, useDeleteUser } from '@/features/user/hooks/use-user';
 import { getUsers } from '@/features/user/apis/user.api';
 import { useRoles } from '@/features/role/hooks/use-role';
 import { toast } from 'sonner';
+import { toastDeleteError } from '@/libs/toast';
 import { format } from 'date-fns';
 import {
 	AlertDialog,
@@ -83,7 +84,7 @@ export function UserListWrapper() {
 			await deleteMutation.mutateAsync(deleteId);
 			toast.success('User deleted', { description: 'The user has been deleted successfully.' });
 		} catch {
-			toast.error('Delete failed', { description: 'Failed to delete the user. Please try again.' });
+			toastDeleteError('user');
 		}
 	};
 

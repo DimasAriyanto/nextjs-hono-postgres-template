@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Mail, MapPin, Phone } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Icon } from '@/components/icon';
 import { getSocialPlatform } from '@/components/social-platforms';
 import type { TSetting } from '@/contracts';
@@ -9,6 +10,7 @@ interface AppFooterProps {
 }
 
 export const AppFooter = ({ settings }: AppFooterProps) => {
+	const t = useTranslations('footer');
 	const appName = settings?.app_name ?? 'App';
 	const year = new Date().getFullYear();
 	const socialLinks = settings?.social_links ?? [];
@@ -31,7 +33,7 @@ export const AppFooter = ({ settings }: AppFooterProps) => {
 
 				{/* Contact */}
 				<div className="space-y-3">
-					<h3 className="text-sm font-semibold">Contact</h3>
+					<h3 className="text-sm font-semibold">{t('contact')}</h3>
 					<ul className="space-y-2 text-sm text-muted-foreground">
 						{settings?.contact_email && (
 							<li className="flex items-center gap-2">
@@ -61,7 +63,7 @@ export const AppFooter = ({ settings }: AppFooterProps) => {
 				{/* Social */}
 				{socialLinks.length > 0 && (
 					<div className="space-y-3">
-						<h3 className="text-sm font-semibold">Social Media</h3>
+						<h3 className="text-sm font-semibold">{t('socialMedia')}</h3>
 						<div className="flex flex-wrap gap-2">
 							{socialLinks.map((link) => {
 								const platform = getSocialPlatform(link.platform);
@@ -85,13 +87,13 @@ export const AppFooter = ({ settings }: AppFooterProps) => {
 
 			<div className="border-t border-border py-4 flex flex-col items-center gap-2 sm:flex-row sm:justify-between container mx-auto px-4 md:px-6">
 				<p className="text-center text-xs text-muted-foreground">
-					© {year} {appName}. All rights reserved.
+					© {year} {appName}. {t('rights')}
 				</p>
 				<div className="flex items-center gap-4 text-xs text-muted-foreground">
-					<a href="/about" className="hover:text-foreground transition-colors">About Us</a>
-						<a href="/contact" className="hover:text-foreground transition-colors">Contact Us</a>
-					<a href="/terms-of-service" className="hover:text-foreground transition-colors">Terms of Service</a>
-					<a href="/privacy-policy" className="hover:text-foreground transition-colors">Privacy Policy</a>
+					<a href="/about" className="hover:text-foreground transition-colors">{t('about')}</a>
+						<a href="/contact" className="hover:text-foreground transition-colors">{t('contactUs')}</a>
+					<a href="/terms-of-service" className="hover:text-foreground transition-colors">{t('terms')}</a>
+					<a href="/privacy-policy" className="hover:text-foreground transition-colors">{t('privacy')}</a>
 				</div>
 			</div>
 		</footer>

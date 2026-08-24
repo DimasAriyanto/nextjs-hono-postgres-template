@@ -8,6 +8,7 @@ import {
   Sparkles,
 } from "lucide-react"
 import Link from "next/link"
+import { toast } from "sonner"
 
 import {
   Avatar,
@@ -44,6 +45,17 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const { mutate: logout, isPending: isLoggingOut } = useLogout()
+
+  const handleLogout = () => {
+    logout(undefined, {
+      onSuccess: () => {
+        toast.success("Logged out", { description: "You have been successfully logged out." })
+      },
+      onError: () => {
+        toast.error("Logout failed", { description: "An error occurred. Please try again." })
+      },
+    })
+  }
 
   return (
     <SidebarMenu>
@@ -113,7 +125,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem disabled={isLoggingOut} onClick={() => logout()}>
+            <DropdownMenuItem disabled={isLoggingOut} onClick={handleLogout}>
               <LogOut />
               {isLoggingOut ? 'Logging out...' : 'Log out'}
             </DropdownMenuItem>

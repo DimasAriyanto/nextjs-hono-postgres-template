@@ -85,7 +85,7 @@ export async function seed() {
 		console.log('user: ', user);
 	});
 
-	const faqs: TFaqItem[] = [
+	const faqsEn: TFaqItem[] = [
 		{
 			question: 'What is this template built with?',
 			answer:
@@ -117,7 +117,39 @@ export async function seed() {
 		},
 	];
 
-	const aboutContentHtml = `
+	const faqsId: TFaqItem[] = [
+		{
+			question: 'Template ini dibuat dengan apa?',
+			answer:
+				'Next.js (App Router) untuk frontend, Hono sebagai API layer, Drizzle ORM untuk akses database yang type-safe, dan PostgreSQL sebagai database.',
+		},
+		{
+			question: 'Bagaimana cara menjalankan proyek ini secara lokal?',
+			answer:
+				'Salin .env.example menjadi .env, atur kredensial database Anda, lalu jalankan dev server. Database dan skemanya dibuat otomatis saat pertama kali menjalankan migration.',
+		},
+		{
+			question: 'Apakah sudah termasuk autentikasi bawaan?',
+			answer:
+				'Ya. Login email/kata sandi, izin berbasis peran, dan rotasi refresh token yang aman sudah terpasang sehingga Anda bisa langsung membangun fitur.',
+		},
+		{
+			question: 'Bisakah saya beralih antara database PostgreSQL lokal dan Supabase?',
+			answer:
+				'Bisa. Atur DB_PROVIDER menjadi "local" atau "supabase" di environment variable — lapisan koneksi akan otomatis memilih konfigurasi yang tepat.',
+		},
+		{
+			question: 'Komponen UI apa saja yang tersedia?',
+			answer:
+				'Sekumpulan komponen yang aksesibel dan dapat di-theming (tabel, form, modal, rich text editor, dan lainnya) dibangun dengan Tailwind CSS, siap dipakai di panel admin maupun halaman publik Anda.',
+		},
+		{
+			question: 'Apakah template ini gratis digunakan dan dimodifikasi?',
+			answer: 'Ya, template ini dimaksudkan sebagai titik awal untuk proyek Anda sendiri — gunakan, kembangkan, dan sesuaikan dengan kebutuhan Anda.',
+		},
+	];
+
+	const aboutContentHtmlEn = `
 <h2>Who We Are</h2>
 <p>We're a small team building tools that help businesses launch faster without reinventing the basics. This application started as an internal starter kit and grew into a product we're proud to share.</p>
 <h2>Our Mission</h2>
@@ -132,7 +164,22 @@ export async function seed() {
 <p>Have questions about what we do or how we can help? Visit our <a href="/contact">contact page</a> — we'd love to hear from you.</p>
 `.trim();
 
-	const termsOfServiceHtml = `
+	const aboutContentHtmlId = `
+<h2>Siapa Kami</h2>
+<p>Kami adalah tim kecil yang membangun tools untuk membantu bisnis meluncurkan produk lebih cepat tanpa perlu membangun ulang hal-hal dasar. Aplikasi ini bermula sebagai starter kit internal dan berkembang menjadi produk yang kami banggakan untuk dibagikan.</p>
+<h2>Misi Kami</h2>
+<p>Kami percaya tim seharusnya menghabiskan waktu untuk menyelesaikan masalah yang unik bagi bisnis mereka — bukan membangun ulang autentikasi, panel admin, dan manajemen konten dari nol setiap saat. Misi kami adalah memberikan fondasi yang solid dan siap produksi agar Anda bisa fokus pada apa yang membuat produk Anda berbeda.</p>
+<h2>Yang Kami Junjung</h2>
+<ul>
+<li><strong>Kesederhanaan</strong> — kode yang jelas dan mudah diprediksi, bukan abstraksi yang rumit.</li>
+<li><strong>Keandalan</strong> — setiap fitur dibangun agar dapat diandalkan di production, bukan sekadar demo.</li>
+<li><strong>Transparansi</strong> — tidak ada yang disembunyikan; Anda bisa membaca dan memahami setiap bagian dari stack ini.</li>
+</ul>
+<h2>Hubungi Kami</h2>
+<p>Ada pertanyaan tentang apa yang kami lakukan atau bagaimana kami bisa membantu? Kunjungi <a href="/contact">halaman kontak</a> kami — kami senang mendengar dari Anda.</p>
+`.trim();
+
+	const termsOfServiceHtmlEn = `
 <h2>1. Acceptance of Terms</h2>
 <p>By accessing or using this application, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, please do not use the application.</p>
 <h2>2. Use of the Application</h2>
@@ -149,7 +196,24 @@ export async function seed() {
 <p>If you have any questions about these terms, please contact us through the details provided on our contact page.</p>
 `.trim();
 
-	const privacyPolicyHtml = `
+	const termsOfServiceHtmlId = `
+<h2>1. Penerimaan Ketentuan</h2>
+<p>Dengan mengakses atau menggunakan aplikasi ini, Anda setuju untuk terikat oleh Syarat & Ketentuan ini. Jika Anda tidak setuju dengan bagian mana pun dari ketentuan ini, mohon untuk tidak menggunakan aplikasi.</p>
+<h2>2. Penggunaan Aplikasi</h2>
+<p>Anda setuju untuk menggunakan aplikasi ini hanya untuk tujuan yang sah dan dengan cara yang tidak melanggar hak, membatasi, atau menghalangi penggunaan oleh orang lain.</p>
+<h2>3. Akun</h2>
+<p>Saat membuat akun bersama kami, Anda wajib memberikan informasi yang akurat dan lengkap. Anda bertanggung jawab menjaga kerahasiaan kata sandi Anda dan setiap aktivitas di bawah akun Anda.</p>
+<h2>4. Kekayaan Intelektual</h2>
+<p>Seluruh konten, fitur, dan fungsionalitas aplikasi ini dimiliki oleh kami dan dilindungi oleh hukum kekayaan intelektual yang berlaku.</p>
+<h2>5. Batasan Tanggung Jawab</h2>
+<p>Kami tidak bertanggung jawab atas kerugian tidak langsung, insidental, maupun konsekuensial yang timbul dari penggunaan aplikasi ini.</p>
+<h2>6. Perubahan Ketentuan Ini</h2>
+<p>Kami dapat memperbarui Syarat & Ketentuan ini dari waktu ke waktu. Penggunaan aplikasi yang berlanjut setelah perubahan berarti Anda menerima ketentuan yang baru.</p>
+<h2>7. Hubungi Kami</h2>
+<p>Jika Anda memiliki pertanyaan tentang ketentuan ini, silakan hubungi kami melalui detail yang tersedia di halaman kontak kami.</p>
+`.trim();
+
+	const privacyPolicyHtmlEn = `
 <h2>1. Information We Collect</h2>
 <p>We collect information you provide directly to us, such as your name, email address, and any other details you submit when creating an account or contacting us.</p>
 <h2>2. How We Use Your Information</h2>
@@ -168,7 +232,26 @@ export async function seed() {
 <p>If you have any questions about this Privacy Policy, please contact us through the details provided on our contact page.</p>
 `.trim();
 
-	const banners: TBannerItem[] = [
+	const privacyPolicyHtmlId = `
+<h2>1. Informasi yang Kami Kumpulkan</h2>
+<p>Kami mengumpulkan informasi yang Anda berikan secara langsung, seperti nama, alamat email, dan detail lain yang Anda kirimkan saat membuat akun atau menghubungi kami.</p>
+<h2>2. Bagaimana Kami Menggunakan Informasi Anda</h2>
+<p>Kami menggunakan informasi yang dikumpulkan untuk menyediakan, memelihara, dan meningkatkan layanan kami, berkomunikasi dengan Anda, dan menjaga keamanan akun Anda.</p>
+<h2>3. Cookie</h2>
+<p>Kami dapat menggunakan cookie dan teknologi serupa untuk menjaga Anda tetap masuk, mengingat preferensi Anda, dan memahami bagaimana Anda menggunakan aplikasi ini.</p>
+<h2>4. Keamanan Data</h2>
+<p>Kami menerapkan langkah teknis dan organisasi yang wajar untuk melindungi informasi Anda dari akses, perubahan, atau pengungkapan yang tidak sah.</p>
+<h2>5. Layanan Pihak Ketiga</h2>
+<p>Kami dapat menggunakan layanan pihak ketiga tepercaya untuk membantu mengoperasikan aplikasi kami. Penyedia ini hanya memiliki akses ke informasi yang diperlukan untuk menjalankan fungsinya.</p>
+<h2>6. Hak Anda</h2>
+<p>Anda dapat meminta akses, koreksi, atau penghapusan informasi pribadi Anda kapan saja dengan menghubungi kami.</p>
+<h2>7. Perubahan Kebijakan Ini</h2>
+<p>Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu. Kami menyarankan Anda meninjau halaman ini secara berkala untuk informasi terbaru.</p>
+<h2>8. Hubungi Kami</h2>
+<p>Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, silakan hubungi kami melalui detail yang tersedia di halaman kontak kami.</p>
+`.trim();
+
+	const bannersEn: TBannerItem[] = [
 		{
 			image_url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1600&q=80',
 			title: 'Build Faster, Ship Sooner',
@@ -195,17 +278,56 @@ export async function seed() {
 		},
 	];
 
-	const settingsSeed: { key: string; value: unknown }[] = [
-		{ key: SETTING_KEYS.FAQS, value: faqs },
-		{ key: SETTING_KEYS.ABOUT_CONTENT, value: aboutContentHtml },
-		{ key: SETTING_KEYS.TERMS_OF_SERVICE, value: termsOfServiceHtml },
-		{ key: SETTING_KEYS.PRIVACY_POLICY, value: privacyPolicyHtml },
-		{ key: SETTING_KEYS.BANNERS, value: banners },
+	const bannersId: TBannerItem[] = [
+		{
+			image_url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1600&q=80',
+			title: 'Bangun Lebih Cepat, Rilis Lebih Cepat',
+			subtitle: 'Starter Next.js + Hono + Postgres yang siap production',
+			button_label: 'Mulai Sekarang',
+			button_link: '/register',
+			text_align: 'center',
+		},
+		{
+			image_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1600&q=80',
+			title: 'Dashboard Admin Modern',
+			subtitle: 'Kelola pengguna, peran, dan konten dengan mudah',
+			button_label: 'Jelajahi Fitur',
+			button_link: '/articles',
+			text_align: 'left',
+		},
+		{
+			image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80',
+			title: 'Aman & Skalabel',
+			subtitle: 'Autentikasi, izin, dan lainnya, sudah terpasang',
+			button_label: 'Pelajari Lebih Lanjut',
+			button_link: '/terms-of-service',
+			text_align: 'right',
+		},
+	];
+
+	// Translatable keys get one row per content locale so switching the site language
+	// actually shows different content (see AppSettingsTable.locale / TRANSLATABLE_SETTING_KEYS).
+	const settingsSeed: { key: string; locale: 'id' | 'en'; value: unknown }[] = [
+		{ key: SETTING_KEYS.FAQS, locale: 'en', value: faqsEn },
+		{ key: SETTING_KEYS.FAQS, locale: 'id', value: faqsId },
+		{ key: SETTING_KEYS.ABOUT_CONTENT, locale: 'en', value: aboutContentHtmlEn },
+		{ key: SETTING_KEYS.ABOUT_CONTENT, locale: 'id', value: aboutContentHtmlId },
+		{ key: SETTING_KEYS.TERMS_OF_SERVICE, locale: 'en', value: termsOfServiceHtmlEn },
+		{ key: SETTING_KEYS.TERMS_OF_SERVICE, locale: 'id', value: termsOfServiceHtmlId },
+		{ key: SETTING_KEYS.PRIVACY_POLICY, locale: 'en', value: privacyPolicyHtmlEn },
+		{ key: SETTING_KEYS.PRIVACY_POLICY, locale: 'id', value: privacyPolicyHtmlId },
+		{ key: SETTING_KEYS.BANNERS, locale: 'en', value: bannersEn },
+		{ key: SETTING_KEYS.BANNERS, locale: 'id', value: bannersId },
 	];
 
 	const insertedSettings = await db
 		.insert(schema.AppSettingsTable)
-		.values(settingsSeed.map((s) => ({ key: s.key, group: SETTING_KEY_GROUP_MAP[s.key as keyof typeof SETTING_KEY_GROUP_MAP], value: s.value })))
+		.values(settingsSeed.map((s) => ({
+			key: s.key,
+			locale: s.locale,
+			group: SETTING_KEY_GROUP_MAP[s.key as keyof typeof SETTING_KEY_GROUP_MAP],
+			value: s.value,
+		})))
 		.onConflictDoNothing()
 		.returning();
 

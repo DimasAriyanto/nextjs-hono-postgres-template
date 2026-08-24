@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { ResetPasswordWrapper } from '@/features/auth';
 
-export const metadata: Metadata = {
-	robots: 'noindex, nofollow',
-	title: 'Reset Password',
-};
+export async function generateMetadata(): Promise<Metadata> {
+	const t = await getTranslations('auth.resetPassword');
+	return { robots: 'noindex, nofollow', title: t('title') };
+}
 
 interface PageProps {
 	searchParams: Promise<{ token?: string }>;

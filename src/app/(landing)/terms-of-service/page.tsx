@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { LegalPageWrapper } from '@/features/setting';
 
-export const metadata: Metadata = {
-	title: 'Terms of Service',
-};
+export async function generateMetadata(): Promise<Metadata> {
+	const t = await getTranslations('legal');
+	return { title: t('titles.terms_of_service') };
+}
 
 export default function TermsOfServicePage() {
-	return <LegalPageWrapper title="Terms of Service" field="terms_of_service" />;
+	return <LegalPageWrapper field="terms_of_service" />;
 }

@@ -1,14 +1,16 @@
 import { Context } from 'hono';
 import { settingService } from '@/server/services';
 import { response } from '@/server/http/response';
+import { isContentLocale } from '@/contracts/setting';
 
 export const settingsController = {
 	/**
-	 * GET /settings
-	 * Get application settings
+	 * GET /settings?locale=id|en
+	 * Get application settings, with translatable content resolved for the given content locale
 	 */
 	async show(c: Context) {
-		const settings = await settingService.getSettings();
+		const rawLocale = c.req.query('locale');
+		const settings = await settingService.getSettings(isContentLocale(rawLocale) ? rawLocale : undefined);
 
 		return response.ok(c, settings);
 	},

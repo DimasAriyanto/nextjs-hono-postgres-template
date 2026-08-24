@@ -20,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/page-header';
 import { useProfile, useUpdateProfile, useChangePassword, useResendVerification } from '@/features/auth/hooks/use-auth';
 import { useUploadImage } from '@/features/upload/hooks/use-upload';
+import { toastUploadError } from '@/libs/toast';
 import { formatTZ } from '@/libs/dayjs';
 import { changePasswordSchema } from '@/contracts';
 
@@ -110,7 +111,7 @@ export function AccountSettingWrapper() {
 				const res = await uploadImageMutation.mutateAsync({ file: avatarFiles[0], folder: 'avatars' });
 				avatarUrl = res.data.url;
 			} catch (err) {
-				toast.error('Upload failed', { description: err instanceof Error ? err.message : 'Failed to upload avatar' });
+				toastUploadError(err, 'avatar');
 				return;
 			}
 		}
@@ -122,6 +123,10 @@ export function AccountSettingWrapper() {
 					setEditingProfile(false);
 					setAvatarFiles([]);
 					setReplacingAvatar(false);
+					toast.success('Profile updated', { description: 'Your profile has been updated successfully.' });
+				},
+				onError: (err) => {
+					toast.error('Update failed', { description: err.message });
 				},
 			},
 		);
@@ -132,6 +137,10 @@ export function AccountSettingWrapper() {
 			onSuccess: () => {
 				passwordForm.reset();
 				setEditingPassword(false);
+				toast.success('Password changed', { description: 'Your password has been changed successfully.' });
+			},
+			onError: (err) => {
+				toast.error('Change failed', { description: err.message });
 			},
 		});
 	};
@@ -200,7 +209,14 @@ export function AccountSettingWrapper() {
 								size="sm"
 								className="h-auto p-0 text-xs"
 								disabled={resendingVerification}
-								onClick={() => resendVerification()}
+								onClick={() => resendVerification(undefined, {
+									onSuccess: () => {
+										toast.success('Verification email sent', { description: 'Please check your inbox for the verification link.' });
+									},
+									onError: (err) => {
+										toast.error('Failed to send verification email', { description: err.message });
+									},
+								})}
 							>
 								{resendingVerification ? 'Sending...' : 'Resend verification email'}
 							</Button>

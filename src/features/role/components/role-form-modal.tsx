@@ -14,8 +14,8 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { useCreateRole, useUpdateRole } from '@/features/role/hooks/use-role';
-import { ApiError } from '@/libs/api';
 import { toast } from 'sonner';
+import { getErrorMessage, toastMutationError } from '@/libs/toast';
 import type { TRole } from '@/contracts';
 
 interface RoleFormModalProps {
@@ -71,13 +71,8 @@ export function RoleFormModal({ isOpen, onClose, role, mode }: RoleFormModalProp
 				toast.success('Role updated', { description: 'The role has been updated successfully.' });
 			}
 		} catch (err) {
-			if (err instanceof ApiError) {
-				setError(err.message);
-				toast.error('Failed', { description: err.message });
-			} else {
-				setError('An error occurred');
-				toast.error('Something went wrong', { description: 'An error occurred. Please try again.' });
-			}
+			setError(getErrorMessage(err));
+			toastMutationError(err);
 		}
 	};
 

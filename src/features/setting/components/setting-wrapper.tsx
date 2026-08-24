@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Building2, Contact, GalleryHorizontal, Globe2, HelpCircle, Info, Loader2, Palette, Scale, X } from 'lucide-react';
+import { Building2, Contact, GalleryHorizontal, Globe2, HelpCircle, Info, Languages, Loader2, Palette, Scale, X } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { FileUpload } from '@/components/ui/file-upload';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { SocialLinksInput } from '@/components/social-links-input';
 import { BusinessHoursInput } from '@/components/business-hours-input';
 import { PhoneInput } from '@/components/ui/phone-input';
@@ -24,8 +25,9 @@ import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { PageHeader } from '@/components/page-header';
 import { useSettings, useUpdateSettings } from '@/features/setting/hooks/use-setting';
 import { useUploadImage } from '@/features/upload/hooks/use-upload';
+import { toastUploadError } from '@/libs/toast';
 import { LOCALE_OPTIONS, setAppCurrency, setAppLocale, setAppTimezone } from '@/libs/dayjs';
-import { updateSettingSchema, type TUpdateSettingRequest } from '@/contracts';
+import { CONTENT_LOCALES, DEFAULT_CONTENT_LOCALE, updateSettingSchema, type TContentLocale, type TUpdateSettingRequest } from '@/contracts';
 
 // ─── Timezone options ───────────────────────────────────────────────────────────
 
@@ -76,6 +78,36 @@ const CURRENCY_OPTIONS = [
 
 const DEFAULT_PRIMARY_COLOR = '#171717';
 
+// ─── Content locale (About / FAQ / Banner / Legal tabs) ─────────────────────────
+
+const CONTENT_LOCALE_LABELS: Record<TContentLocale, string> = {
+	id: 'Indonesian',
+	en: 'English',
+};
+
+function ContentLocaleSwitcher({ value, onChange }: { value: TContentLocale; onChange: (locale: TContentLocale) => void }) {
+	return (
+		<div className="flex items-center gap-2 mb-4">
+			<Languages className="size-4 text-muted-foreground" />
+			<span className="text-sm text-muted-foreground">Editing:</span>
+			<div className="inline-flex rounded-md border border-input p-0.5">
+				{CONTENT_LOCALES.map((locale) => (
+					<Button
+						key={locale}
+						type="button"
+						size="sm"
+						variant={value === locale ? 'default' : 'ghost'}
+						className="h-7 px-3"
+						onClick={() => onChange(locale)}
+					>
+						{CONTENT_LOCALE_LABELS[locale]}
+					</Button>
+				))}
+			</div>
+		</div>
+	);
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function SettingWrapper() {
@@ -84,6 +116,7 @@ export function SettingWrapper() {
 
 	const [logoFiles, setLogoFiles] = useState<File[]>([]);
 	const [replacingLogo, setReplacingLogo] = useState(false);
+	const [contentLocale, setContentLocale] = useState<TContentLocale>(DEFAULT_CONTENT_LOCALE);
 
 	const updateMutation = useUpdateSettings();
 	const uploadImageMutation = useUploadImage();
@@ -94,7 +127,6 @@ export function SettingWrapper() {
 			app_name: '',
 			description: '',
 			logo_url: '',
-			about_content: '',
 			contact_email: '',
 			contact_phone: '',
 			address: '',
@@ -104,18 +136,22 @@ export function SettingWrapper() {
 			timezone: '',
 			locale: '',
 			currency: '',
-			faqs: [],
-			terms_of_service: '',
-			privacy_policy: '',
 			primary_color: '',
-			banners: [],
+			default_content_locale: DEFAULT_CONTENT_LOCALE,
+			language_switcher_enabled: true,
+			translations: {
+				about_content: { id: '', en: '' },
+				terms_of_service: { id: '', en: '' },
+				privacy_policy: { id: '', en: '' },
+				faqs: { id: [], en: [] },
+				banners: { id: [], en: [] },
+			},
 		},
 		values: settings
 			? {
 				app_name: settings.app_name,
 				description: settings.description ?? '',
 				logo_url: settings.logo_url ?? '',
-				about_content: settings.about_content ?? '',
 				contact_email: settings.contact_email ?? '',
 				contact_phone: settings.contact_phone ?? '',
 				address: settings.address ?? '',
@@ -125,11 +161,10 @@ export function SettingWrapper() {
 				timezone: settings.timezone,
 				locale: settings.locale,
 				currency: settings.currency,
-				faqs: settings.faqs,
-				terms_of_service: settings.terms_of_service ?? '',
-				privacy_policy: settings.privacy_policy ?? '',
 				primary_color: settings.primary_color ?? '',
-				banners: settings.banners,
+				default_content_locale: settings.default_content_locale,
+				language_switcher_enabled: settings.language_switcher_enabled,
+				translations: settings.translations,
 			}
 			: undefined,
 	});
@@ -149,7 +184,7 @@ export function SettingWrapper() {
 				const res = await uploadImageMutation.mutateAsync({ file: logoFiles[0], folder: 'settings' });
 				logoUrl = res.data.url;
 			} catch (err) {
-				toast.error('Upload failed', { description: err instanceof Error ? err.message : 'Failed to upload logo' });
+				toastUploadError(err, 'logo');
 				return;
 			}
 		}
@@ -263,7 +298,8 @@ export function SettingWrapper() {
 						<TabsContent value="about">
 							<Card>
 								<CardContent className="pt-6 space-y-4">
-									<FormField control={form.control} name="about_content" render={({ field }) => (
+									<ContentLocaleSwitcher value={contentLocale} onChange={setContentLocale} />
+									<FormField control={form.control} name={`translations.about_content.${contentLocale}`} render={({ field }) => (
 										<FormItem>
 											<FormLabel>About Us</FormLabel>
 											<RichTextEditor content={field.value ?? ''} onChange={field.onChange} placeholder="Tell visitors about your company..." />
@@ -396,6 +432,43 @@ export function SettingWrapper() {
 											<FormMessage />
 										</FormItem>
 									)} />
+
+									<FormField control={form.control} name="default_content_locale" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Default Language</FormLabel>
+											<Select value={field.value} onValueChange={field.onChange} disabled={isSaving}>
+												<FormControl>
+													<SelectTrigger className="w-full sm:w-80">
+														<SelectValue placeholder="Select default language" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{CONTENT_LOCALES.map((locale) => (
+														<SelectItem key={locale} value={locale}>{CONTENT_LOCALE_LABELS[locale]}</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<p className="text-sm text-muted-foreground">
+												Language shown to first-time visitors, and used whenever a page has no translation for their chosen language yet.
+											</p>
+											<FormMessage />
+										</FormItem>
+									)} />
+
+									<FormField control={form.control} name="language_switcher_enabled" render={({ field }) => (
+										<FormItem>
+											<div className="flex items-center justify-between rounded-md border border-input p-3 sm:w-80">
+												<div className="space-y-0.5">
+													<FormLabel>Language Switcher</FormLabel>
+													<p className="text-sm text-muted-foreground">Let visitors change the site language.</p>
+												</div>
+												<FormControl>
+													<Switch checked={field.value} onCheckedChange={field.onChange} disabled={isSaving} />
+												</FormControl>
+											</div>
+											<FormMessage />
+										</FormItem>
+									)} />
 								</CardContent>
 							</Card>
 						</TabsContent>
@@ -441,7 +514,8 @@ export function SettingWrapper() {
 						<TabsContent value="banner">
 							<Card>
 								<CardContent className="pt-6 space-y-4">
-									<FormField control={form.control} name="banners" render={({ field }) => (
+									<ContentLocaleSwitcher value={contentLocale} onChange={setContentLocale} />
+									<FormField control={form.control} name={`translations.banners.${contentLocale}`} render={({ field }) => (
 										<FormItem>
 											<FormLabel>Home Page Banners</FormLabel>
 											<BannerInput value={field.value ?? []} onChange={field.onChange} disabled={isSaving} />
@@ -456,7 +530,8 @@ export function SettingWrapper() {
 						<TabsContent value="faq">
 							<Card>
 								<CardContent className="pt-6 space-y-4">
-									<FormField control={form.control} name="faqs" render={({ field }) => (
+									<ContentLocaleSwitcher value={contentLocale} onChange={setContentLocale} />
+									<FormField control={form.control} name={`translations.faqs.${contentLocale}`} render={({ field }) => (
 										<FormItem>
 											<FormLabel>Frequently Asked Questions</FormLabel>
 											<FaqInput value={field.value ?? []} onChange={field.onChange} />
@@ -471,7 +546,9 @@ export function SettingWrapper() {
 						<TabsContent value="legal">
 							<Card>
 								<CardContent className="pt-6 space-y-6">
-									<FormField control={form.control} name="terms_of_service" render={({ field }) => (
+									<ContentLocaleSwitcher value={contentLocale} onChange={setContentLocale} />
+
+									<FormField control={form.control} name={`translations.terms_of_service.${contentLocale}`} render={({ field }) => (
 										<FormItem>
 											<FormLabel>Terms of Service</FormLabel>
 											<RichTextEditor content={field.value ?? ''} onChange={field.onChange} placeholder="Write your terms of service..." />
@@ -479,7 +556,7 @@ export function SettingWrapper() {
 										</FormItem>
 									)} />
 
-									<FormField control={form.control} name="privacy_policy" render={({ field }) => (
+									<FormField control={form.control} name={`translations.privacy_policy.${contentLocale}`} render={({ field }) => (
 										<FormItem>
 											<FormLabel>Privacy Policy</FormLabel>
 											<RichTextEditor content={field.value ?? ''} onChange={field.onChange} placeholder="Write your privacy policy..." />

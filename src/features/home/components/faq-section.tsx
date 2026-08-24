@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { TFaqItem } from '@/contracts';
@@ -13,13 +14,14 @@ interface FaqSectionProps {
 
 export function FaqSection({ faqs, isLoading }: FaqSectionProps) {
 	const [openIndex, setOpenIndex] = useState<number | null>(0);
+	const t = useTranslations('home');
 
 	if (!isLoading && faqs.length === 0) return null;
 
 	return (
 		<section className="container mx-auto px-4 md:px-6 py-16">
 			<div className="mx-auto max-w-2xl text-center mb-10">
-				<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Frequently Asked Questions</h2>
+				<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{t('faqTitle')}</h2>
 			</div>
 
 			{isLoading ? (

@@ -1,0 +1,172 @@
+{
+	"nav": {
+		"articles": "Articles",
+		"login": "Login",
+		"register": "Register",
+		"dashboard": "Dashboard",
+		"logout": "Logout",
+		"admin": "Admin",
+		"loggedInAs": "Logged in as",
+		"logoutSuccessTitle": "Logged out",
+		"logoutSuccessDescription": "You have been successfully logged out.",
+		"logoutErrorTitle": "Logout failed",
+		"logoutGenericError": "An error occurred. Please try again."
+	},
+	"footer": {
+		"contact": "Contact",
+		"socialMedia": "Social Media",
+		"rights": "All rights reserved.",
+		"about": "About Us",
+		"contactUs": "Contact Us",
+		"terms": "Terms of Service",
+		"privacy": "Privacy Policy"
+	},
+	"home": {
+		"faqTitle": "Frequently Asked Questions"
+	},
+	"banner": {
+		"goToSlide": "Go to slide {number}"
+	},
+	"contact": {
+		"title": "Contact Us",
+		"haveQuestion": "Have a question or need help? Here's how you can reach {appName}.",
+		"email": "Email",
+		"phone": "Phone",
+		"address": "Address",
+		"businessHours": "Business Hours",
+		"closed": "Closed",
+		"viewOnMaps": "View location on Google Maps",
+		"followUs": "Follow us",
+		"noContactInfo": "Contact information has not been added yet.",
+		"days": {
+			"monday": "Monday",
+			"tuesday": "Tuesday",
+			"wednesday": "Wednesday",
+			"thursday": "Thursday",
+			"friday": "Friday",
+			"saturday": "Saturday",
+			"sunday": "Sunday"
+		}
+	},
+	"articles": {
+		"title": "Articles",
+		"description": "The latest news and insights from us.",
+		"empty": "No articles yet.",
+		"previous": "Previous",
+		"next": "Next",
+		"page": "Page {page} of {totalPages}",
+		"backToArticles": "Back to Articles",
+		"relatedArticles": "Related Articles",
+		"latestArticles": "Latest Articles",
+		"viewAll": "View All"
+	},
+	"legal": {
+		"noContent": "Content has not been added yet.",
+		"titles": {
+			"about_content": "About Us",
+			"terms_of_service": "Terms of Service",
+			"privacy_policy": "Privacy Policy"
+		}
+	},
+	"language": {
+		"label": "Language",
+		"id": "Indonesian",
+		"en": "English"
+	},
+	"auth": {
+		"backToHome": "Back to home",
+		"orContinueWith": "Or continue with",
+		"termsAgreement": "By clicking continue, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
+		"googleErrorTitle": "Google Authentication Failed",
+		"login": {
+			"title": "Login",
+			"welcomeBack": "Welcome back",
+			"subtitle": "Login to your account",
+			"email": "Email",
+			"password": "Password",
+			"forgotPassword": "Forgot your password?",
+			"submit": "Login",
+			"submitting": "Logging in...",
+			"noAccount": "Don't have an account?",
+			"signUp": "Sign up",
+			"successTitle": "Login successful",
+			"successDescription": "Welcome back!",
+			"errorTitle": "Login Error",
+			"genericError": "An error occurred during login"
+		},
+		"register": {
+			"title": "Register",
+			"heading": "Create your account",
+			"subtitle": "Enter your details below to create your account",
+			"fullName": "Full Name",
+			"email": "Email",
+			"emailHint": "We'll use this to contact you. We will not share your email with any other.",
+			"password": "Password",
+			"confirmPassword": "Confirm Password",
+			"passwordHint": "Must be at least 6 characters long.",
+			"submit": "Create Account",
+			"submitting": "Creating account...",
+			"haveAccount": "Already have an account?",
+			"signIn": "Sign in",
+			"successTitle": "Register successful",
+			"successDescription": "Your account has been created successfully.",
+			"errorTitle": "Register Error",
+			"genericError": "An error occurred during registration."
+		},
+		"forgotPassword": {
+			"title": "Forgot Password",
+			"heading": "Forgot your password?",
+			"subtitle": "Enter your email and we'll send you a reset link",
+			"email": "Email",
+			"submit": "Send Reset Link",
+			"submitting": "Sending...",
+			"rememberPassword": "Remember your password?",
+			"signIn": "Sign in",
+			"errorTitle": "Failed to send reset email",
+			"genericError": "An error occurred, please try again.",
+			"checkEmailHeading": "Check your email",
+			"checkEmailSubtitle": "We sent a reset link to",
+			"checkEmailExpiry": "The link will expire in 1 hour.",
+			"backToLogin": "Back to Login"
+		},
+		"resetPassword": {
+			"title": "Reset Password",
+			"heading": "Reset your password",
+			"subtitle": "Enter a new strong password for your account",
+			"newPassword": "New Password",
+			"confirmPassword": "Confirm Password",
+			"passwordPlaceholder": "min. 6 characters",
+			"confirmPlaceholder": "repeat new password",
+			"submit": "Reset Password",
+			"submitting": "Resetting...",
+			"rememberPassword": "Remember your password?",
+			"signIn": "Sign in",
+			"successTitle": "Password reset successfully",
+			"successDescription": "Please sign in with your new password.",
+			"errorTitle": "Reset failed",
+			"genericError": "An error occurred, please try again."
+		},
+		"emailVerified": {
+			"title": "Email Verified",
+			"signIn": "Sign in",
+			"status": {
+				"success": {
+					"title": "Email verified",
+					"description": "Your email has been verified successfully. You can now sign in to your account."
+				},
+				"alreadyVerified": {
+					"title": "Already verified",
+					"description": "This email address has already been verified. You can sign in to your account."
+				},
+				"expired": {
+					"title": "Link expired",
+					"description": "This verification link has expired. Sign in and request a new one from your account settings."
+				},
+				"invalid": {
+					"title": "Invalid link",
+					"description": "This verification link is invalid. Sign in and request a new one from your account settings."
+				}
+			}
+		}
+	}
+}

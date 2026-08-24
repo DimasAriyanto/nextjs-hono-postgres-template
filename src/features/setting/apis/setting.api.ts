@@ -1,5 +1,5 @@
 import { client, handleResponse, ApiError } from '@/libs/api';
-import type { TSetting, TUpdateSettingRequest } from '@/contracts';
+import type { TContentLocale, TSetting, TUpdateSettingRequest } from '@/contracts';
 import type { ApiSuccessResponse } from '@/types/api-response';
 
 // ============================================
@@ -8,11 +8,13 @@ import type { ApiSuccessResponse } from '@/types/api-response';
 
 /**
  * GET /api/v1/settings
- * Get application settings
+ * Get application settings. `contentLocale` resolves the translatable fields
+ * (about_content, terms_of_service, privacy_policy, faqs, banners) for that
+ * language — omit it to get the default content locale.
  */
-export async function getSettings(): Promise<ApiSuccessResponse<TSetting>> {
+export async function getSettings(contentLocale?: TContentLocale): Promise<ApiSuccessResponse<TSetting>> {
 	return handleResponse<TSetting>(
-		client.api.v1.settings.$get()
+		client.api.v1.settings.$get({ query: contentLocale ? { locale: contentLocale } : undefined })
 	);
 }
 

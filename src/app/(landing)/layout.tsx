@@ -1,3 +1,4 @@
+import { NextIntlClientProvider } from 'next-intl';
 import { AppLayout } from '@/layouts/app-layout';
 
 export default function RootLayout({
@@ -5,5 +6,9 @@ export default function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	return <AppLayout>{children}</AppLayout>;
+	return (
+		<NextIntlClientProvider>
+			<AppLayout>{children}</AppLayout>
+		</NextIntlClientProvider>
+	);
 }

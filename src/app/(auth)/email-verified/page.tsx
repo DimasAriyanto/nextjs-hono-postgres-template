@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { EmailVerifiedWrapper } from '@/features/auth';
 
-export const metadata: Metadata = {
-	robots: 'noindex, nofollow',
-	title: 'Email Verified',
-};
+export async function generateMetadata(): Promise<Metadata> {
+	const t = await getTranslations('auth.emailVerified');
+	return { robots: 'noindex, nofollow', title: t('title') };
+}
 
 interface PageProps {
 	searchParams: Promise<{ status?: string }>;

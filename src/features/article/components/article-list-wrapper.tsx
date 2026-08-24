@@ -13,6 +13,7 @@ import { PageHeader } from '@/components/page-header';
 import { useArticles, useDeleteArticle, useUpdateArticle } from '@/features/article/hooks/use-article';
 import { getArticles } from '@/features/article/apis/article.api';
 import { toast } from 'sonner';
+import { toastDeleteError } from '@/libs/toast';
 import { format } from 'date-fns';
 import {
 	AlertDialog,
@@ -82,7 +83,7 @@ export function ArticleListWrapper() {
 			await deleteMutation.mutateAsync(deleteId);
 			toast.success('Article deleted', { description: 'The article has been deleted successfully.' });
 		} catch {
-			toast.error('Delete failed', { description: 'Failed to delete the article. Please try again.' });
+			toastDeleteError('article');
 		}
 	};
 

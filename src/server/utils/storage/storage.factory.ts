@@ -2,8 +2,9 @@ import { StorageProvider } from './storage.interface';
 import { LocalStorageProvider } from './local.storage';
 import { S3StorageProvider } from './s3.storage';
 import { SupabaseStorageProvider } from './supabase.storage';
+import { CloudinaryStorageProvider } from './cloudinary.storage';
 
-export type StorageDriver = 'local' | 's3' | 'supabase';
+export type StorageDriver = 'local' | 's3' | 'supabase' | 'cloudinary';
 
 let instance: StorageProvider | null = null;
 
@@ -18,6 +19,9 @@ export function getStorage(): StorageProvider {
 			break;
 		case 'supabase':
 			instance = new SupabaseStorageProvider();
+			break;
+		case 'cloudinary':
+			instance = new CloudinaryStorageProvider();
 			break;
 		case 'local':
 		default:

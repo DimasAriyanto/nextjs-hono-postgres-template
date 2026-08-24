@@ -28,7 +28,7 @@ import {
 import { useCreateArticle, useUpdateArticle } from '@/features/article/hooks/use-article';
 import { useUploadImage } from '@/features/upload/hooks/use-upload';
 import { slugify } from '@/libs/string';
-import { ApiError } from '@/libs/api';
+import { getErrorMessage, toastMutationError, toastUploadError } from '@/libs/toast';
 import type { TArticleStatus, TArticleWithAuthor } from '@/contracts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 					const res = await uploadImageMutation.mutateAsync({ file: thumbnailFiles[0], folder: 'articles' });
 					thumbnailUrl = res.data.url;
 				} catch (err) {
-					toast.error('Upload failed', { description: err instanceof Error ? err.message : 'Failed to upload thumbnail' });
+					toastUploadError(err, 'thumbnail');
 					return;
 				}
 			}
@@ -132,13 +132,8 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 				toast.success('Article updated', { description: 'The article has been updated successfully.' });
 			}
 		} catch (err) {
-			if (err instanceof ApiError) {
-				setError(err.message);
-				toast.error('Failed', { description: err.message });
-			} else {
-				setError('An error occurred');
-				toast.error('Something went wrong', { description: 'An error occurred. Please try again.' });
-			}
+			setError(getErrorMessage(err));
+			toastMutationError(err);
 		}
 	};
 

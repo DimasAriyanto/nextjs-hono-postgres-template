@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { CONTENT_LOCALES } from '@/i18n/config';
+
+export { CONTENT_LOCALES, DEFAULT_CONTENT_LOCALE, type TContentLocale, isContentLocale } from '@/i18n/config';
 
 // ============================================
 // SETTING KEYS / GROUPS
@@ -38,6 +41,8 @@ export const SETTING_KEYS = {
 	PRIVACY_POLICY: 'privacy_policy',
 	PRIMARY_COLOR: 'primary_color',
 	BANNERS: 'banners',
+	DEFAULT_CONTENT_LOCALE: 'default_content_locale',
+	LANGUAGE_SWITCHER_ENABLED: 'language_switcher_enabled',
 } as const;
 
 export type TSettingKey = (typeof SETTING_KEYS)[keyof typeof SETTING_KEYS];
@@ -62,7 +67,20 @@ export const SETTING_KEY_GROUP_MAP: Record<TSettingKey, TSettingGroup> = {
 	[SETTING_KEYS.PRIVACY_POLICY]: SETTING_GROUPS.LEGAL,
 	[SETTING_KEYS.PRIMARY_COLOR]: SETTING_GROUPS.APPEARANCE,
 	[SETTING_KEYS.BANNERS]: SETTING_GROUPS.BANNER,
+	[SETTING_KEYS.DEFAULT_CONTENT_LOCALE]: SETTING_GROUPS.REGIONAL,
+	[SETTING_KEYS.LANGUAGE_SWITCHER_ENABLED]: SETTING_GROUPS.REGIONAL,
 };
+
+/** Keys that are stored per content locale (see `AppSettingsTable.locale`) instead of a single global row. */
+export const TRANSLATABLE_SETTING_KEYS = [
+	SETTING_KEYS.ABOUT_CONTENT,
+	SETTING_KEYS.TERMS_OF_SERVICE,
+	SETTING_KEYS.PRIVACY_POLICY,
+	SETTING_KEYS.FAQS,
+	SETTING_KEYS.BANNERS,
+] as const satisfies readonly TSettingKey[];
+
+export type TTranslatableSettingKey = (typeof TRANSLATABLE_SETTING_KEYS)[number];
 
 // ============================================
 // REQUEST SCHEMAS
@@ -122,13 +140,28 @@ export function extractMapsEmbedUrl(value: string): string {
 }
 
 /**
+ * Per-content-locale values for the translatable setting keys — one entry per
+ * supported locale, partial (a locale can be left untranslated).
+ */
+export const settingTranslationsSchema = z.object({
+	about_content: z.record(z.enum(CONTENT_LOCALES), z.string().nullable()).optional(),
+	terms_of_service: z.record(z.enum(CONTENT_LOCALES), z.string().nullable()).optional(),
+	privacy_policy: z.record(z.enum(CONTENT_LOCALES), z.string().nullable()).optional(),
+	faqs: z.record(z.enum(CONTENT_LOCALES), z.array(faqItemSchema)).optional(),
+	banners: z.record(z.enum(CONTENT_LOCALES), z.array(bannerItemSchema)).optional(),
+});
+
+export type TSettingTranslations = z.infer<typeof settingTranslationsSchema>;
+
+/**
  * Update settings request schema — a partial patch over the known setting keys.
+ * Translatable keys (about_content, terms_of_service, privacy_policy, faqs,
+ * banners) are sent via `translations`, not as flat fields.
  */
 export const updateSettingSchema = z.object({
 	app_name: z.string().min(1, 'App name is required').optional(),
 	description: z.string().optional(),
 	logo_url: z.string().optional(),
-	about_content: z.string().optional(),
 	contact_email: z.string().email('Invalid email format').optional().or(z.literal('')),
 	contact_phone: z.string().optional(),
 	address: z.string().optional(),
@@ -138,11 +171,10 @@ export const updateSettingSchema = z.object({
 	timezone: z.string().optional(),
 	locale: z.string().optional(),
 	currency: z.string().optional(),
-	faqs: z.array(faqItemSchema).optional(),
-	terms_of_service: z.string().optional(),
-	privacy_policy: z.string().optional(),
 	primary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color (e.g. #171717)').optional().or(z.literal('')),
-	banners: z.array(bannerItemSchema).optional(),
+	default_content_locale: z.enum(CONTENT_LOCALES).optional(),
+	language_switcher_enabled: z.boolean().optional(),
+	translations: settingTranslationsSchema.optional(),
 });
 
 export type TUpdateSettingRequest = z.infer<typeof updateSettingSchema>;
@@ -170,6 +202,9 @@ export const settingSchema = z.object({
 	privacy_policy: z.string().nullable(),
 	primary_color: z.string().nullable(),
 	banners: z.array(bannerItemSchema),
+	default_content_locale: z.enum(CONTENT_LOCALES),
+	language_switcher_enabled: z.boolean(),
+	translations: settingTranslationsSchema,
 });
 
 export type TSetting = z.infer<typeof settingSchema>;

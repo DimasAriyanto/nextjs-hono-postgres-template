@@ -36,6 +36,20 @@
       "when": 1786519630266,
       "tag": "0004_careless_apocalypse",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1787536201734,
+      "tag": "0005_amused_molecule_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787539240819,
+      "tag": "0006_backfill_content_locale",
+      "breakpoints": true
     }
   ]
 }

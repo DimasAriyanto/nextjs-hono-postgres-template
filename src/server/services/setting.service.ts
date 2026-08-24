@@ -1,5 +1,20 @@
 import { settingRepository } from '@/server/repositories';
-import { extractMapsEmbedUrl, SETTING_KEYS, SETTING_KEY_GROUP_MAP, WEEKDAYS, type TBannerItem, type TBusinessHour, type TFaqItem, type TSetting, type TSocialLink, type TUpdateSettingRequest } from '@/contracts/setting';
+import {
+	CONTENT_LOCALES,
+	DEFAULT_CONTENT_LOCALE,
+	SETTING_KEYS,
+	SETTING_KEY_GROUP_MAP,
+	TRANSLATABLE_SETTING_KEYS,
+	WEEKDAYS,
+	extractMapsEmbedUrl,
+	isContentLocale,
+	type TBusinessHour,
+	type TContentLocale,
+	type TSetting,
+	type TSettingKey,
+	type TTranslatableSettingKey,
+	type TUpdateSettingRequest,
+} from '@/contracts/setting';
 
 /**
  * Fill in any weekday missing from a partially-configured business hours list (defaulting to
@@ -32,48 +47,119 @@ const DEFAULTS: TSetting = {
 	privacy_policy: null,
 	primary_color: null,
 	banners: [],
+	default_content_locale: isContentLocale(process.env.DEFAULT_CONTENT_LOCALE) ? process.env.DEFAULT_CONTENT_LOCALE : DEFAULT_CONTENT_LOCALE,
+	language_switcher_enabled: process.env.LANGUAGE_SWITCHER_ENABLED !== 'false',
+	translations: {
+		about_content: { id: null, en: null },
+		terms_of_service: { id: null, en: null },
+		privacy_policy: { id: null, en: null },
+		faqs: { id: [], en: [] },
+		banners: { id: [], en: [] },
+	},
 };
 
 export class SettingService {
 	/**
-	 * Get all settings, assembled from key/value rows with defaults for anything not yet set
+	 * Get all settings, assembled from key/value rows with defaults for anything not yet set.
+	 * Translatable keys (about_content, terms_of_service, privacy_policy, faqs, banners) are
+	 * resolved for `contentLocale` — defaulting to the admin-configured default content locale
+	 * (Settings > Regional > Default Language, itself defaulting to `DEFAULT_CONTENT_LOCALE` env
+	 * var) when omitted — falling back to that same default locale, then to defaults. The full
+	 * `translations` bundle is always returned too, for the admin form to edit every locale at
+	 * once.
 	 */
-	async getSettings(): Promise<TSetting> {
+	async getSettings(contentLocale?: TContentLocale): Promise<TSetting> {
 		const rows = await settingRepository.findAll();
-		const byKey = new Map(rows.map((row) => [row.key, row.value]));
+		const byKeyLocale = new Map(rows.map((row) => [`${row.key}:${row.locale}`, row.value]));
+
+		const global = <T>(key: TSettingKey, fallback: T): T => (byKeyLocale.get(`${key}:`) as T | undefined) ?? fallback;
+
+		const defaultContentLocale = global(SETTING_KEYS.DEFAULT_CONTENT_LOCALE, DEFAULTS.default_content_locale);
+		const effectiveLocale = contentLocale ?? defaultContentLocale;
+
+		const perLocale = <T>(key: TTranslatableSettingKey, locale: TContentLocale, fallback: T): T =>
+			(byKeyLocale.get(`${key}:${locale}`) as T | undefined) ?? fallback;
+
+		const resolved = <T>(key: TTranslatableSettingKey, fallback: T): T =>
+			perLocale(key, effectiveLocale, perLocale(key, defaultContentLocale, fallback));
+
+		const allLocales = <T>(key: TTranslatableSettingKey, fallback: T): Record<TContentLocale, T> =>
+			Object.fromEntries(CONTENT_LOCALES.map((locale) => [locale, perLocale(key, locale, fallback)])) as Record<TContentLocale, T>;
 
 		return {
-			app_name: (byKey.get(SETTING_KEYS.APP_NAME) as string | undefined) ?? DEFAULTS.app_name,
-			description: (byKey.get(SETTING_KEYS.DESCRIPTION) as string | undefined) ?? DEFAULTS.description,
-			logo_url: (byKey.get(SETTING_KEYS.LOGO_URL) as string | undefined) ?? DEFAULTS.logo_url,
-			about_content: (byKey.get(SETTING_KEYS.ABOUT_CONTENT) as string | undefined) ?? DEFAULTS.about_content,
-			contact_email: (byKey.get(SETTING_KEYS.CONTACT_EMAIL) as string | undefined) ?? DEFAULTS.contact_email,
-			contact_phone: (byKey.get(SETTING_KEYS.CONTACT_PHONE) as string | undefined) ?? DEFAULTS.contact_phone,
-			address: (byKey.get(SETTING_KEYS.ADDRESS) as string | undefined) ?? DEFAULTS.address,
-			social_links: (byKey.get(SETTING_KEYS.SOCIAL_LINKS) as TSocialLink[] | undefined) ?? DEFAULTS.social_links,
-			maps_url: (byKey.get(SETTING_KEYS.MAPS_URL) as string | undefined) ?? DEFAULTS.maps_url,
-			business_hours: normalizeBusinessHours((byKey.get(SETTING_KEYS.BUSINESS_HOURS) as TBusinessHour[] | undefined) ?? DEFAULTS.business_hours),
-			timezone: (byKey.get(SETTING_KEYS.TIMEZONE) as string | undefined) ?? DEFAULTS.timezone,
-			locale: (byKey.get(SETTING_KEYS.LOCALE) as string | undefined) ?? DEFAULTS.locale,
-			currency: (byKey.get(SETTING_KEYS.CURRENCY) as string | undefined) ?? DEFAULTS.currency,
-			faqs: (byKey.get(SETTING_KEYS.FAQS) as TFaqItem[] | undefined) ?? DEFAULTS.faqs,
-			terms_of_service: (byKey.get(SETTING_KEYS.TERMS_OF_SERVICE) as string | undefined) ?? DEFAULTS.terms_of_service,
-			privacy_policy: (byKey.get(SETTING_KEYS.PRIVACY_POLICY) as string | undefined) ?? DEFAULTS.privacy_policy,
-			primary_color: (byKey.get(SETTING_KEYS.PRIMARY_COLOR) as string | undefined) || DEFAULTS.primary_color,
-			banners: (byKey.get(SETTING_KEYS.BANNERS) as TBannerItem[] | undefined) ?? DEFAULTS.banners,
+			app_name: global(SETTING_KEYS.APP_NAME, DEFAULTS.app_name),
+			description: global(SETTING_KEYS.DESCRIPTION, DEFAULTS.description),
+			logo_url: global(SETTING_KEYS.LOGO_URL, DEFAULTS.logo_url),
+			about_content: resolved(SETTING_KEYS.ABOUT_CONTENT, DEFAULTS.about_content),
+			contact_email: global(SETTING_KEYS.CONTACT_EMAIL, DEFAULTS.contact_email),
+			contact_phone: global(SETTING_KEYS.CONTACT_PHONE, DEFAULTS.contact_phone),
+			address: global(SETTING_KEYS.ADDRESS, DEFAULTS.address),
+			social_links: global(SETTING_KEYS.SOCIAL_LINKS, DEFAULTS.social_links),
+			maps_url: global(SETTING_KEYS.MAPS_URL, DEFAULTS.maps_url),
+			business_hours: normalizeBusinessHours(global(SETTING_KEYS.BUSINESS_HOURS, DEFAULTS.business_hours)),
+			timezone: global(SETTING_KEYS.TIMEZONE, DEFAULTS.timezone),
+			locale: global(SETTING_KEYS.LOCALE, DEFAULTS.locale),
+			currency: global(SETTING_KEYS.CURRENCY, DEFAULTS.currency),
+			faqs: resolved(SETTING_KEYS.FAQS, DEFAULTS.faqs),
+			terms_of_service: resolved(SETTING_KEYS.TERMS_OF_SERVICE, DEFAULTS.terms_of_service),
+			privacy_policy: resolved(SETTING_KEYS.PRIVACY_POLICY, DEFAULTS.privacy_policy),
+			primary_color: global(SETTING_KEYS.PRIMARY_COLOR, DEFAULTS.primary_color) || DEFAULTS.primary_color,
+			banners: resolved(SETTING_KEYS.BANNERS, DEFAULTS.banners),
+			default_content_locale: defaultContentLocale,
+			language_switcher_enabled: global(SETTING_KEYS.LANGUAGE_SWITCHER_ENABLED, DEFAULTS.language_switcher_enabled),
+			translations: {
+				about_content: allLocales(SETTING_KEYS.ABOUT_CONTENT, DEFAULTS.about_content),
+				terms_of_service: allLocales(SETTING_KEYS.TERMS_OF_SERVICE, DEFAULTS.terms_of_service),
+				privacy_policy: allLocales(SETTING_KEYS.PRIVACY_POLICY, DEFAULTS.privacy_policy),
+				faqs: allLocales(SETTING_KEYS.FAQS, DEFAULTS.faqs),
+				banners: allLocales(SETTING_KEYS.BANNERS, DEFAULTS.banners),
+			},
 		};
 	}
 
 	/**
-	 * Update settings — only the provided keys are upserted, the rest are left untouched
+	 * Cheap, targeted read for `src/i18n/request.ts` — that file resolves the locale for every
+	 * single request, so it reads just these two global rows instead of the full `getSettings()`
+	 * composition (which loads every setting).
+	 */
+	async getLanguageConfig(): Promise<{ defaultLocale: TContentLocale; switcherEnabled: boolean }> {
+		const [defaultRow, enabledRow] = await Promise.all([
+			settingRepository.findByKey(SETTING_KEYS.DEFAULT_CONTENT_LOCALE),
+			settingRepository.findByKey(SETTING_KEYS.LANGUAGE_SWITCHER_ENABLED),
+		]);
+		const rawDefaultLocale = defaultRow?.value as string | undefined;
+
+		return {
+			defaultLocale: isContentLocale(rawDefaultLocale) ? rawDefaultLocale : DEFAULTS.default_content_locale,
+			switcherEnabled: typeof enabledRow?.value === 'boolean' ? enabledRow.value : DEFAULTS.language_switcher_enabled,
+		};
+	}
+
+	/**
+	 * Update settings — only the provided keys are upserted, the rest are left untouched.
+	 * Non-translatable fields are stored globally (locale ''); `translations` entries are
+	 * stored one row per (key, content locale).
 	 */
 	async updateSettings(data: TUpdateSettingRequest, actorId?: string): Promise<TSetting> {
-		const entries = Object.entries(data) as [keyof TUpdateSettingRequest, unknown][];
+		const { translations, ...globalFields } = data;
+		const entries = Object.entries(globalFields) as [Exclude<keyof TUpdateSettingRequest, 'translations'>, unknown][];
 
 		for (const [key, value] of entries) {
 			if (value === undefined) continue;
 			const normalizedValue = key === SETTING_KEYS.MAPS_URL && typeof value === 'string' ? extractMapsEmbedUrl(value) : value;
-			await settingRepository.upsert(key, SETTING_KEY_GROUP_MAP[key], normalizedValue, actorId);
+			await settingRepository.upsert(key, SETTING_KEY_GROUP_MAP[key], normalizedValue, '', actorId);
+		}
+
+		if (translations) {
+			for (const key of TRANSLATABLE_SETTING_KEYS) {
+				const perLocaleValues = translations[key];
+				if (!perLocaleValues) continue;
+
+				for (const [locale, value] of Object.entries(perLocaleValues) as [TContentLocale, unknown][]) {
+					if (value === undefined) continue;
+					await settingRepository.upsert(key, SETTING_KEY_GROUP_MAP[key], value, locale, actorId);
+				}
+			}
 		}
 
 		return this.getSettings();

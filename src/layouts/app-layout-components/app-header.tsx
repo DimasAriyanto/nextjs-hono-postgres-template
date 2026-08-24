@@ -4,6 +4,8 @@ import { useState, useEffect, forwardRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { Menu, X, User, LogOut, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,6 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useProfile, useLogout } from '@/features/auth/hooks/use-auth';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { LanguageSwitcher } from '@/components/language-switcher';
 import type { TSetting } from '@/contracts';
 
 // ── Avatar trigger ─────────────────────────────────────────────────────────────
@@ -53,6 +56,8 @@ AvatarTrigger.displayName = 'AvatarTrigger';
 // ── Admin dropdown ─────────────────────────────────────────────────────────────
 
 function AdminMenu({ name, avatarUrl, onLogout }: { name: string; avatarUrl?: string | null; onLogout: () => void }) {
+	const t = useTranslations('nav');
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -67,7 +72,7 @@ function AdminMenu({ name, avatarUrl, onLogout }: { name: string; avatarUrl?: st
 						</AvatarFallback>
 					</Avatar>
 					<span className="min-w-0">
-						<p className="text-xs text-muted-foreground">Admin</p>
+						<p className="text-xs text-muted-foreground">{t('admin')}</p>
 						<p className="truncate font-semibold">{name}</p>
 					</span>
 				</DropdownMenuLabel>
@@ -75,7 +80,7 @@ function AdminMenu({ name, avatarUrl, onLogout }: { name: string; avatarUrl?: st
 				<DropdownMenuItem asChild>
 					<Link href="/gundala-admin/d" className="flex items-center gap-2 cursor-pointer">
 						<LayoutDashboard className="size-4" />
-						Dashboard
+						{t('dashboard')}
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
@@ -84,7 +89,7 @@ function AdminMenu({ name, avatarUrl, onLogout }: { name: string; avatarUrl?: st
 					className="flex items-center gap-2 text-destructive focus:text-destructive cursor-pointer"
 				>
 					<LogOut className="size-4" />
-					Logout
+					{t('logout')}
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
@@ -94,6 +99,8 @@ function AdminMenu({ name, avatarUrl, onLogout }: { name: string; avatarUrl?: st
 // ── User dropdown ──────────────────────────────────────────────────────────────
 
 function UserMenu({ name, avatarUrl, onLogout }: { name: string; avatarUrl?: string | null; onLogout: () => void }) {
+	const t = useTranslations('nav');
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -108,7 +115,7 @@ function UserMenu({ name, avatarUrl, onLogout }: { name: string; avatarUrl?: str
 						</AvatarFallback>
 					</Avatar>
 					<span className="min-w-0">
-						<p className="text-xs text-muted-foreground">Logged in as</p>
+						<p className="text-xs text-muted-foreground">{t('loggedInAs')}</p>
 						<p className="truncate font-semibold">{name}</p>
 					</span>
 				</DropdownMenuLabel>
@@ -118,7 +125,7 @@ function UserMenu({ name, avatarUrl, onLogout }: { name: string; avatarUrl?: str
 					className="flex items-center gap-2 text-destructive focus:text-destructive cursor-pointer"
 				>
 					<LogOut className="size-4" />
-					Logout
+					{t('logout')}
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
@@ -128,7 +135,7 @@ function UserMenu({ name, avatarUrl, onLogout }: { name: string; avatarUrl?: str
 // ── Nav ────────────────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-	{ href: '/articles', label: 'Articles' },
+	{ href: '/articles', labelKey: 'articles' } as const,
 ];
 
 function isNavActive(pathname: string, href: string) {
@@ -161,6 +168,18 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 	const { data: profileData } = useProfile();
 	const { mutate: logout } = useLogout();
 	const pathname = usePathname();
+	const t = useTranslations('nav');
+
+	const handleLogout = () => {
+		logout(undefined, {
+			onSuccess: () => {
+				toast.success(t('logoutSuccessTitle'), { description: t('logoutSuccessDescription') });
+			},
+			onError: () => {
+				toast.error(t('logoutErrorTitle'), { description: t('logoutGenericError') });
+			},
+		});
+	};
 
 	const appName = settings?.app_name ?? 'App';
 
@@ -210,7 +229,7 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 										: 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
 								}`}
 							>
-								{item.label}
+								{t(item.labelKey)}
 							</Link>
 						);
 					})}
@@ -218,20 +237,21 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 
 				{/* Desktop right */}
 				<div className="hidden md:flex items-center gap-3">
+					{settings?.language_switcher_enabled !== false && <LanguageSwitcher />}
 					<ThemeToggle />
 					{user ? (
 						isAdmin ? (
-							<AdminMenu name={displayName} avatarUrl={avatarUrl} onLogout={() => logout()} />
+							<AdminMenu name={displayName} avatarUrl={avatarUrl} onLogout={handleLogout} />
 						) : (
-							<UserMenu name={displayName} avatarUrl={avatarUrl} onLogout={() => logout()} />
+							<UserMenu name={displayName} avatarUrl={avatarUrl} onLogout={handleLogout} />
 						)
 					) : (
 						<>
 							<Button variant="outline" asChild size="sm">
-								<Link href="/login">Login</Link>
+								<Link href="/login">{t('login')}</Link>
 							</Button>
 							<Button asChild size="sm">
-								<Link href="/register">Register</Link>
+								<Link href="/register">{t('register')}</Link>
 							</Button>
 						</>
 					)}
@@ -239,6 +259,7 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 
 				{/* Mobile right */}
 				<div className="flex items-center gap-1 md:hidden">
+					{settings?.language_switcher_enabled !== false && <LanguageSwitcher />}
 					<ThemeToggle />
 					<Button
 						variant="ghost"
@@ -278,7 +299,7 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 											asChild
 											className="w-full justify-start h-11"
 										>
-											<Link href={item.href} onClick={() => setMobileOpen(false)}>{item.label}</Link>
+											<Link href={item.href} onClick={() => setMobileOpen(false)}>{t(item.labelKey)}</Link>
 										</Button>
 									);
 								})}
@@ -289,7 +310,7 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 											<Button variant="outline" asChild className="w-full justify-start h-11">
 												<Link href="/gundala-admin/d" onClick={() => setMobileOpen(false)}>
 													<LayoutDashboard className="size-4 mr-2" />
-													Dashboard
+													{t('dashboard')}
 												</Link>
 											</Button>
 										)}
@@ -298,20 +319,20 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 											className="w-full h-11"
 											onClick={() => {
 												setMobileOpen(false);
-												logout();
+												handleLogout();
 											}}
 										>
 											<LogOut className="size-4 mr-2" />
-											Logout
+											{t('logout')}
 										</Button>
 									</>
 								) : (
 									<>
 										<Button variant="outline" asChild className="w-full h-11">
-											<Link href="/login" onClick={() => setMobileOpen(false)}>Login</Link>
+											<Link href="/login" onClick={() => setMobileOpen(false)}>{t('login')}</Link>
 										</Button>
 										<Button asChild className="w-full h-11">
-											<Link href="/register" onClick={() => setMobileOpen(false)}>Register</Link>
+											<Link href="/register" onClick={() => setMobileOpen(false)}>{t('register')}</Link>
 										</Button>
 									</>
 								)}

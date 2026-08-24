@@ -22,6 +22,7 @@ import {
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { toastDeleteError } from '@/libs/toast';
 import type { TRole } from '@/contracts';
 
 const ROLE_TYPE_OPTIONS = [
@@ -76,7 +77,7 @@ export function RoleListWrapper() {
 			await deleteMutation.mutateAsync(deleteId);
 			toast.success('Role deleted', { description: 'The role has been deleted successfully.' });
 		} catch {
-			toast.error('Delete failed', { description: 'Failed to delete the role. Please try again.' });
+			toastDeleteError('role');
 		}
 	};
 

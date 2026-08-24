@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/libs/utils';
 import {
 	Carousel,
@@ -28,6 +29,7 @@ interface BannerSectionProps {
 export function BannerSection({ banners, isLoading }: BannerSectionProps) {
 	const [api, setApi] = useState<CarouselApi>();
 	const [selected, setSelected] = useState(0);
+	const t = useTranslations('banner');
 
 	const onSelect = useCallback((carouselApi: CarouselApi) => {
 		if (!carouselApi) return;
@@ -107,7 +109,7 @@ export function BannerSection({ banners, isLoading }: BannerSectionProps) {
 								<button
 									key={index}
 									type="button"
-									aria-label={`Go to slide ${index + 1}`}
+									aria-label={t('goToSlide', { number: index + 1 })}
 									onClick={() => api?.scrollTo(index)}
 									className={cn(
 										'h-1.5 rounded-full transition-all',

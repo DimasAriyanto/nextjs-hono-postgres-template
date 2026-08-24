@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/libs/utils';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,8 @@ interface ResetPasswordWrapperProps {
 export const ResetPasswordWrapper = ({ token }: ResetPasswordWrapperProps) => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+	const t = useTranslations('auth');
+	const tReset = useTranslations('auth.resetPassword');
 
 	const {
 		register,
@@ -40,7 +43,7 @@ export const ResetPasswordWrapper = ({ token }: ResetPasswordWrapperProps) => {
 
 	const { mutate, isPending } = useResetPassword({
 		onSuccess: () => {
-			toast.success('Password reset successfully', { description: 'Please sign in with your new password.' });
+			toast.success(tReset('successTitle'), { description: tReset('successDescription') });
 		},
 		onError: (error) => {
 			if (error instanceof ApiError) {
@@ -55,10 +58,10 @@ export const ResetPasswordWrapper = ({ token }: ResetPasswordWrapperProps) => {
 						setError('password_confirmation', { message: confirmErrors[0] });
 					}
 				} else {
-					toast.error('Reset failed', { description: error.message });
+					toast.error(tReset('errorTitle'), { description: error.message });
 				}
 			} else {
-				toast.error('Reset failed', { description: 'An error occurred, please try again.' });
+				toast.error(tReset('errorTitle'), { description: tReset('genericError') });
 			}
 		},
 	});
@@ -71,26 +74,26 @@ export const ResetPasswordWrapper = ({ token }: ResetPasswordWrapperProps) => {
 		<div className={cn('flex flex-col gap-6')}>
 			<Link href="/" className="flex w-fit items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
 				<ArrowLeft size={16} />
-				Back to home
+				{t('backToHome')}
 			</Link>
 			<Card className="overflow-hidden p-0">
 				<CardContent className="grid p-0 md:grid-cols-2">
 					<form className="p-6 md:p-8" onSubmit={handleSubmit(onSubmit)}>
 						<FieldGroup>
 							<div className="flex flex-col items-center gap-2 text-center">
-								<h1 className="text-2xl font-bold">Reset your password</h1>
+								<h1 className="text-2xl font-bold">{tReset('heading')}</h1>
 								<p className="text-muted-foreground text-balance text-sm">
-									Enter a new strong password for your account
+									{tReset('subtitle')}
 								</p>
 							</div>
 
 							<Field>
-								<FieldLabel htmlFor="password">New Password</FieldLabel>
+								<FieldLabel htmlFor="password">{tReset('newPassword')}</FieldLabel>
 								<div className="relative">
 									<Input
 										id="password"
 										type={showPassword ? 'text' : 'password'}
-										placeholder="min. 6 characters"
+										placeholder={tReset('passwordPlaceholder')}
 										className="pr-9"
 										{...register('password')}
 									/>
@@ -107,12 +110,12 @@ export const ResetPasswordWrapper = ({ token }: ResetPasswordWrapperProps) => {
 							</Field>
 
 							<Field>
-								<FieldLabel htmlFor="password_confirmation">Confirm Password</FieldLabel>
+								<FieldLabel htmlFor="password_confirmation">{tReset('confirmPassword')}</FieldLabel>
 								<div className="relative">
 									<Input
 										id="password_confirmation"
 										type={showPasswordConfirm ? 'text' : 'password'}
-										placeholder="repeat new password"
+										placeholder={tReset('confirmPlaceholder')}
 										className="pr-9"
 										{...register('password_confirmation')}
 									/>
@@ -129,13 +132,13 @@ export const ResetPasswordWrapper = ({ token }: ResetPasswordWrapperProps) => {
 							</Field>
 
 							<Button type="submit" disabled={isPending} className="w-full">
-								{isPending ? 'Resetting...' : 'Reset Password'}
+								{isPending ? tReset('submitting') : tReset('submit')}
 							</Button>
 
 							<FieldDescription className="text-center">
-								Remember your password?{' '}
+								{tReset('rememberPassword')}{' '}
 								<Link href="/login" className="underline underline-offset-4">
-									Sign in
+									{tReset('signIn')}
 								</Link>
 							</FieldDescription>
 						</FieldGroup>

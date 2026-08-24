@@ -1,18 +1,8 @@
 import { Clock, ExternalLink, Mail, MapPin, Phone } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import { getSettings } from '@/features/setting/apis/setting.api';
 import { Icon } from '@/components/icon';
 import { getSocialPlatform } from '@/components/social-platforms';
-import type { TWeekday } from '@/contracts';
-
-const DAY_LABELS: Record<TWeekday, string> = {
-	monday: 'Monday',
-	tuesday: 'Tuesday',
-	wednesday: 'Wednesday',
-	thursday: 'Thursday',
-	friday: 'Friday',
-	saturday: 'Saturday',
-	sunday: 'Sunday',
-};
 
 /** Only Google Maps' dedicated embed URL format is allowed to be framed — regular share/place links refuse to render inside an <iframe>. */
 function isEmbeddableMapsUrl(url: string): boolean {
@@ -20,16 +10,16 @@ function isEmbeddableMapsUrl(url: string): boolean {
 }
 
 export async function ContactPageWrapper() {
-	const { data: settings } = await getSettings();
+	const [{ data: settings }, t] = await Promise.all([getSettings(), getTranslations('contact')]);
 
 	const hasContactInfo =
 		settings.contact_email || settings.contact_phone || settings.address || settings.business_hours.length > 0 || settings.maps_url;
 
 	return (
 		<article className="container mx-auto max-w-3xl px-4 md:px-6 py-16">
-			<h1 className="text-2xl font-bold tracking-tight sm:text-4xl">Contact Us</h1>
+			<h1 className="text-2xl font-bold tracking-tight sm:text-4xl">{t('title')}</h1>
 			<p className="mt-4 text-muted-foreground">
-				Have a question or need help? Here&apos;s how you can reach {settings.app_name}.
+				{t('haveQuestion', { appName: settings.app_name })}
 			</p>
 
 			{hasContactInfo ? (
@@ -40,7 +30,7 @@ export async function ContactPageWrapper() {
 								<Mail className="size-4.5" />
 							</span>
 							<div>
-								<p className="text-sm text-muted-foreground">Email</p>
+								<p className="text-sm text-muted-foreground">{t('email')}</p>
 								<a href={`mailto:${settings.contact_email}`} className="font-medium hover:text-primary hover:underline">
 									{settings.contact_email}
 								</a>
@@ -54,7 +44,7 @@ export async function ContactPageWrapper() {
 								<Phone className="size-4.5" />
 							</span>
 							<div>
-								<p className="text-sm text-muted-foreground">Phone</p>
+								<p className="text-sm text-muted-foreground">{t('phone')}</p>
 								<a href={`tel:${settings.contact_phone}`} className="font-medium hover:text-primary hover:underline">
 									{settings.contact_phone}
 								</a>
@@ -68,7 +58,7 @@ export async function ContactPageWrapper() {
 								<MapPin className="size-4.5" />
 							</span>
 							<div>
-								<p className="text-sm text-muted-foreground">Address</p>
+								<p className="text-sm text-muted-foreground">{t('address')}</p>
 								<p className="font-medium">{settings.address}</p>
 							</div>
 						</div>
@@ -94,7 +84,7 @@ export async function ContactPageWrapper() {
 								className="flex items-center gap-3 rounded-lg border border-border p-4 text-sm font-medium transition-colors hover:bg-muted"
 							>
 								<MapPin className="size-4.5 shrink-0 text-muted-foreground" />
-								View location on Google Maps
+								{t('viewOnMaps')}
 								<ExternalLink className="ml-auto size-3.5 shrink-0 text-muted-foreground" />
 							</a>
 						)
@@ -106,13 +96,13 @@ export async function ContactPageWrapper() {
 								<Clock className="size-4.5" />
 							</span>
 							<div>
-								<p className="text-sm text-muted-foreground">Business Hours</p>
+								<p className="text-sm text-muted-foreground">{t('businessHours')}</p>
 								<dl className="mt-1 space-y-1">
 									{settings.business_hours.map((row) => (
 										<div key={row.day} className="flex items-center gap-3 text-sm">
-											<dt className="w-28 font-medium">{DAY_LABELS[row.day]}</dt>
+											<dt className="w-28 font-medium">{t(`days.${row.day}`)}</dt>
 											<dd className="text-muted-foreground">
-												{row.is_closed ? 'Closed' : `${row.open_time} – ${row.close_time}`}
+												{row.is_closed ? t('closed') : `${row.open_time} – ${row.close_time}`}
 											</dd>
 										</div>
 									))}
@@ -122,12 +112,12 @@ export async function ContactPageWrapper() {
 					)}
 				</div>
 			) : (
-				<p className="mt-10 text-muted-foreground">Contact information has not been added yet.</p>
+				<p className="mt-10 text-muted-foreground">{t('noContactInfo')}</p>
 			)}
 
 			{settings.social_links.length > 0 && (
 				<div className="mt-10 border-t border-border pt-8">
-					<p className="mb-4 text-sm text-muted-foreground">Follow us</p>
+					<p className="mb-4 text-sm text-muted-foreground">{t('followUs')}</p>
 					<div className="flex flex-wrap gap-3">
 						{settings.social_links.map((link, index) => {
 							const platform = getSocialPlatform(link.platform);

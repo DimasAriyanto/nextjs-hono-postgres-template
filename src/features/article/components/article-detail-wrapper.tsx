@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import { formatTZ } from '@/libs/dayjs';
 import { ArticleCard } from '@/components/article-card';
 import { getPublicArticleBySlugSafe, getRelatedArticles } from '@/features/article/apis/article.api';
@@ -15,14 +16,14 @@ export async function ArticleDetailWrapper({ slug }: ArticleDetailWrapperProps) 
 
 	if (!article) notFound();
 
-	const relatedArticles = await getRelatedArticles(article.id);
+	const [relatedArticles, t] = await Promise.all([getRelatedArticles(article.id), getTranslations('articles')]);
 	const author = article.author as { name?: string | null; email?: string } | null | undefined;
 
 	return (
 		<article className="container mx-auto max-w-3xl px-4 md:px-6 py-16">
 			<Link href="/articles" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
 				<ArrowLeft className="size-4" />
-				Back to Articles
+				{t('backToArticles')}
 			</Link>
 
 			<header className="mt-6 space-y-3">
@@ -51,7 +52,7 @@ export async function ArticleDetailWrapper({ slug }: ArticleDetailWrapperProps) 
 
 			{relatedArticles.length > 0 && (
 				<div className="mt-16 border-t border-border pt-10">
-					<h2 className="mb-6 text-xl font-bold tracking-tight">Related Articles</h2>
+					<h2 className="mb-6 text-xl font-bold tracking-tight">{t('relatedArticles')}</h2>
 					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 						{relatedArticles.map((related) => (
 							<ArticleCard key={related.id} article={related} />

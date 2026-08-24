@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import * as authApi from '@/features/auth/apis/auth.api';
-import type { TForgotPasswordRequest, TLoginRequest, TRegisterRequest, TResetPasswordRequest, TUpdateProfileRequest, TChangePasswordRequest } from '@/contracts';
-import { toast } from 'sonner';
+import type { TForgotPasswordRequest, TLoginRequest, TLoginResponse, TRegisterRequest, TResetPasswordRequest, TUpdateProfileRequest, TChangePasswordRequest } from '@/contracts';
+import type { ApiSuccessResponse } from '@/types/api-response';
 
 /**
  * Query keys for auth
@@ -27,18 +27,18 @@ export function useProfile() {
 /**
  * Hook for login mutation
  */
-export function useLogin(options?: { onError?: (error: Error) => void }) {
+export function useLogin(options?: { onSuccess?: (result: ApiSuccessResponse<TLoginResponse>) => void; onError?: (error: Error) => void }) {
 	const queryClient = useQueryClient();
 	const router = useRouter();
 
 	return useMutation({
 		mutationFn: (data: TLoginRequest) => authApi.login(data),
 		onSuccess: (result) => {
-			toast.success('Login successful', { description: 'Welcome back!' });
 			queryClient.invalidateQueries({ queryKey: authKeys.all });
 			const hasAdminAccess = result.data.is_admin || result.data.permissions.length > 0;
 			router.push(hasAdminAccess ? '/gundala-admin/d' : '/');
 			router.refresh();
+			options?.onSuccess?.(result);
 		},
 		onError: options?.onError,
 	});
@@ -73,13 +73,9 @@ export function useLogout() {
 	return useMutation({
 		mutationFn: authApi.logout,
 		onSuccess: () => {
-			toast.success('Logged out', { description: 'You have been successfully logged out.' });
 			queryClient.clear();
 			router.push('/login');
 			router.refresh();
-		},
-		onError: () => {
-			toast.error('Logout failed', { description: 'An error occurred. Please try again.' });
 		},
 	});
 }
@@ -90,12 +86,6 @@ export function useLogout() {
 export function useResendVerification() {
 	return useMutation({
 		mutationFn: authApi.resendVerification,
-		onSuccess: () => {
-			toast.success('Verification email sent', { description: 'Please check your inbox for the verification link.' });
-		},
-		onError: (error: Error) => {
-			toast.error('Failed to send verification email', { description: error.message });
-		},
 	});
 }
 
@@ -136,10 +126,6 @@ export function useUpdateProfile() {
 		mutationFn: (data: TUpdateProfileRequest) => authApi.updateProfile(data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: authKeys.profile() });
-			toast.success('Profile updated', { description: 'Your profile has been updated successfully.' });
-		},
-		onError: (error: Error) => {
-			toast.error('Update failed', { description: error.message });
 		},
 	});
 }
@@ -150,12 +136,6 @@ export function useUpdateProfile() {
 export function useChangePassword() {
 	return useMutation({
 		mutationFn: (data: TChangePasswordRequest) => authApi.changePassword(data),
-		onSuccess: () => {
-			toast.success('Password changed', { description: 'Your password has been changed successfully.' });
-		},
-		onError: (error: Error) => {
-			toast.error('Change failed', { description: error.message });
-		},
 	});
 }
 
@@ -172,16 +152,13 @@ export function useDeleteAccount() {
 			queryClient.clear();
 			router.replace('/');
 		},
-		onError: (error: Error) => {
-			toast.error('Delete failed', { description: error.message });
-		},
 	});
 }
 
 /**
  * Hook for Google authentication
  */
-export function useGoogleAuth() {
+export function useGoogleAuth(options?: { onSuccess?: (result: ApiSuccessResponse<TLoginResponse>) => void; onError?: (error: Error) => void }) {
 	const queryClient = useQueryClient();
 	const router = useRouter();
 
@@ -192,9 +169,8 @@ export function useGoogleAuth() {
 			const hasAdminAccess = result.data.is_admin || result.data.permissions.length > 0;
 			router.push(hasAdminAccess ? '/gundala-admin/d' : '/');
 			router.refresh();
+			options?.onSuccess?.(result);
 		},
-		onError: (error: Error) => {
-			toast.error('Google Authentication Failed', { description: error.message });
-		},
+		onError: options?.onError,
 	});
 }

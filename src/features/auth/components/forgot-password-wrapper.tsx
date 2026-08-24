@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/libs/utils';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,8 @@ import Link from 'next/link';
 
 export const ForgotPasswordWrapper = () => {
 	const [isSuccess, setIsSuccess] = useState(false);
+	const t = useTranslations('auth');
+	const tForgot = useTranslations('auth.forgotPassword');
 	const {
 		register,
 		handleSubmit,
@@ -43,10 +46,10 @@ export const ForgotPasswordWrapper = () => {
 						setError('email', { message: emailErrors[0] });
 					}
 				} else {
-					toast.error('Failed to send reset email', { description: error.message });
+					toast.error(tForgot('errorTitle'), { description: error.message });
 				}
 			} else {
-				toast.error('Failed to send reset email', { description: 'An error occurred, please try again.' });
+				toast.error(tForgot('errorTitle'), { description: tForgot('genericError') });
 			}
 		},
 	});
@@ -61,7 +64,7 @@ export const ForgotPasswordWrapper = () => {
 		<div className={cn('flex flex-col gap-6')}>
 			<Link href="/" className="flex w-fit items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
 				<ArrowLeft size={16} />
-				Back to home
+				{t('backToHome')}
 			</Link>
 			<Card className="overflow-hidden p-0">
 				<CardContent className="grid p-0 md:grid-cols-2">
@@ -70,14 +73,14 @@ export const ForgotPasswordWrapper = () => {
 							<form onSubmit={handleSubmit(onSubmit)}>
 								<FieldGroup>
 									<div className="flex flex-col items-center gap-2 text-center">
-										<h1 className="text-2xl font-bold">Forgot your password?</h1>
+										<h1 className="text-2xl font-bold">{tForgot('heading')}</h1>
 										<p className="text-muted-foreground text-balance text-sm">
-											Enter your email and we&apos;ll send you a reset link
+											{tForgot('subtitle')}
 										</p>
 									</div>
 
 									<Field>
-										<FieldLabel htmlFor="email">Email</FieldLabel>
+										<FieldLabel htmlFor="email">{tForgot('email')}</FieldLabel>
 										<Input
 											id="email"
 											type="email"
@@ -88,13 +91,13 @@ export const ForgotPasswordWrapper = () => {
 									</Field>
 
 									<Button type="submit" disabled={isPending} className="w-full">
-										{isPending ? 'Sending...' : 'Send Reset Link'}
+										{isPending ? tForgot('submitting') : tForgot('submit')}
 									</Button>
 
 									<FieldDescription className="text-center">
-										Remember your password?{' '}
+										{tForgot('rememberPassword')}{' '}
 										<Link href="/login" className="underline underline-offset-4">
-											Sign in
+											{tForgot('signIn')}
 										</Link>
 									</FieldDescription>
 								</FieldGroup>
@@ -102,18 +105,18 @@ export const ForgotPasswordWrapper = () => {
 						) : (
 							<FieldGroup>
 								<div className="flex flex-col items-center gap-2 text-center">
-									<h1 className="text-2xl font-bold">Check your email</h1>
+									<h1 className="text-2xl font-bold">{tForgot('checkEmailHeading')}</h1>
 									<p className="text-muted-foreground text-balance text-sm">
-										We sent a reset link to
+										{tForgot('checkEmailSubtitle')}
 									</p>
 									<p className="font-medium">{emailValue}</p>
 									<p className="text-muted-foreground text-balance text-sm">
-										The link will expire in 1 hour.
+										{tForgot('checkEmailExpiry')}
 									</p>
 								</div>
 
 								<Button asChild className="w-full">
-									<Link href="/login">Back to Login</Link>
+									<Link href="/login">{tForgot('backToLogin')}</Link>
 								</Button>
 							</FieldGroup>
 						)}

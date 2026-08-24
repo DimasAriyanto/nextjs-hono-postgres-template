@@ -1,18 +1,20 @@
+import { getTranslations } from 'next-intl/server';
 import { getSettings } from '@/features/setting/apis/setting.api';
+import { getContentLocale } from '@/features/setting/apis/get-content-locale';
 import type { TSetting } from '@/contracts';
 
 interface LegalPageWrapperProps {
-	title: string;
 	field: Extract<keyof TSetting, 'terms_of_service' | 'privacy_policy' | 'about_content'>;
 }
 
-export async function LegalPageWrapper({ title, field }: LegalPageWrapperProps) {
-	const { data: settings } = await getSettings();
+export async function LegalPageWrapper({ field }: LegalPageWrapperProps) {
+	const contentLocale = await getContentLocale();
+	const [{ data: settings }, t] = await Promise.all([getSettings(contentLocale), getTranslations('legal')]);
 	const content = settings[field];
 
 	return (
 		<article className="container mx-auto max-w-3xl px-4 md:px-6 py-16">
-			<h1 className="text-2xl font-bold tracking-tight sm:text-4xl">{title}</h1>
+			<h1 className="text-2xl font-bold tracking-tight sm:text-4xl">{t(`titles.${field}`)}</h1>
 
 			{content ? (
 				<div
@@ -20,7 +22,7 @@ export async function LegalPageWrapper({ title, field }: LegalPageWrapperProps) 
 					dangerouslySetInnerHTML={{ __html: content }}
 				/>
 			) : (
-				<p className="mt-8 text-muted-foreground">Content has not been added yet.</p>
+				<p className="mt-8 text-muted-foreground">{t('noContent')}</p>
 			)}
 		</article>
 	);
