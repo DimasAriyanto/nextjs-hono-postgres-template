@@ -31,8 +31,10 @@ export const LoginWrapper = () => {
 	} = useForm<TLoginRequest>({
 		resolver: zodResolver(loginSchema),
 		defaultValues: {
-			email: '',
-			password: '',
+			// Prefilled with the admin account created by `src/server/databases/seed.ts`
+			// so this template is easy to log into out of the box.
+			email: 'admin@gmail.com',
+			password: 'password',
 		},
 	});
 
