@@ -207,67 +207,69 @@ export const AppHeader = ({ settings }: AppHeaderProps) => {
 	const avatarUrl = user?.avatar_url;
 
 	return (
-		<header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
-			<div className="container mx-auto px-4 md:px-6 flex items-center justify-between h-16">
+		<header className="sticky top-0 z-50 w-full">
+			<div className="border-b border-border bg-background/80 backdrop-blur-md">
+				<div className="container mx-auto px-4 md:px-6 flex items-center justify-between h-16">
 
-				{/* Logo */}
-				<Link href="/" className="hover:opacity-80 transition-opacity">
-					<Brand appName={appName} logoUrl={settings?.logo_url} />
-				</Link>
+					{/* Logo */}
+					<Link href="/" className="hover:opacity-80 transition-opacity">
+						<Brand appName={appName} logoUrl={settings?.logo_url} />
+					</Link>
 
-				{/* Desktop nav */}
-				<nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-					{NAV_ITEMS.map((item) => {
-						const active = isNavActive(pathname, item.href);
-						return (
-							<Link
-								key={item.href}
-								href={item.href}
-								className={`border-b-2 py-1 transition-colors ${
-									active
-										? 'border-primary text-foreground'
-										: 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-								}`}
-							>
-								{t(item.labelKey)}
-							</Link>
-						);
-					})}
-				</nav>
+					{/* Desktop nav */}
+					<nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+						{NAV_ITEMS.map((item) => {
+							const active = isNavActive(pathname, item.href);
+							return (
+								<Link
+									key={item.href}
+									href={item.href}
+									className={`border-b-2 py-1 transition-colors ${
+										active
+											? 'border-primary text-foreground'
+											: 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+									}`}
+								>
+									{t(item.labelKey)}
+								</Link>
+							);
+						})}
+					</nav>
 
-				{/* Desktop right */}
-				<div className="hidden md:flex items-center gap-3">
-					{settings?.language_switcher_enabled !== false && <LanguageSwitcher />}
-					<ThemeToggle />
-					{user ? (
-						isAdmin ? (
-							<AdminMenu name={displayName} avatarUrl={avatarUrl} onLogout={handleLogout} />
+					{/* Desktop right */}
+					<div className="hidden md:flex items-center gap-3">
+						{settings?.language_switcher_enabled !== false && <LanguageSwitcher />}
+						<ThemeToggle />
+						{user ? (
+							isAdmin ? (
+								<AdminMenu name={displayName} avatarUrl={avatarUrl} onLogout={handleLogout} />
+							) : (
+								<UserMenu name={displayName} avatarUrl={avatarUrl} onLogout={handleLogout} />
+							)
 						) : (
-							<UserMenu name={displayName} avatarUrl={avatarUrl} onLogout={handleLogout} />
-						)
-					) : (
-						<>
-							<Button variant="outline" asChild size="sm">
-								<Link href="/login">{t('login')}</Link>
-							</Button>
-							<Button asChild size="sm">
-								<Link href="/register">{t('register')}</Link>
-							</Button>
-						</>
-					)}
-				</div>
+							<>
+								<Button variant="outline" asChild size="sm">
+									<Link href="/login">{t('login')}</Link>
+								</Button>
+								<Button asChild size="sm">
+									<Link href="/register">{t('register')}</Link>
+								</Button>
+							</>
+						)}
+					</div>
 
-				{/* Mobile right */}
-				<div className="flex items-center gap-1 md:hidden">
-					{settings?.language_switcher_enabled !== false && <LanguageSwitcher />}
-					<ThemeToggle />
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={() => setMobileOpen(!mobileOpen)}
-					>
-						{mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-					</Button>
+					{/* Mobile right */}
+					<div className="flex items-center gap-1 md:hidden">
+						{settings?.language_switcher_enabled !== false && <LanguageSwitcher />}
+						<ThemeToggle />
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => setMobileOpen(!mobileOpen)}
+						>
+							{mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+						</Button>
+					</div>
 				</div>
 			</div>
 
