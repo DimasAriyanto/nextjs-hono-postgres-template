@@ -86,8 +86,13 @@ export const BANNER_TEXT_ALIGNS = ['left', 'center', 'right'] as const;
 
 export type TBannerTextAlign = (typeof BANNER_TEXT_ALIGNS)[number];
 
+export const BANNER_MEDIA_TYPES = ['image', 'video'] as const;
+
+export type TBannerMediaType = (typeof BANNER_MEDIA_TYPES)[number];
+
 export const bannerItemSchema = z.object({
-	image_url: z.string().min(1, 'Image is required'),
+	image_url: z.string().min(1, 'Media is required'),
+	media_type: z.enum(BANNER_MEDIA_TYPES).optional(),
 	title: z.string().optional(),
 	subtitle: z.string().optional(),
 	button_label: z.string().optional(),

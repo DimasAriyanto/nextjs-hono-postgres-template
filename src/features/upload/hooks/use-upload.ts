@@ -21,6 +21,19 @@ export function useUploadImage(options?: { onSuccess?: () => void; onError?: (er
 	});
 }
 
+// ── Upload Video Hook ──────────────────────────────────────────────────────────
+
+/**
+ * Hook for upload video mutation
+ */
+export function useUploadVideo(options?: { onSuccess?: () => void; onError?: (error: Error) => void }) {
+	return useMutation({
+		mutationFn: (params: UploadParams) => uploadApi.uploadVideo(params),
+		onSuccess: options?.onSuccess,
+		onError: options?.onError,
+	});
+}
+
 // ── Upload Document Hook ──────────────────────────────────────────────────────
 
 /**

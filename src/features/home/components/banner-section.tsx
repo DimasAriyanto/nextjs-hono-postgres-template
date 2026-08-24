@@ -56,13 +56,24 @@ export function BannerSection({ banners, isLoading }: BannerSectionProps) {
 					{banners.map((banner, index) => (
 						<CarouselItem key={index} className="pl-0">
 							<div className="relative h-[320px] w-full overflow-hidden sm:h-[420px] md:h-[520px] xl:h-[600px]">
-								<Image
-									src={banner.image_url}
-									alt={banner.title || 'Banner'}
-									fill
-									priority={index === 0}
-									className="object-cover"
-								/>
+								{banner.media_type === 'video' ? (
+									<video
+										src={banner.image_url}
+										className="absolute inset-0 h-full w-full object-cover"
+										autoPlay
+										muted
+										loop
+										playsInline
+									/>
+								) : (
+									<Image
+										src={banner.image_url}
+										alt={banner.title || 'Banner'}
+										fill
+										priority={index === 0}
+										className="object-cover"
+									/>
+								)}
 								<div className="absolute inset-0 bg-black/10" />
 								<div className={cn('relative flex h-full flex-col justify-center px-6 md:px-16', ALIGN_CLASSES[banner.text_align ?? 'center'])}>
 									<div className={cn('flex max-w-2xl flex-col gap-3 rounded-2xl bg-black/10 p-6 backdrop-blur-sm sm:p-8', ALIGN_CLASSES[banner.text_align ?? 'center'])}>

@@ -1,21 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { AlignCenter, AlignLeft, AlignRight, Plus, Trash2, X } from 'lucide-react';
+import { AlignCenter, AlignLeft, AlignRight, ImageIcon, Plus, Trash2, Video, X } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FileUpload } from '@/components/ui/file-upload';
 import { cn } from '@/libs/utils';
-import { useUploadImage } from '@/features/upload/hooks/use-upload';
-import type { TBannerItem, TBannerTextAlign } from '@/contracts';
+import { useUploadImage, useUploadVideo } from '@/features/upload/hooks/use-upload';
+import type { TBannerItem, TBannerMediaType, TBannerTextAlign } from '@/contracts';
 
 const TEXT_ALIGN_OPTIONS: { value: TBannerTextAlign; icon: typeof AlignLeft; label: string }[] = [
 	{ value: 'left', icon: AlignLeft, label: 'Align left' },
 	{ value: 'center', icon: AlignCenter, label: 'Align center' },
 	{ value: 'right', icon: AlignRight, label: 'Align right' },
 ];
+
+const MEDIA_TYPE_OPTIONS: { value: TBannerMediaType; icon: typeof ImageIcon; label: string }[] = [
+	{ value: 'image', icon: ImageIcon, label: 'Image' },
+	{ value: 'video', icon: Video, label: 'Video' },
+];
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024;
 
 interface BannerInputProps {
 	value: TBannerItem[];
@@ -26,10 +34,11 @@ interface BannerInputProps {
 
 export function BannerInput({ value, onChange, disabled, className }: BannerInputProps) {
 	const uploadImageMutation = useUploadImage();
+	const uploadVideoMutation = useUploadVideo();
 	const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
 
 	const addBanner = () => {
-		onChange([...value, { image_url: '', title: '', subtitle: '', button_label: '', button_link: '', text_align: 'center' }]);
+		onChange([...value, { image_url: '', media_type: 'image', title: '', subtitle: '', button_label: '', button_link: '', text_align: 'center' }]);
 	};
 
 	const removeBanner = (index: number) => {
@@ -40,20 +49,22 @@ export function BannerInput({ value, onChange, disabled, className }: BannerInpu
 		onChange(value.map((item, i) => (i === index ? { ...item, ...patch } : item)));
 	};
 
-	const handleImageSelect = (index: number, files: File[]) => {
+	const handleMediaSelect = (index: number, mediaType: TBannerMediaType, files: File[]) => {
 		const file = files[0];
 		if (!file) return;
 
+		const mutation = mediaType === 'video' ? uploadVideoMutation : uploadImageMutation;
+
 		setUploadingIndex(index);
-		uploadImageMutation.mutate(
+		mutation.mutate(
 			{ file, folder: 'banners' },
 			{
 				onSuccess: (res) => {
-					updateBanner(index, { image_url: res.data.url });
+					updateBanner(index, { image_url: res.data.url, media_type: mediaType });
 					setUploadingIndex(null);
 				},
 				onError: (err) => {
-					toast.error('Upload failed', { description: err instanceof Error ? err.message : 'Failed to upload banner image' });
+					toast.error('Upload failed', { description: err instanceof Error ? err.message : `Failed to upload banner ${mediaType}` });
 					setUploadingIndex(null);
 				},
 			},
@@ -77,10 +88,40 @@ export function BannerInput({ value, onChange, disabled, className }: BannerInpu
 							</button>
 						</div>
 
+						{!banner.image_url && (
+							<div className="flex items-center gap-2">
+								<span className="text-xs text-muted-foreground">Media type</span>
+								<div className="inline-flex rounded-md border border-input overflow-hidden">
+									{MEDIA_TYPE_OPTIONS.map(({ value: typeValue, icon: TypeIcon, label }) => (
+										<button
+											key={typeValue}
+											type="button"
+											aria-label={label}
+											aria-pressed={(banner.media_type ?? 'image') === typeValue}
+											disabled={disabled}
+											onClick={() => updateBanner(index, { media_type: typeValue })}
+											className={cn(
+												'flex h-7 items-center gap-1.5 px-2.5 text-xs transition-colors disabled:opacity-50',
+												(banner.media_type ?? 'image') === typeValue
+													? 'bg-primary text-primary-foreground'
+													: 'bg-background hover:bg-accent hover:text-accent-foreground',
+											)}
+										>
+											<TypeIcon className="size-3.5" /> {label}
+										</button>
+									))}
+								</div>
+							</div>
+						)}
+
 						{banner.image_url ? (
 							<div className="relative h-40 w-full">
 								<div className="h-40 w-full overflow-hidden rounded-md ring-1 ring-border bg-muted relative">
-									<Image src={banner.image_url} alt={banner.title || 'Banner'} fill className="object-cover" />
+									{banner.media_type === 'video' ? (
+										<video src={banner.image_url} className="h-full w-full object-cover" muted loop controls />
+									) : (
+										<Image src={banner.image_url} alt={banner.title || 'Banner'} fill className="object-cover" />
+									)}
 								</div>
 								{!disabled && (
 									<button
@@ -97,10 +138,14 @@ export function BannerInput({ value, onChange, disabled, className }: BannerInpu
 								compact
 								compactShape="rect"
 								compactSize={160}
-								description="Click to upload banner image (recommended wide/landscape)"
-								accept="image/*"
-								maxSize={5 * 1024 * 1024}
-								onChange={(files) => handleImageSelect(index, files)}
+								description={
+									banner.media_type === 'video'
+										? 'Click to upload banner video (recommended wide/landscape)'
+										: 'Click to upload banner image (recommended wide/landscape)'
+								}
+								accept={banner.media_type === 'video' ? 'video/*' : 'image/*'}
+								maxSize={banner.media_type === 'video' ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE}
+								onChange={(files) => handleMediaSelect(index, banner.media_type ?? 'image', files)}
 								disabled={disabled || uploadingIndex === index}
 							/>
 						)}
