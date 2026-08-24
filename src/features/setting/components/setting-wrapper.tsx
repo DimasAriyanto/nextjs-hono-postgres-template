@@ -286,7 +286,13 @@ export function SettingWrapper() {
 									<FormField control={form.control} name="description" render={({ field }) => (
 										<FormItem>
 											<FormLabel>Description</FormLabel>
-											<FormControl><Textarea {...field} placeholder="Short description of your application" disabled={isSaving} rows={3} /></FormControl>
+											<FormControl>
+												<Textarea
+													{...field}
+													disabled={isSaving}
+													rows={3}
+												/>
+											</FormControl>
 											<FormMessage />
 										</FormItem>
 									)} />
@@ -302,7 +308,7 @@ export function SettingWrapper() {
 									<FormField control={form.control} name={`translations.about_content.${contentLocale}`} render={({ field }) => (
 										<FormItem>
 											<FormLabel>About Us</FormLabel>
-											<RichTextEditor content={field.value ?? ''} onChange={field.onChange} placeholder="Tell visitors about your company..." />
+											<RichTextEditor key={contentLocale} content={field.value ?? ''} onChange={field.onChange} placeholder="Tell visitors about your company..." />
 											<FormMessage />
 										</FormItem>
 									)} />
@@ -551,7 +557,7 @@ export function SettingWrapper() {
 									<FormField control={form.control} name={`translations.terms_of_service.${contentLocale}`} render={({ field }) => (
 										<FormItem>
 											<FormLabel>Terms of Service</FormLabel>
-											<RichTextEditor content={field.value ?? ''} onChange={field.onChange} placeholder="Write your terms of service..." />
+											<RichTextEditor key={contentLocale} content={field.value ?? ''} onChange={field.onChange} placeholder="Write your terms of service..." />
 											<FormMessage />
 										</FormItem>
 									)} />
@@ -559,7 +565,7 @@ export function SettingWrapper() {
 									<FormField control={form.control} name={`translations.privacy_policy.${contentLocale}`} render={({ field }) => (
 										<FormItem>
 											<FormLabel>Privacy Policy</FormLabel>
-											<RichTextEditor content={field.value ?? ''} onChange={field.onChange} placeholder="Write your privacy policy..." />
+											<RichTextEditor key={contentLocale} content={field.value ?? ''} onChange={field.onChange} placeholder="Write your privacy policy..." />
 											<FormMessage />
 										</FormItem>
 									)} />
