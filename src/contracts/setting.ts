@@ -42,6 +42,7 @@ export const SETTING_KEYS = {
 	PRIVACY_POLICY: 'privacy_policy',
 	PRIMARY_COLOR: 'primary_color',
 	BANNERS: 'banners',
+	BANNER_DISPLAY_MODE: 'banner_display_mode',
 	DEFAULT_CONTENT_LOCALE: 'default_content_locale',
 	LANGUAGE_SWITCHER_ENABLED: 'language_switcher_enabled',
 	GA_ID: 'ga_id',
@@ -72,6 +73,7 @@ export const SETTING_KEY_GROUP_MAP: Record<TSettingKey, TSettingGroup> = {
 	[SETTING_KEYS.PRIVACY_POLICY]: SETTING_GROUPS.LEGAL,
 	[SETTING_KEYS.PRIMARY_COLOR]: SETTING_GROUPS.APPEARANCE,
 	[SETTING_KEYS.BANNERS]: SETTING_GROUPS.BANNER,
+	[SETTING_KEYS.BANNER_DISPLAY_MODE]: SETTING_GROUPS.BANNER,
 	[SETTING_KEYS.DEFAULT_CONTENT_LOCALE]: SETTING_GROUPS.REGIONAL,
 	[SETTING_KEYS.LANGUAGE_SWITCHER_ENABLED]: SETTING_GROUPS.REGIONAL,
 	[SETTING_KEYS.GA_ID]: SETTING_GROUPS.SEO,
@@ -129,6 +131,10 @@ export const bannerItemSchema = z.object({
 
 export type TBannerItem = z.infer<typeof bannerItemSchema>;
 
+export const BANNER_DISPLAY_MODES = ['carousel', 'hero'] as const;
+
+export type TBannerDisplayMode = (typeof BANNER_DISPLAY_MODES)[number];
+
 export const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
 export type TWeekday = (typeof WEEKDAYS)[number];
@@ -181,6 +187,7 @@ export const updateSettingSchema = z.object({
 	locale: z.string().optional(),
 	currency: z.string().optional(),
 	primary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color (e.g. #171717)').optional().or(z.literal('')),
+	banner_display_mode: z.enum(BANNER_DISPLAY_MODES).optional(),
 	default_content_locale: z.enum(CONTENT_LOCALES).optional(),
 	language_switcher_enabled: z.boolean().optional(),
 	ga_id: z.string().regex(/^G-[A-Z0-9]+$/, 'Must be a valid GA4 Measurement ID (e.g. G-XXXXXXXXXX)').optional().or(z.literal('')),
@@ -215,6 +222,7 @@ export const settingSchema = z.object({
 	privacy_policy: z.string().nullable(),
 	primary_color: z.string().nullable(),
 	banners: z.array(bannerItemSchema),
+	banner_display_mode: z.enum(BANNER_DISPLAY_MODES),
 	default_content_locale: z.enum(CONTENT_LOCALES),
 	language_switcher_enabled: z.boolean(),
 	ga_id: z.string().nullable(),

@@ -13,7 +13,7 @@ import {
 	type CarouselApi,
 } from '@/components/ui/carousel';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { TBannerItem } from '@/contracts';
+import type { TBannerDisplayMode, TBannerItem } from '@/contracts';
 
 const ALIGN_CLASSES: Record<NonNullable<TBannerItem['text_align']>, string> = {
 	left: 'items-start text-left',
@@ -24,9 +24,64 @@ const ALIGN_CLASSES: Record<NonNullable<TBannerItem['text_align']>, string> = {
 interface BannerSectionProps {
 	banners: TBannerItem[];
 	isLoading?: boolean;
+	displayMode?: TBannerDisplayMode;
 }
 
-export function BannerSection({ banners, isLoading }: BannerSectionProps) {
+function BannerMedia({ banner, priority }: { banner: TBannerItem; priority?: boolean }) {
+	return banner.media_type === 'video' ? (
+		<video
+			src={banner.image_url}
+			className="absolute inset-0 h-full w-full object-cover"
+			autoPlay
+			muted
+			loop
+			playsInline
+		/>
+	) : (
+		<Image
+			src={banner.image_url}
+			alt={banner.title || 'Banner'}
+			fill
+			priority={priority}
+			className="object-cover"
+		/>
+	);
+}
+
+function BannerCaption({ banner }: { banner: TBannerItem }) {
+	return (
+		<div className={cn('flex max-w-2xl flex-col gap-3 rounded-2xl bg-black/10 p-6 backdrop-blur-sm sm:p-8', ALIGN_CLASSES[banner.text_align ?? 'center'])}>
+			{banner.title && (
+				<h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">{banner.title}</h2>
+			)}
+			{banner.subtitle && (
+				<p className="text-base text-white/90 sm:text-lg">{banner.subtitle}</p>
+			)}
+			{banner.button_label && banner.button_link && (
+				<a
+					href={banner.button_link}
+					className="mt-2 inline-flex w-fit items-center justify-center rounded-md bg-white px-5 py-2.5 text-sm font-medium text-black transition-colors hover:bg-white/90"
+				>
+					{banner.button_label}
+				</a>
+			)}
+		</div>
+	);
+}
+
+function HeroBanner({ banner }: { banner: TBannerItem }) {
+	return (
+		<section className="relative h-[360px] w-full overflow-hidden sm:h-[480px] md:h-[600px] xl:h-[680px]">
+			<BannerMedia banner={banner} priority />
+			<div className="absolute inset-0 bg-black/20" />
+			<div className={cn('relative flex h-full flex-col justify-center px-6 md:px-16', ALIGN_CLASSES[banner.text_align ?? 'center'])}>
+				<BannerCaption banner={banner} />
+			</div>
+		</section>
+	);
+}
+
+function BannerCarousel({ banners }: { banners: TBannerItem[] }) {
 	const [api, setApi] = useState<CarouselApi>();
 	const [selected, setSelected] = useState(0);
 	const t = useTranslations('banner');
@@ -45,12 +100,6 @@ export function BannerSection({ banners, isLoading }: BannerSectionProps) {
 		};
 	}, [api, onSelect]);
 
-	if (isLoading) {
-		return <Skeleton className="h-[320px] w-full rounded-none sm:h-[420px] md:h-[520px] xl:h-[600px]" />;
-	}
-
-	if (banners.length === 0) return null;
-
 	return (
 		<section className="relative">
 			<Carousel setApi={setApi} opts={{ loop: banners.length > 1 }}>
@@ -58,42 +107,10 @@ export function BannerSection({ banners, isLoading }: BannerSectionProps) {
 					{banners.map((banner, index) => (
 						<CarouselItem key={index} className="pl-0">
 							<div className="relative h-[320px] w-full overflow-hidden sm:h-[420px] md:h-[520px] xl:h-[600px]">
-								{banner.media_type === 'video' ? (
-									<video
-										src={banner.image_url}
-										className="absolute inset-0 h-full w-full object-cover"
-										autoPlay
-										muted
-										loop
-										playsInline
-									/>
-								) : (
-									<Image
-										src={banner.image_url}
-										alt={banner.title || 'Banner'}
-										fill
-										priority={index === 0}
-										className="object-cover"
-									/>
-								)}
+								<BannerMedia banner={banner} priority={index === 0} />
 								<div className="absolute inset-0 bg-black/10" />
 								<div className={cn('relative flex h-full flex-col justify-center px-6 md:px-16', ALIGN_CLASSES[banner.text_align ?? 'center'])}>
-									<div className={cn('flex max-w-2xl flex-col gap-3 rounded-2xl bg-black/10 p-6 backdrop-blur-sm sm:p-8', ALIGN_CLASSES[banner.text_align ?? 'center'])}>
-										{banner.title && (
-											<h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">{banner.title}</h2>
-										)}
-										{banner.subtitle && (
-											<p className="text-base text-white/90 sm:text-lg">{banner.subtitle}</p>
-										)}
-										{banner.button_label && banner.button_link && (
-											<a
-												href={banner.button_link}
-												className="mt-2 inline-flex w-fit items-center justify-center rounded-md bg-white px-5 py-2.5 text-sm font-medium text-black transition-colors hover:bg-white/90"
-											>
-												{banner.button_label}
-											</a>
-										)}
-									</div>
+									<BannerCaption banner={banner} />
 								</div>
 							</div>
 						</CarouselItem>
@@ -123,4 +140,18 @@ export function BannerSection({ banners, isLoading }: BannerSectionProps) {
 			</Carousel>
 		</section>
 	);
+}
+
+export function BannerSection({ banners, isLoading, displayMode = 'carousel' }: BannerSectionProps) {
+	if (isLoading) {
+		return <Skeleton className="h-[320px] w-full rounded-none sm:h-[420px] md:h-[520px] xl:h-[600px]" />;
+	}
+
+	if (banners.length === 0) return null;
+
+	if (displayMode === 'hero') {
+		return <HeroBanner banner={banners[0]} />;
+	}
+
+	return <BannerCarousel banners={banners} />;
 }

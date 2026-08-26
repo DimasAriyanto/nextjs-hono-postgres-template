@@ -27,7 +27,7 @@ import { useSettings, useUpdateSettings } from '@/features/setting/hooks/use-set
 import { useUploadImage } from '@/features/upload/hooks/use-upload';
 import { toastUploadError } from '@/libs/toast';
 import { LOCALE_OPTIONS, setAppCurrency, setAppLocale, setAppTimezone } from '@/libs/dayjs';
-import { CONTENT_LOCALES, DEFAULT_CONTENT_LOCALE, updateSettingSchema, type TContentLocale, type TUpdateSettingRequest } from '@/contracts';
+import { BANNER_DISPLAY_MODES, CONTENT_LOCALES, DEFAULT_CONTENT_LOCALE, updateSettingSchema, type TBannerDisplayMode, type TContentLocale, type TUpdateSettingRequest } from '@/contracts';
 
 // ─── Timezone options ───────────────────────────────────────────────────────────
 
@@ -85,6 +85,11 @@ const CONTENT_LOCALE_LABELS: Record<TContentLocale, string> = {
 	en: 'English',
 };
 
+const BANNER_DISPLAY_MODE_LABELS: Record<TBannerDisplayMode, string> = {
+	carousel: 'Carousel',
+	hero: 'Hero',
+};
+
 function ContentLocaleSwitcher({ value, onChange }: { value: TContentLocale; onChange: (locale: TContentLocale) => void }) {
 	return (
 		<div className="flex items-center gap-2 mb-4">
@@ -139,6 +144,7 @@ export function SettingWrapper() {
 			locale: '',
 			currency: '',
 			primary_color: '',
+			banner_display_mode: 'carousel',
 			default_content_locale: DEFAULT_CONTENT_LOCALE,
 			language_switcher_enabled: true,
 			ga_id: '',
@@ -168,6 +174,7 @@ export function SettingWrapper() {
 				locale: settings.locale,
 				currency: settings.currency,
 				primary_color: settings.primary_color ?? '',
+				banner_display_mode: settings.banner_display_mode,
 				default_content_locale: settings.default_content_locale,
 				language_switcher_enabled: settings.language_switcher_enabled,
 				ga_id: settings.ga_id ?? '',
@@ -544,6 +551,28 @@ export function SettingWrapper() {
 						<TabsContent value="banner">
 							<Card>
 								<CardContent className="pt-6 space-y-4">
+									<FormField control={form.control} name="banner_display_mode" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Display Mode</FormLabel>
+											<Select value={field.value} onValueChange={field.onChange} disabled={isSaving}>
+												<FormControl>
+													<SelectTrigger className="w-full sm:w-80">
+														<SelectValue placeholder="Select display mode" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{BANNER_DISPLAY_MODES.map((mode) => (
+														<SelectItem key={mode} value={mode}>{BANNER_DISPLAY_MODE_LABELS[mode]}</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<p className="text-sm text-muted-foreground">
+												Carousel rotates through all banners below. Hero shows only the first banner as a static section.
+											</p>
+											<FormMessage />
+										</FormItem>
+									)} />
+
 									<ContentLocaleSwitcher value={contentLocale} onChange={setContentLocale} />
 									<FormField control={form.control} name={`translations.banners.${contentLocale}`} render={({ field }) => (
 										<FormItem>
@@ -604,8 +633,8 @@ export function SettingWrapper() {
 									<div className="grid gap-2">
 										<FormLabel>OG Image (Social Share Image)</FormLabel>
 										{settings?.og_image_url && !replacingOgImage && ogImageFiles.length === 0 ? (
-											<div className="relative h-32 w-56">
-												<div className="h-32 w-56 overflow-hidden rounded-md ring-1 ring-border bg-muted relative">
+											<div className="relative h-40 w-full">
+												<div className="h-40 w-full overflow-hidden rounded-md ring-1 ring-border bg-muted relative">
 													<Image src={settings.og_image_url} alt="OG Image" fill className="object-cover" />
 												</div>
 												<button
@@ -620,13 +649,14 @@ export function SettingWrapper() {
 										) : (
 											<FileUpload
 												compact
-												compactShape="square"
-												compactSize={128}
+												compactShape="rect"
+												compactSize={160}
 												accept="image/*"
 												maxSize={5 * 1024 * 1024}
 												value={ogImageFiles}
 												onChange={setOgImageFiles}
 												disabled={isSaving}
+												description="Click to upload · 1200×630 recommended"
 											/>
 										)}
 										<p className="text-sm text-muted-foreground">

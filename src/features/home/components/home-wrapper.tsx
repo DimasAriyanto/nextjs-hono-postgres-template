@@ -14,7 +14,7 @@ export function HomeWrapper() {
 
 	return (
 		<>
-			<BannerSection banners={settings?.banners ?? []} isLoading={isLoading} />
+			<BannerSection banners={settings?.banners ?? []} isLoading={isLoading} displayMode={settings?.banner_display_mode} />
 
 			<LatestArticlesSection />
 
