@@ -25,9 +25,12 @@ export const comparePassword = async (password: string, hash: string): Promise<b
 };
 
 /**
- * Hash a high-entropy opaque token (e.g. refresh token) for storage.
- * Uses sha256 instead of bcrypt since the input is already random, not a low-entropy secret.
+ * Hash a high-entropy opaque token (refresh token, email verification token,
+ * password reset token) for storage. Uses sha256 instead of bcrypt since the input
+ * is already random, not a low-entropy secret — so a DB leak alone (backup exposure,
+ * read-only SQLi, insider access) can't be used to log in, verify an email, or reset
+ * a password; the raw token only ever exists in the cookie/email link sent to the user.
  */
-export const hashRefreshToken = (token: string): string => {
+export const hashToken = (token: string): string => {
     return crypto.createHash('sha256').update(token).digest('hex');
 };

@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { AuthError, NotFoundError, ConflictError, InternalError } from '@/server/errors';
 import { userRepository, roleRepository, permissionRepository, refreshTokenRepository } from '@/server/repositories';
 import { emailService } from './email.service';
-import { generateVerificationToken, generateTokenExpiration, isTokenExpired, hashPassword, comparePassword, hashRefreshToken } from '@/server/utils';
+import { generateVerificationToken, generateTokenExpiration, isTokenExpired, hashPassword, comparePassword, hashToken } from '@/server/utils';
 import type { TInsertUser, TSelectUser } from '@/server/databases/schemas/users.schema';
 import { MENU_PERMISSIONS } from '@/constants/permissions';
 import { env } from '@/server/env';
@@ -36,7 +36,7 @@ export class AuthService {
 
 		const refreshToken = generateVerificationToken();
 		const refreshExpiresAt = generateTokenExpiration(REFRESH_TOKEN_TTL_SECONDS / 3600);
-		await refreshTokenRepository.create(user.id, hashRefreshToken(refreshToken), refreshExpiresAt.toISOString());
+		await refreshTokenRepository.create(user.id, hashToken(refreshToken), refreshExpiresAt.toISOString());
 
 		return { token, refreshToken };
 	}
@@ -100,7 +100,7 @@ export class AuthService {
 			email: data.email,
 			password: hashedPassword,
 			name: data.name,
-			verification_token: verificationToken,
+			verification_token: hashToken(verificationToken),
 			verification_token_expires_at: tokenExpiration.toISOString(),
 		};
 
@@ -142,7 +142,7 @@ export class AuthService {
 	 * Verify email with token
 	 */
 	async verifyEmail(token: string) {
-		const user = await userRepository.findByVerificationToken(token);
+		const user = await userRepository.findByVerificationToken(hashToken(token));
 
 		if (!user) {
 			throw AuthError.tokenInvalid();
@@ -188,7 +188,7 @@ export class AuthService {
 		// Update token in database
 		await userRepository.updateVerificationToken(
 			user.id,
-			verificationToken,
+			hashToken(verificationToken),
 			tokenExpiration.toISOString()
 		);
 
@@ -357,7 +357,7 @@ export class AuthService {
 	 * Refresh an access token using a valid refresh token, rotating it in the process
 	 */
 	async refresh(rawRefreshToken: string) {
-		const hash = hashRefreshToken(rawRefreshToken);
+		const hash = hashToken(rawRefreshToken);
 		const row = await refreshTokenRepository.findByHash(hash);
 
 		if (!row) {
@@ -400,7 +400,7 @@ export class AuthService {
 	 * Revoke a refresh token (used on sign out)
 	 */
 	async revokeRefreshToken(rawRefreshToken: string) {
-		const hash = hashRefreshToken(rawRefreshToken);
+		const hash = hashToken(rawRefreshToken);
 		const row = await refreshTokenRepository.findByHash(hash);
 
 		if (row && !row.revoked_at) {
@@ -422,7 +422,7 @@ export class AuthService {
 		const token = generateVerificationToken();
 		const expiresAt = generateTokenExpiration(1); // 1 hour
 
-		await userRepository.updateForgotPasswordToken(user.id, token, expiresAt.toISOString());
+		await userRepository.updateForgotPasswordToken(user.id, hashToken(token), expiresAt.toISOString());
 
 		emailService.sendPasswordResetEmail({
 			to: user.email,
@@ -439,7 +439,7 @@ export class AuthService {
 	 * Reset password with token
 	 */
 	async resetPassword(data: { token: string; password: string }) {
-		const user = await userRepository.findByForgotPasswordToken(data.token);
+		const user = await userRepository.findByForgotPasswordToken(hashToken(data.token));
 
 		if (!user) {
 			throw AuthError.tokenInvalid();
