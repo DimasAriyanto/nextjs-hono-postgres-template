@@ -1,11 +1,48 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 
 import { getLocale } from 'next-intl/server';
 import { Toaster } from '@/components/ui/sonner';
 import { Providers } from '@/providers';
 import { getSettings } from '@/features/setting/apis/setting.api';
+import type { TContentLocale, TSetting } from '@/contracts';
+
+function getAppUrl(): string {
+	return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+}
+
+/** Open Graph expects an underscore locale tag (e.g. `id_ID`), not the bare content locale we store. */
+const OG_LOCALE_MAP: Record<TContentLocale, string> = {
+	id: 'id_ID',
+	en: 'en_US',
+};
+
+/** `Organization` JSON-LD so search engines can attribute pages to the business and surface it in Knowledge Panels. */
+function buildOrganizationJsonLd(data: TSetting, appUrl: string) {
+	const sameAs = data.social_links.map((link) => link.url).filter(Boolean);
+
+	return {
+		'@context': 'https://schema.org',
+		'@type': 'Organization',
+		name: data.app_name,
+		url: appUrl,
+		description: data.description ?? undefined,
+		logo: data.logo_url ?? undefined,
+		sameAs: sameAs.length > 0 ? sameAs : undefined,
+		...(data.contact_email || data.contact_phone
+			? {
+				contactPoint: {
+					'@type': 'ContactPoint',
+					contactType: 'customer support',
+					email: data.contact_email ?? undefined,
+					telephone: data.contact_phone ?? undefined,
+				},
+			}
+			: {}),
+	};
+}
 
 const geistSans = Geist({
 	variable: '--font-geist-sans',
@@ -18,8 +55,9 @@ const geistMono = Geist_Mono({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-	const { data } = await getSettings();
-	const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+	const [{ data }, locale] = await Promise.all([getSettings(), getLocale()]);
+	const appUrl = getAppUrl();
+	const ogImage = data.og_image_url || data.logo_url;
 
 	return {
 		metadataBase: new URL(appUrl),
@@ -29,18 +67,21 @@ export async function generateMetadata(): Promise<Metadata> {
 		},
 		description: data.description ?? undefined,
 		icons: data.logo_url ? { icon: data.logo_url } : undefined,
+		verification: data.google_site_verification ? { google: data.google_site_verification } : undefined,
 		openGraph: {
 			title: data.app_name,
 			description: data.description ?? undefined,
 			siteName: data.app_name,
-			images: data.logo_url ? [{ url: data.logo_url }] : undefined,
+			url: appUrl,
+			locale: OG_LOCALE_MAP[locale as TContentLocale] ?? OG_LOCALE_MAP.id,
+			images: ogImage ? [{ url: ogImage }] : undefined,
 			type: 'website',
 		},
 		twitter: {
-			card: 'summary',
+			card: ogImage ? 'summary_large_image' : 'summary',
 			title: data.app_name,
 			description: data.description ?? undefined,
-			images: data.logo_url ? [data.logo_url] : undefined,
+			images: ogImage ? [ogImage] : undefined,
 		},
 	};
 }
@@ -62,15 +103,46 @@ export default async function RootLayout({
 }>) {
 	const [{ data }, locale] = await Promise.all([getSettings(), getLocale()]);
 	const primaryColor = data.primary_color;
+	const { ga_id: gaId, gtm_id: gtmId } = data;
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
 			<body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+				<script
+					type="application/ld+json"
+					dangerouslySetInnerHTML={{ __html: JSON.stringify(buildOrganizationJsonLd(data, getAppUrl())) }}
+				/>
+
 				{primaryColor && (
 					<style dangerouslySetInnerHTML={{
 						__html: `:root,.dark{--primary:${primaryColor};--primary-foreground:${getReadableForeground(primaryColor)};}`,
 					}}
 					/>
+				)}
+
+				{gtmId && (
+					<>
+						<Script id="gtm-script" strategy="afterInteractive">
+							{`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}
+						</Script>
+						<noscript>
+							<iframe
+								src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+								height="0"
+								width="0"
+								style={{ display: 'none', visibility: 'hidden' }}
+							/>
+						</noscript>
+					</>
+				)}
+
+				{gaId && (
+					<>
+						<Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive" />
+						<Script id="ga-script" strategy="afterInteractive">
+							{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`}
+						</Script>
+					</>
 				)}
 
 				<Providers>

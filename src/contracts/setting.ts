@@ -18,6 +18,7 @@ export const SETTING_GROUPS = {
 	LEGAL: 'legal',
 	APPEARANCE: 'appearance',
 	BANNER: 'banner',
+	SEO: 'seo',
 } as const;
 
 export type TSettingGroup = (typeof SETTING_GROUPS)[keyof typeof SETTING_GROUPS];
@@ -43,6 +44,10 @@ export const SETTING_KEYS = {
 	BANNERS: 'banners',
 	DEFAULT_CONTENT_LOCALE: 'default_content_locale',
 	LANGUAGE_SWITCHER_ENABLED: 'language_switcher_enabled',
+	GA_ID: 'ga_id',
+	GTM_ID: 'gtm_id',
+	GOOGLE_SITE_VERIFICATION: 'google_site_verification',
+	OG_IMAGE_URL: 'og_image_url',
 } as const;
 
 export type TSettingKey = (typeof SETTING_KEYS)[keyof typeof SETTING_KEYS];
@@ -69,6 +74,10 @@ export const SETTING_KEY_GROUP_MAP: Record<TSettingKey, TSettingGroup> = {
 	[SETTING_KEYS.BANNERS]: SETTING_GROUPS.BANNER,
 	[SETTING_KEYS.DEFAULT_CONTENT_LOCALE]: SETTING_GROUPS.REGIONAL,
 	[SETTING_KEYS.LANGUAGE_SWITCHER_ENABLED]: SETTING_GROUPS.REGIONAL,
+	[SETTING_KEYS.GA_ID]: SETTING_GROUPS.SEO,
+	[SETTING_KEYS.GTM_ID]: SETTING_GROUPS.SEO,
+	[SETTING_KEYS.GOOGLE_SITE_VERIFICATION]: SETTING_GROUPS.SEO,
+	[SETTING_KEYS.OG_IMAGE_URL]: SETTING_GROUPS.SEO,
 };
 
 /** Keys that are stored per content locale (see `AppSettingsTable.locale`) instead of a single global row. */
@@ -174,6 +183,10 @@ export const updateSettingSchema = z.object({
 	primary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color (e.g. #171717)').optional().or(z.literal('')),
 	default_content_locale: z.enum(CONTENT_LOCALES).optional(),
 	language_switcher_enabled: z.boolean().optional(),
+	ga_id: z.string().regex(/^G-[A-Z0-9]+$/, 'Must be a valid GA4 Measurement ID (e.g. G-XXXXXXXXXX)').optional().or(z.literal('')),
+	gtm_id: z.string().regex(/^GTM-[A-Z0-9]+$/, 'Must be a valid GTM Container ID (e.g. GTM-XXXXXXX)').optional().or(z.literal('')),
+	google_site_verification: z.string().optional(),
+	og_image_url: z.string().optional(),
 	translations: settingTranslationsSchema.optional(),
 });
 
@@ -204,6 +217,10 @@ export const settingSchema = z.object({
 	banners: z.array(bannerItemSchema),
 	default_content_locale: z.enum(CONTENT_LOCALES),
 	language_switcher_enabled: z.boolean(),
+	ga_id: z.string().nullable(),
+	gtm_id: z.string().nullable(),
+	google_site_verification: z.string().nullable(),
+	og_image_url: z.string().nullable(),
 	translations: settingTranslationsSchema,
 });
 

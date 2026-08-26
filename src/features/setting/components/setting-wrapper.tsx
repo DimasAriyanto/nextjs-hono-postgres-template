@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Building2, Contact, GalleryHorizontal, Globe2, HelpCircle, Info, Languages, Loader2, Palette, Scale, X } from 'lucide-react';
+import { Building2, Contact, GalleryHorizontal, Globe2, HelpCircle, Info, Languages, Loader2, Palette, Scale, Search, X } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -116,6 +116,8 @@ export function SettingWrapper() {
 
 	const [logoFiles, setLogoFiles] = useState<File[]>([]);
 	const [replacingLogo, setReplacingLogo] = useState(false);
+	const [ogImageFiles, setOgImageFiles] = useState<File[]>([]);
+	const [replacingOgImage, setReplacingOgImage] = useState(false);
 	const [contentLocale, setContentLocale] = useState<TContentLocale>(DEFAULT_CONTENT_LOCALE);
 
 	const updateMutation = useUpdateSettings();
@@ -139,6 +141,10 @@ export function SettingWrapper() {
 			primary_color: '',
 			default_content_locale: DEFAULT_CONTENT_LOCALE,
 			language_switcher_enabled: true,
+			ga_id: '',
+			gtm_id: '',
+			google_site_verification: '',
+			og_image_url: '',
 			translations: {
 				about_content: { id: '', en: '' },
 				terms_of_service: { id: '', en: '' },
@@ -164,6 +170,10 @@ export function SettingWrapper() {
 				primary_color: settings.primary_color ?? '',
 				default_content_locale: settings.default_content_locale,
 				language_switcher_enabled: settings.language_switcher_enabled,
+				ga_id: settings.ga_id ?? '',
+				gtm_id: settings.gtm_id ?? '',
+				google_site_verification: settings.google_site_verification ?? '',
+				og_image_url: settings.og_image_url ?? '',
 				translations: settings.translations,
 			}
 			: undefined,
@@ -178,6 +188,7 @@ export function SettingWrapper() {
 
 	const onSubmit = async (values: TUpdateSettingRequest) => {
 		let logoUrl = values.logo_url;
+		let ogImageUrl = values.og_image_url;
 
 		if (logoFiles[0]) {
 			try {
@@ -189,12 +200,24 @@ export function SettingWrapper() {
 			}
 		}
 
+		if (ogImageFiles[0]) {
+			try {
+				const res = await uploadImageMutation.mutateAsync({ file: ogImageFiles[0], folder: 'settings' });
+				ogImageUrl = res.data.url;
+			} catch (err) {
+				toastUploadError(err, 'OG image');
+				return;
+			}
+		}
+
 		updateMutation.mutate(
-			{ ...values, logo_url: logoUrl },
+			{ ...values, logo_url: logoUrl, og_image_url: ogImageUrl },
 			{
 				onSuccess: () => {
 					setLogoFiles([]);
 					setReplacingLogo(false);
+					setOgImageFiles([]);
+					setReplacingOgImage(false);
 					toast.success('Settings updated', { description: 'Your settings have been updated successfully.' });
 				},
 				onError: (err) => toast.error('Failed to update settings', { description: err.message }),
@@ -239,6 +262,7 @@ export function SettingWrapper() {
 							<TabsTrigger value="banner"><GalleryHorizontal className="size-3.5 mr-1.5" />Banner</TabsTrigger>
 							<TabsTrigger value="faq"><HelpCircle className="size-3.5 mr-1.5" />FAQ</TabsTrigger>
 							<TabsTrigger value="legal"><Scale className="size-3.5 mr-1.5" />Legal</TabsTrigger>
+							<TabsTrigger value="seo"><Search className="size-3.5 mr-1.5" />SEO</TabsTrigger>
 						</TabsList>
 
 						{/* ── General ── */}
@@ -566,6 +590,79 @@ export function SettingWrapper() {
 										<FormItem>
 											<FormLabel>Privacy Policy</FormLabel>
 											<RichTextEditor key={contentLocale} content={field.value ?? ''} onChange={field.onChange} placeholder="Write your privacy policy..." />
+											<FormMessage />
+										</FormItem>
+									)} />
+								</CardContent>
+							</Card>
+						</TabsContent>
+
+						{/* ── SEO ── */}
+						<TabsContent value="seo">
+							<Card>
+								<CardContent className="pt-6 space-y-4">
+									<div className="grid gap-2">
+										<FormLabel>OG Image (Social Share Image)</FormLabel>
+										{settings?.og_image_url && !replacingOgImage && ogImageFiles.length === 0 ? (
+											<div className="relative h-32 w-56">
+												<div className="h-32 w-56 overflow-hidden rounded-md ring-1 ring-border bg-muted relative">
+													<Image src={settings.og_image_url} alt="OG Image" fill className="object-cover" />
+												</div>
+												<button
+													type="button"
+													onClick={() => setReplacingOgImage(true)}
+													disabled={isSaving}
+													className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-background hover:bg-foreground/80 transition-colors disabled:opacity-50"
+												>
+													<X className="size-3.5" />
+												</button>
+											</div>
+										) : (
+											<FileUpload
+												compact
+												compactShape="square"
+												compactSize={128}
+												accept="image/*"
+												maxSize={5 * 1024 * 1024}
+												value={ogImageFiles}
+												onChange={setOgImageFiles}
+												disabled={isSaving}
+											/>
+										)}
+										<p className="text-sm text-muted-foreground">
+											Shown when a page is shared on WhatsApp, Facebook, X, etc. Recommended size 1200×630. Falls back to the Logo above if left empty.
+										</p>
+									</div>
+
+									<FormField control={form.control} name="ga_id" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Google Analytics Measurement ID</FormLabel>
+											<FormControl><Input {...field} placeholder="G-XXXXXXXXXX" disabled={isSaving} /></FormControl>
+											<p className="text-sm text-muted-foreground">
+												From Google Analytics: Admin → Data Streams → your stream → Measurement ID.
+											</p>
+											<FormMessage />
+										</FormItem>
+									)} />
+
+									<FormField control={form.control} name="gtm_id" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Google Tag Manager Container ID</FormLabel>
+											<FormControl><Input {...field} placeholder="GTM-XXXXXXX" disabled={isSaving} /></FormControl>
+											<p className="text-sm text-muted-foreground">
+												From Google Tag Manager: top of the workspace, next to your container name.
+											</p>
+											<FormMessage />
+										</FormItem>
+									)} />
+
+									<FormField control={form.control} name="google_site_verification" render={({ field }) => (
+										<FormItem>
+											<FormLabel>Google Search Console Verification</FormLabel>
+											<FormControl><Input {...field} placeholder="content value from the HTML tag verification method" disabled={isSaving} /></FormControl>
+											<p className="text-sm text-muted-foreground">
+												From Search Console: Settings → Ownership verification → HTML tag → copy just the <code>content</code> value.
+											</p>
 											<FormMessage />
 										</FormItem>
 									)} />

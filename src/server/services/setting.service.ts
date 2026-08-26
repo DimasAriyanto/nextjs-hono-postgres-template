@@ -49,6 +49,10 @@ const DEFAULTS: TSetting = {
 	banners: [],
 	default_content_locale: isContentLocale(process.env.DEFAULT_CONTENT_LOCALE) ? process.env.DEFAULT_CONTENT_LOCALE : DEFAULT_CONTENT_LOCALE,
 	language_switcher_enabled: process.env.LANGUAGE_SWITCHER_ENABLED !== 'false',
+	ga_id: null,
+	gtm_id: null,
+	google_site_verification: null,
+	og_image_url: null,
 	translations: {
 		about_content: { id: null, en: null },
 		terms_of_service: { id: null, en: null },
@@ -107,6 +111,10 @@ export class SettingService {
 			banners: resolved(SETTING_KEYS.BANNERS, DEFAULTS.banners),
 			default_content_locale: defaultContentLocale,
 			language_switcher_enabled: global(SETTING_KEYS.LANGUAGE_SWITCHER_ENABLED, DEFAULTS.language_switcher_enabled),
+			ga_id: global(SETTING_KEYS.GA_ID, DEFAULTS.ga_id),
+			gtm_id: global(SETTING_KEYS.GTM_ID, DEFAULTS.gtm_id),
+			google_site_verification: global(SETTING_KEYS.GOOGLE_SITE_VERIFICATION, DEFAULTS.google_site_verification),
+			og_image_url: global(SETTING_KEYS.OG_IMAGE_URL, DEFAULTS.og_image_url),
 			translations: {
 				about_content: allLocales(SETTING_KEYS.ABOUT_CONTENT, DEFAULTS.about_content),
 				terms_of_service: allLocales(SETTING_KEYS.TERMS_OF_SERVICE, DEFAULTS.terms_of_service),
