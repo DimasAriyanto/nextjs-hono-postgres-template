@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -16,9 +16,12 @@ import { forgotPasswordSchema, type TForgotPasswordRequest } from '@/contracts';
 import { useForgotPassword } from '@/features/auth/hooks/use-auth';
 import { ApiError } from '@/libs/api';
 import Link from 'next/link';
+import { TurnstileWidget } from '@/components/ui/turnstile';
 
 export const ForgotPasswordWrapper = () => {
 	const [isSuccess, setIsSuccess] = useState(false);
+	const [turnstileToken, setTurnstileToken] = useState('');
+	const turnstileRef = useRef<{ reset: () => void } | null>(null);
 	const t = useTranslations('auth');
 	const tForgot = useTranslations('auth.forgotPassword');
 	const {
@@ -55,7 +58,9 @@ export const ForgotPasswordWrapper = () => {
 	});
 
 	const onSubmit = (values: TForgotPasswordRequest) => {
-		mutate(values);
+		mutate({ ...values, cf_turnstile_token: turnstileToken || undefined });
+		turnstileRef.current?.reset();
+		setTurnstileToken('');
 	};
 
 	const emailValue = watch('email');
@@ -93,6 +98,13 @@ export const ForgotPasswordWrapper = () => {
 									<Button type="submit" disabled={isPending} className="w-full">
 										{isPending ? tForgot('submitting') : tForgot('submit')}
 									</Button>
+
+									<TurnstileWidget
+										onVerify={setTurnstileToken}
+										onExpire={() => setTurnstileToken('')}
+										onError={() => setTurnstileToken('')}
+										widgetRef={turnstileRef}
+									/>
 
 									<FieldDescription className="text-center">
 										{tForgot('rememberPassword')}{' '}

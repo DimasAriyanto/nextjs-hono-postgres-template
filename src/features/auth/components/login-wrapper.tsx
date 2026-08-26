@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -14,12 +14,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { GoogleAuthButton } from '@/components/google-auth-button';
+import { TurnstileWidget } from '@/components/ui/turnstile';
 import { loginSchema, type TLoginRequest } from '@/contracts';
 import { useLogin, useGoogleAuth } from '@/features/auth/hooks/use-auth';
 import { ApiError } from '@/libs/api';
 
 export const LoginWrapper = () => {
 	const [showPassword, setShowPassword] = useState(false);
+	const [turnstileToken, setTurnstileToken] = useState('');
+	const turnstileRef = useRef<{ reset: () => void } | null>(null);
 	const t = useTranslations('auth');
 	const tLogin = useTranslations('auth.login');
 
@@ -70,7 +73,9 @@ export const LoginWrapper = () => {
 	});
 
 	const onSubmit = (values: TLoginRequest) => {
-		mutate(values);
+		mutate({ ...values, cf_turnstile_token: turnstileToken || undefined });
+		turnstileRef.current?.reset();
+		setTurnstileToken('');
 	};
 
 	const handleGoogleSuccess = (credential: string) => {
@@ -89,6 +94,7 @@ export const LoginWrapper = () => {
 			</Link>
 			<Card className="overflow-hidden p-0">
 				<CardContent className="grid p-0 md:grid-cols-2">
+					{/* eslint-disable-next-line react-hooks/refs -- onSubmit only reads turnstileRef.current inside the submit event handler itself, never during render */}
 					<form className="p-6 md:p-8" onSubmit={handleSubmit(onSubmit)}>
 						<FieldGroup>
 							<div className="flex flex-col items-center gap-2 text-center">
@@ -126,6 +132,13 @@ export const LoginWrapper = () => {
 							<Button type="submit" disabled={isPending} className="w-full">
 								{isPending ? tLogin('submitting') : tLogin('submit')}
 							</Button>
+
+							<TurnstileWidget
+								onVerify={setTurnstileToken}
+								onExpire={() => setTurnstileToken('')}
+								onError={() => setTurnstileToken('')}
+								widgetRef={turnstileRef}
+							/>
 
 							<FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">{t('orContinueWith')}</FieldSeparator>
 

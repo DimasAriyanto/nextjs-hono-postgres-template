@@ -10,6 +10,7 @@ import { z } from 'zod';
 export const loginSchema = z.object({
 	email: z.string().min(1, 'Email is required').email('Invalid email format'),
 	password: z.string().min(1, 'Password is required'),
+	cf_turnstile_token: z.string().optional(),
 });
 
 export type TLoginRequest = z.infer<typeof loginSchema>;
@@ -23,6 +24,7 @@ export const registerSchema = z
 		password: z.string().min(6, 'Password must be at least 6 characters'),
 		password_confirmation: z.string().min(1, 'Password confirmation is required'),
 		title: z.string().optional(),
+		cf_turnstile_token: z.string().optional(),
 	})
 	.refine((data) => data.password === data.password_confirmation, {
 		message: 'Passwords do not match',
@@ -71,6 +73,7 @@ export type TGoogleAuthRequest = z.infer<typeof googleAuthSchema>;
  */
 export const forgotPasswordSchema = z.object({
 	email: z.string().min(1, 'Email is required').email('Invalid email format'),
+	cf_turnstile_token: z.string().optional(),
 });
 
 export type TForgotPasswordRequest = z.infer<typeof forgotPasswordSchema>;
