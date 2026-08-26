@@ -38,12 +38,13 @@ export class NotificationService {
 	}
 
 	/**
-	 * Get a single notification by ID
+	 * Get a single notification by ID — scoped to its recipient so one user can't
+	 * read another user's notification by guessing/incrementing the id.
 	 */
-	async getNotificationById(id: string) {
+	async getNotificationById(id: string, recipientId: string) {
 		const notification = await notificationRepository.findById(id);
 
-		if (!notification) {
+		if (!notification || notification.recipient_id !== recipientId) {
 			throw new NotFoundError('Notification');
 		}
 

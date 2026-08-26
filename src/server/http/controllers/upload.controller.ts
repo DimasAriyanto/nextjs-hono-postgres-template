@@ -1,5 +1,6 @@
 import { Context } from 'hono';
 import { getStorage } from '@/server/utils/storage';
+import { isAllowedUploadFolder, IMAGE_MIME_EXT, VIDEO_MIME_EXT, documentExtFromMime } from '@/server/utils/storage/upload-policy';
 import { response } from '@/server/http/response';
 import { ValidationError } from '@/server/errors';
 
@@ -30,6 +31,16 @@ function formatMB(bytes: number): string {
 	return `${(bytes / (1024 * 1024)).toFixed(bytes % (1024 * 1024) === 0 ? 0 : 1)} MB`;
 }
 
+function validateFolder(formData: FormData): string {
+	const folder = (formData.get('folder') as string | null) ?? 'uploads';
+
+	if (!isAllowedUploadFolder(folder)) {
+		throw new ValidationError('Validation failed', { folder: ['Invalid upload folder'] });
+	}
+
+	return folder;
+}
+
 export const uploadController = {
 	/**
 	 * POST /uploads/image
@@ -38,14 +49,15 @@ export const uploadController = {
 	async image(c: Context) {
 		const formData = await c.req.formData();
 		const file = formData.get('file');
-		const folder = (formData.get('folder') as string | null) ?? 'uploads';
+		const folder = validateFolder(formData);
 
 		if (!file || !(file instanceof File)) {
 			throw new ValidationError('Validation failed', { file: ['File is required'] });
 		}
 
-		if (!file.type.startsWith('image/')) {
-			throw new ValidationError('Validation failed', { file: ['Only image files are allowed'] });
+		const ext = IMAGE_MIME_EXT[file.type];
+		if (!ext) {
+			throw new ValidationError('Validation failed', { file: ['Only PNG, JPEG, GIF, or WEBP images are allowed'] });
 		}
 
 		if (file.size > MAX_IMAGE_SIZE) {
@@ -53,7 +65,7 @@ export const uploadController = {
 		}
 
 		const storage = getStorage();
-		const result = await storage.upload(file, folder);
+		const result = await storage.upload(file, folder, ext);
 
 		return response.ok(c, { url: result.url, path: result.path }, 'Upload successful');
 	},
@@ -65,14 +77,15 @@ export const uploadController = {
 	async video(c: Context) {
 		const formData = await c.req.formData();
 		const file = formData.get('file');
-		const folder = (formData.get('folder') as string | null) ?? 'uploads';
+		const folder = validateFolder(formData);
 
 		if (!file || !(file instanceof File)) {
 			throw new ValidationError('Validation failed', { file: ['File is required'] });
 		}
 
-		if (!file.type.startsWith('video/')) {
-			throw new ValidationError('Validation failed', { file: ['Only video files are allowed'] });
+		const ext = VIDEO_MIME_EXT[file.type];
+		if (!ext) {
+			throw new ValidationError('Validation failed', { file: ['Only MP4, WEBM, MOV, or OGG videos are allowed'] });
 		}
 
 		if (file.size > MAX_VIDEO_SIZE) {
@@ -80,7 +93,7 @@ export const uploadController = {
 		}
 
 		const storage = getStorage();
-		const result = await storage.upload(file, folder);
+		const result = await storage.upload(file, folder, ext);
 
 		return response.ok(c, { url: result.url, path: result.path }, 'Upload successful');
 	},
@@ -93,7 +106,7 @@ export const uploadController = {
 	async document(c: Context) {
 		const formData = await c.req.formData();
 		const file = formData.get('file');
-		const folder = (formData.get('folder') as string | null) ?? 'uploads';
+		const folder = validateFolder(formData);
 
 		if (!file || !(file instanceof File)) {
 			throw new ValidationError('Validation failed', { file: ['File is required'] });
@@ -108,7 +121,7 @@ export const uploadController = {
 		}
 
 		const storage = getStorage();
-		const result = await storage.upload(file, folder);
+		const result = await storage.upload(file, folder, documentExtFromMime(file.type));
 
 		return response.ok(c, { url: result.url, path: result.path }, 'Upload successful');
 	},

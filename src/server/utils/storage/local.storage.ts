@@ -5,12 +5,11 @@ import { StorageProvider, UploadResult } from './storage.interface';
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads');
 
 export class LocalStorageProvider implements StorageProvider {
-	async upload(file: File, folder: string): Promise<UploadResult> {
+	async upload(file: File, folder: string, ext: string): Promise<UploadResult> {
 		const dir = path.join(UPLOAD_DIR, folder);
 		await fs.mkdir(dir, { recursive: true });
 
-		const ext = path.extname(file.name);
-		const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
+		const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 		const filePath = path.join(dir, filename);
 
 		const buffer = Buffer.from(await file.arrayBuffer());

@@ -1,7 +1,7 @@
 import { Context } from 'hono';
 import { notificationService } from '@/server/services';
 import { AuthError } from '@/server/errors';
-import { response } from '@/server/http/response';
+import { response, getPaginationParams } from '@/server/http/response';
 
 export const notificationController = {
 	/**
@@ -12,11 +12,12 @@ export const notificationController = {
 		const payload = c.get('user') as { auid: string };
 		if (!payload?.auid) throw AuthError.unauthorized();
 
-		const { page, limit, is_read } = c.req.query();
+		const { page, limit } = getPaginationParams(c);
+		const is_read = c.req.query('is_read');
 
 		const result = await notificationService.getUserNotifications(payload.auid, {
-			page: page ? Number(page) : 1,
-			limit: limit ? Number(limit) : 20,
+			page,
+			limit,
 			isRead: is_read !== undefined ? is_read === 'true' : undefined,
 		});
 
@@ -45,18 +46,20 @@ export const notificationController = {
 		if (!payload?.auid) throw AuthError.unauthorized();
 
 		const id = c.req.param('id') as string;
-		const notification = await notificationService.getNotificationById(id);
+		const notification = await notificationService.getNotificationById(id, payload.auid);
 
 		return response.ok(c, notification);
 	},
 
 	/**
 	 * POST /notifications
-	 * Create a notification (admin use)
+	 * Create a notification for another user — admin only, since it lets the caller
+	 * target an arbitrary recipient_id.
 	 */
 	async create(c: Context) {
 		const payload = c.get('user') as { auid: string };
 		if (!payload?.auid) throw AuthError.unauthorized();
+		if (c.get('role') !== 'admin') throw AuthError.forbidden();
 
 		const body = await c.req.json();
 		const notification = await notificationService.createNotification({

@@ -17,8 +17,7 @@ export class SupabaseStorageProvider implements StorageProvider {
 		);
 	}
 
-	async upload(file: File, folder: string): Promise<UploadResult> {
-		const ext = file.name.split('.').pop();
+	async upload(file: File, folder: string, ext: string): Promise<UploadResult> {
 		const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 		const storagePath = `${folder}/${filename}`;
 
