@@ -1,5 +1,6 @@
 import type { Context } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
+import { HTTPException } from 'hono/http-exception';
 import { AppError, ValidationError } from './app-error';
 import { getHttpStatus, getErrorTypeName } from './error-codes';
 
@@ -53,6 +54,12 @@ export function errorHandler(err: Error, c: Context) {
 		const details = err instanceof ValidationError ? err.fields : err.details;
 
 		return c.json(createErrorResponse(err.code, err.message, details), status);
+	}
+
+	// Built-in Hono middleware (csrf, bodyLimit, etc.) throws this — preserve its real
+	// status (403, 413, ...) instead of collapsing everything to 500 below.
+	if (err instanceof HTTPException) {
+		return c.json(createErrorResponse('HTTP_ERROR', err.message || 'Request failed'), err.status);
 	}
 
 	// Handle unknown errors
