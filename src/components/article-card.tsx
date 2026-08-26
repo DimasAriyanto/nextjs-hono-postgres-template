@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ImageOff } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { formatTZ } from '@/libs/dayjs';
 import type { TArticleWithAuthor } from '@/contracts';
 
@@ -29,6 +30,9 @@ export function ArticleCard({ article }: ArticleCardProps) {
 				)}
 			</div>
 			<div className="flex flex-1 flex-col gap-2 p-4">
+				{article.category?.name && (
+					<Badge variant="secondary" className="w-fit text-xs">{article.category.name}</Badge>
+				)}
 				{article.published_at && (
 					<span className="text-xs text-muted-foreground">{formatTZ(article.published_at, 'D MMMM YYYY')}</span>
 				)}

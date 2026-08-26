@@ -1,12 +1,42 @@
 import { Clock, ExternalLink, Mail, MapPin, Phone } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { getSettings } from '@/features/setting/apis/setting.api';
+import { getAppUrl, toJsonLdScript } from '@/libs/seo';
 import { Icon } from '@/components/icon';
 import { getSocialPlatform } from '@/components/social-platforms';
+import type { TSetting } from '@/contracts';
 
 /** Only Google Maps' dedicated embed URL format is allowed to be framed — regular share/place links refuse to render inside an <iframe>. */
 function isEmbeddableMapsUrl(url: string): boolean {
 	return url.includes('/maps/embed') || url.includes('output=embed');
+}
+
+/**
+ * `LocalBusiness` JSON-LD so this page can surface in local/"near me" search and Google Maps.
+ * Only emitted when an address is configured — that's the minimum Google expects for the type.
+ */
+function buildLocalBusinessJsonLd(settings: TSetting, appUrl: string) {
+	const openingHours = settings.business_hours
+		.filter((row) => !row.is_closed && row.open_time && row.close_time)
+		.map((row) => ({
+			'@type': 'OpeningHoursSpecification',
+			dayOfWeek: `https://schema.org/${row.day.charAt(0).toUpperCase()}${row.day.slice(1)}`,
+			opens: row.open_time,
+			closes: row.close_time,
+		}));
+
+	return {
+		'@context': 'https://schema.org',
+		'@type': 'LocalBusiness',
+		name: settings.app_name,
+		image: settings.logo_url ?? undefined,
+		url: appUrl,
+		address: { '@type': 'PostalAddress', streetAddress: settings.address ?? undefined },
+		telephone: settings.contact_phone ?? undefined,
+		email: settings.contact_email ?? undefined,
+		sameAs: settings.social_links.length > 0 ? settings.social_links.map((link) => link.url) : undefined,
+		openingHoursSpecification: openingHours.length > 0 ? openingHours : undefined,
+	};
 }
 
 export async function ContactPageWrapper() {
@@ -17,6 +47,13 @@ export async function ContactPageWrapper() {
 
 	return (
 		<article className="container mx-auto max-w-3xl px-4 md:px-6 py-16">
+			{settings.address && (
+				<script
+					type="application/ld+json"
+					dangerouslySetInnerHTML={{ __html: toJsonLdScript(buildLocalBusinessJsonLd(settings, getAppUrl())) }}
+				/>
+			)}
+
 			<h1 className="text-2xl font-bold tracking-tight sm:text-4xl">{t('title')}</h1>
 			<p className="mt-4 text-muted-foreground">
 				{t('haveQuestion', { appName: settings.app_name })}

@@ -6,6 +6,7 @@ import { permissionsRoutes } from './permissions.routes';
 import { notificationRoutes } from './notification.routes';
 import { uploadRoutes } from './upload.routes';
 import { articlesRoutes } from './articles.routes';
+import { articleCategoriesRoutes } from './article-categories.routes';
 import { settingsRoutes } from './settings.routes';
 
 // Mount routes (chained so the type accumulates for Hono RPC client inference)
@@ -17,6 +18,7 @@ export const apiRoutes = new Hono()
 	.route('/notifications', notificationRoutes)
 	.route('/uploads', uploadRoutes)
 	.route('/articles', articlesRoutes)
+	.route('/article-categories', articleCategoriesRoutes)
 	.route('/settings', settingsRoutes);
 
-export { authRoutes, usersRoutes, rolesRoutes, permissionsRoutes, notificationRoutes, uploadRoutes, articlesRoutes, settingsRoutes };
+export { authRoutes, usersRoutes, rolesRoutes, permissionsRoutes, notificationRoutes, uploadRoutes, articlesRoutes, articleCategoriesRoutes, settingsRoutes };

@@ -19,5 +19,8 @@ export * from './notification';
 // Article
 export * from './article';
 
+// Article Category
+export * from './article-category';
+
 // Setting
 export * from './setting';

@@ -1,5 +1,22 @@
 import type { Metadata, ResolvingMetadata } from 'next';
 
+/** The app's public base URL, used for `metadataBase`, canonical/OG `url` fields and JSON-LD `@id`s. */
+export function getAppUrl(): string {
+	return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+}
+
+/**
+ * Serializes a JSON-LD object for embedding in a `<script type="application/ld+json">` tag via
+ * `dangerouslySetInnerHTML`. `JSON.stringify` does not escape angle brackets, so admin-editable
+ * text (article tags, FAQ answers, business address, ...) containing a literal closing script tag
+ * would otherwise terminate the tag early and let the rest be parsed as live HTML/script — this
+ * replaces every angle bracket with its unicode escape, which is a no-op inside a JSON string but
+ * is no longer a tag delimiter once it reaches the browser's HTML parser.
+ */
+export function toJsonLdScript(data: unknown): string {
+	return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 /**
  * Extends the parent (root layout) `openGraph`/`twitter` metadata with this page's own
  * title/description/url instead of replacing them outright. Next.js merges nested metadata

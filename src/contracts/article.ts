@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { articleCategorySchema } from './article-category';
 
 // ============================================
 // REQUEST SCHEMAS
@@ -18,6 +19,8 @@ export const createArticleSchema = z.object({
 	content: z.string().min(1, 'Content is required'),
 	thumbnail_url: z.string().optional(),
 	status: articleStatusSchema.optional(),
+	category_id: z.string().uuid('Invalid category').nullable().optional(),
+	tags: z.array(z.string().min(1)).optional(),
 });
 
 export type TCreateArticleRequest = z.infer<typeof createArticleSchema>;
@@ -32,6 +35,8 @@ export const updateArticleSchema = z.object({
 	content: z.string().min(1, 'Content is required').optional(),
 	thumbnail_url: z.string().optional(),
 	status: articleStatusSchema.optional(),
+	category_id: z.string().uuid('Invalid category').nullable().optional(),
+	tags: z.array(z.string().min(1)).optional(),
 });
 
 export type TUpdateArticleRequest = z.infer<typeof updateArticleSchema>;
@@ -53,6 +58,8 @@ export const articleSchema = z.object({
 	status: articleStatusSchema,
 	published_at: z.string().nullable().optional(),
 	author_id: z.string().nullable().optional(),
+	category_id: z.string().nullable().optional(),
+	tags: z.array(z.string()),
 	created_at: z.string(),
 	updated_at: z.string(),
 	created_by: z.string().nullable().optional(),
@@ -66,6 +73,7 @@ export type TArticle = z.infer<typeof articleSchema>;
  */
 export const articleWithAuthorSchema = articleSchema.extend({
 	author: z.unknown().nullable().optional(),
+	category: articleCategorySchema.nullable().optional(),
 });
 
 export type TArticleWithAuthor = z.infer<typeof articleWithAuthorSchema>;

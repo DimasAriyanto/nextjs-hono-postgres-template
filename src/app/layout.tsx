@@ -7,11 +7,8 @@ import { getLocale } from 'next-intl/server';
 import { Toaster } from '@/components/ui/sonner';
 import { Providers } from '@/providers';
 import { getSettings } from '@/features/setting/apis/setting.api';
+import { getAppUrl, toJsonLdScript } from '@/libs/seo';
 import type { TContentLocale, TSetting } from '@/contracts';
-
-function getAppUrl(): string {
-	return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-}
 
 /** Open Graph expects an underscore locale tag (e.g. `id_ID`), not the bare content locale we store. */
 const OG_LOCALE_MAP: Record<TContentLocale, string> = {
@@ -110,7 +107,7 @@ export default async function RootLayout({
 			<body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
 				<script
 					type="application/ld+json"
-					dangerouslySetInnerHTML={{ __html: JSON.stringify(buildOrganizationJsonLd(data, getAppUrl())) }}
+					dangerouslySetInnerHTML={{ __html: toJsonLdScript(buildOrganizationJsonLd(data, getAppUrl())) }}
 				/>
 
 				{primaryColor && (

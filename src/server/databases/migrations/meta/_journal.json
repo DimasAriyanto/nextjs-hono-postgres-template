@@ -50,6 +50,13 @@
       "when": 1787539240819,
       "tag": "0006_backfill_content_locale",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787710198001,
+      "tag": "0007_awesome_turbo",
+      "breakpoints": true
     }
   ]
 }

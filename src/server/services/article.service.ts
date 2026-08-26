@@ -62,6 +62,8 @@ export class ArticleService {
 		content: string;
 		thumbnail_url?: string;
 		status?: TArticleStatus;
+		category_id?: string | null;
+		tags?: string[];
 		created_by?: string;
 	}) {
 		const slug = await this.resolveUniqueSlug(data.slug || data.title);
@@ -76,6 +78,8 @@ export class ArticleService {
 			status,
 			published_at: status === 'published' ? new Date().toISOString() : null,
 			author_id: data.created_by,
+			category_id: data.category_id,
+			tags: data.tags,
 			created_by: data.created_by,
 		};
 
@@ -94,6 +98,8 @@ export class ArticleService {
 			content?: string;
 			thumbnail_url?: string;
 			status?: TArticleStatus;
+			category_id?: string | null;
+			tags?: string[];
 			updated_by?: string;
 		}
 	) {
@@ -108,6 +114,8 @@ export class ArticleService {
 			content: data.content,
 			thumbnail_url: data.thumbnail_url,
 			status: data.status,
+			category_id: data.category_id,
+			tags: data.tags,
 			updated_by: data.updated_by,
 		};
 
@@ -157,7 +165,7 @@ export class ArticleService {
 		let suffix = 1;
 
 		while (true) {
-			const existing = await articleRepository.findBySlug(candidate);
+			const existing = await articleRepository.findBySlugLite(candidate);
 			if (!existing || existing.id === excludeId) {
 				return candidate;
 			}

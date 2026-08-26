@@ -1,7 +1,7 @@
 import type { Metadata, ResolvingMetadata } from 'next';
 import { getPublicArticleBySlugSafe } from '@/features/article/apis/article.api';
 import { ArticleDetailWrapper } from '@/features/article';
-import { extendParentSocialMetadata } from '@/libs/seo';
+import { extendParentSocialMetadata, getAppUrl, toJsonLdScript } from '@/libs/seo';
 
 type Props = {
 	params: Promise<{ slug: string }>;
@@ -48,6 +48,8 @@ function buildArticleJsonLd(article: NonNullable<Awaited<ReturnType<typeof getPu
 		datePublished: article.published_at ?? undefined,
 		dateModified: article.updated_at,
 		author: authorName ? { '@type': 'Person', name: authorName } : undefined,
+		articleSection: article.category?.name ?? undefined,
+		keywords: article.tags.length > 0 ? article.tags.join(', ') : undefined,
 		mainEntityOfPage: { '@type': 'WebPage', '@id': `${appUrl}/articles/${article.slug}` },
 	};
 }
@@ -55,14 +57,14 @@ function buildArticleJsonLd(article: NonNullable<Awaited<ReturnType<typeof getPu
 export default async function ArticleDetailPage({ params }: Props) {
 	const { slug } = await params;
 	const article = await getPublicArticleBySlugSafe(slug);
-	const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+	const appUrl = getAppUrl();
 
 	return (
 		<>
 			{article && (
 				<script
 					type="application/ld+json"
-					dangerouslySetInnerHTML={{ __html: JSON.stringify(buildArticleJsonLd(article, appUrl)) }}
+					dangerouslySetInnerHTML={{ __html: toJsonLdScript(buildArticleJsonLd(article, appUrl)) }}
 				/>
 			)}
 			<ArticleDetailWrapper slug={slug} />

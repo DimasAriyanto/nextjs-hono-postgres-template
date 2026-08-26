@@ -4,6 +4,7 @@ import { type LegacyColumnDef as ColumnDef } from '@tanstack/react-table/legacy'
 import { Edit, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { formatTZ } from '@/libs/dayjs';
 import type { TArticleWithAuthor } from '@/contracts';
@@ -49,6 +50,17 @@ export const createArticleColumns = ({ onEdit, onDelete, onToggleStatus, togglin
 		cell: ({ row }) => {
 			const author = row.original.author as { name?: string | null; email?: string } | null | undefined;
 			return <span className="text-sm text-muted-foreground">{author?.name || author?.email || '-'}</span>;
+		},
+		enableSorting: false,
+	},
+	{
+		id: 'category',
+		header: ({ column }) => <DataTableColumnHeader column={column} title="Category" />,
+		cell: ({ row }) => {
+			const category = row.original.category;
+			return category?.name
+				? <Badge variant="outline">{category.name}</Badge>
+				: <span className="text-sm text-muted-foreground">-</span>;
 		},
 		enableSorting: false,
 	},

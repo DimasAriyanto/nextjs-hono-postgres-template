@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { formatTZ } from '@/libs/dayjs';
 import { ArticleCard } from '@/components/article-card';
+import { Badge } from '@/components/ui/badge';
 import { getPublicArticleBySlugSafe, getRelatedArticles } from '@/features/article/apis/article.api';
 
 interface ArticleDetailWrapperProps {
@@ -27,6 +28,7 @@ export async function ArticleDetailWrapper({ slug }: ArticleDetailWrapperProps) 
 			</Link>
 
 			<header className="mt-6 space-y-3">
+				{article.category?.name && <Badge variant="secondary">{article.category.name}</Badge>}
 				<h1 className="text-2xl font-bold tracking-tight sm:text-4xl">{article.title}</h1>
 				<div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
 					{article.published_at && <span>{formatTZ(article.published_at, 'D MMMM YYYY')}</span>}
@@ -37,6 +39,13 @@ export async function ArticleDetailWrapper({ slug }: ArticleDetailWrapperProps) 
 						</>
 					)}
 				</div>
+				{article.tags.length > 0 && (
+					<div className="flex flex-wrap gap-1.5">
+						{article.tags.map((tag) => (
+							<Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+						))}
+					</div>
+				)}
 			</header>
 
 			{article.thumbnail_url && (

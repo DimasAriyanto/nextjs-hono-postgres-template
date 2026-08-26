@@ -25,11 +25,15 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
+import { TagsInput } from '@/components/ui/tags-input';
 import { useCreateArticle, useUpdateArticle } from '@/features/article/hooks/use-article';
 import { useUploadImage } from '@/features/upload/hooks/use-upload';
+import { useArticleCategories } from '@/features/article-category/hooks/use-article-category';
 import { slugify } from '@/libs/string';
 import { getErrorMessage, toastMutationError, toastUploadError } from '@/libs/toast';
 import type { TArticleStatus, TArticleWithAuthor } from '@/contracts';
+
+const UNCATEGORIZED = '__uncategorized__';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,6 +53,8 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 	const [excerpt, setExcerpt] = useState('');
 	const [content, setContent] = useState('');
 	const [status, setStatus] = useState<TArticleStatus>('draft');
+	const [categoryId, setCategoryId] = useState<string>(UNCATEGORIZED);
+	const [tags, setTags] = useState<string[]>([]);
 	const [error, setError] = useState('');
 
 	// Thumbnail state — queued until form is submitted
@@ -58,6 +64,8 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 	const createMutation = useCreateArticle({ onSuccess: () => onClose() });
 	const updateMutation = useUpdateArticle({ onSuccess: () => onClose() });
 	const uploadImageMutation = useUploadImage();
+	const { data: categoriesRes } = useArticleCategories();
+	const categories = categoriesRes?.data ?? [];
 
 	const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
 	if (isOpen !== prevIsOpen) {
@@ -69,6 +77,8 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 			setExcerpt(article.excerpt || '');
 			setContent(article.content);
 			setStatus(article.status);
+			setCategoryId(article.category_id || UNCATEGORIZED);
+			setTags(article.tags ?? []);
 			setExistingThumbnailUrl(article.thumbnail_url || null);
 		} else {
 			setTitle('');
@@ -77,6 +87,8 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 			setExcerpt('');
 			setContent('');
 			setStatus('draft');
+			setCategoryId(UNCATEGORIZED);
+			setTags([]);
 			setExistingThumbnailUrl(null);
 		}
 		setThumbnailFiles([]);
@@ -107,6 +119,8 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 				}
 			}
 
+			const categoryPayload = categoryId === UNCATEGORIZED ? null : categoryId;
+
 			if (mode === 'create') {
 				await createMutation.mutateAsync({
 					title: title.trim(),
@@ -114,6 +128,8 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 					excerpt: excerpt.trim() || undefined,
 					content,
 					status,
+					category_id: categoryPayload,
+					tags,
 					...(thumbnailUrl ? { thumbnail_url: thumbnailUrl } : {}),
 				});
 				toast.success('Article created', { description: 'The article has been created successfully.' });
@@ -126,6 +142,8 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 						excerpt: excerpt.trim() || undefined,
 						content,
 						status,
+						category_id: categoryPayload,
+						tags,
 						...(thumbnailUrl ? { thumbnail_url: thumbnailUrl } : {}),
 					},
 				});
@@ -216,21 +234,41 @@ export function ArticleFormModal({ isOpen, onClose, article, mode }: ArticleForm
 							<Label>Content</Label>
 							<RichTextEditor content={content} onChange={(value) => { setContent(value); if (error) setError(''); }} placeholder="Write the article content..." />
 						</div>
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							<div className="grid gap-2">
+								<Label htmlFor="status">Status</Label>
+								<Select
+									value={status}
+									onValueChange={(value) => setStatus(value as TArticleStatus)}
+									disabled={isLoading}
+								>
+									<SelectTrigger id="status">
+										<SelectValue placeholder="Select status" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="draft">Draft</SelectItem>
+										<SelectItem value="published">Published</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
+							<div className="grid gap-2">
+								<Label htmlFor="category">Category</Label>
+								<Select value={categoryId} onValueChange={setCategoryId} disabled={isLoading}>
+									<SelectTrigger id="category">
+										<SelectValue placeholder="Select category" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value={UNCATEGORIZED}>Uncategorized</SelectItem>
+										{categories.map((category) => (
+											<SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+						</div>
 						<div className="grid gap-2">
-							<Label htmlFor="status">Status</Label>
-							<Select
-								value={status}
-								onValueChange={(value) => setStatus(value as TArticleStatus)}
-								disabled={isLoading}
-							>
-								<SelectTrigger>
-									<SelectValue placeholder="Select status" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="draft">Draft</SelectItem>
-									<SelectItem value="published">Published</SelectItem>
-								</SelectContent>
-							</Select>
+							<Label>Tags</Label>
+							<TagsInput value={tags} onChange={setTags} disabled={isLoading} />
 						</div>
 						{error && <p className="text-sm text-red-500">{error}</p>}
 					</div>

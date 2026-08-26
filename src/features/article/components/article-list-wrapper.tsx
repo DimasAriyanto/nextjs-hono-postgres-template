@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { parseAsInteger, useQueryState } from 'nuqs';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { FolderCog, Plus } from 'lucide-react';
 import { DataTable } from '@/components/data-table';
 import { DataTableFacetedFilter } from '@/components/data-table/data-table-faceted-filter';
 import { ExportButton } from '@/components/export-button';
@@ -12,6 +12,7 @@ import { ArticleFormModal } from './article-form-modal';
 import { PageHeader } from '@/components/page-header';
 import { useArticles, useDeleteArticle, useUpdateArticle } from '@/features/article/hooks/use-article';
 import { getArticles } from '@/features/article/apis/article.api';
+import { ManageCategoriesDialog } from '@/features/article-category';
 import { toast } from 'sonner';
 import { toastDeleteError } from '@/libs/toast';
 import { format } from 'date-fns';
@@ -38,6 +39,7 @@ export function ArticleListWrapper() {
 	const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 	const [deleteId, setDeleteId] = useState<string | null>(null);
 	const [toggleArticle, setToggleArticle] = useState<TArticleWithAuthor | null>(null);
+	const [showCategoriesDialog, setShowCategoriesDialog] = useState(false);
 	const [keywords] = useQueryState('keywords');
 	const [page] = useQueryState('page', parseAsInteger.withDefault(1));
 	const [limit] = useQueryState('limit', parseAsInteger.withDefault(10));
@@ -116,10 +118,16 @@ export function ArticleListWrapper() {
 	);
 
 	const CreateButton = () => (
-		<Button onClick={handleCreate} size="sm">
-			<Plus className="w-4 h-4 mr-2" />
-			Add Article
-		</Button>
+		<div className="flex items-center gap-2">
+			<Button onClick={() => setShowCategoriesDialog(true)} size="sm" variant="outline">
+				<FolderCog className="w-4 h-4 mr-2" />
+				Categories
+			</Button>
+			<Button onClick={handleCreate} size="sm">
+				<Plus className="w-4 h-4 mr-2" />
+				Add Article
+			</Button>
+		</div>
 	);
 
 	const ArticleExportButton = () => (
@@ -133,6 +141,8 @@ export function ArticleListWrapper() {
 					'Slug': a.slug,
 					'Status': a.status,
 					'Author': (a.author as { name?: string; email?: string } | null | undefined)?.name ?? (a.author as { email?: string } | null | undefined)?.email ?? '-',
+					'Category': a.category?.name ?? '-',
+					'Tags': a.tags.join(', '),
 					'Created At': a.created_at,
 				}));
 			}}
@@ -163,6 +173,8 @@ export function ArticleListWrapper() {
 			/>
 
 			<ArticleFormModal isOpen={showModal} onClose={handleCloseModal} article={editingArticle} mode={modalMode} />
+
+			<ManageCategoriesDialog isOpen={showCategoriesDialog} onClose={() => setShowCategoriesDialog(false)} />
 
 			<AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
 				<AlertDialogContent>

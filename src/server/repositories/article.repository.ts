@@ -23,6 +23,7 @@ export class ArticleRepository {
 			where: buildFilter(search, status),
 			with: {
 				author: true,
+				category: true,
 			},
 			orderBy: (articles, { desc }) => [desc(articles.created_at)],
 			limit,
@@ -42,9 +43,23 @@ export class ArticleRepository {
 	}
 
 	/**
-	 * Find article by slug
+	 * Find article by slug, with its author and category — used by public detail pages
 	 */
-	async findBySlug(slug: string): Promise<TSelectArticle | undefined> {
+	async findBySlug(slug: string) {
+		return db.query.ArticlesTable.findFirst({
+			where: eq(ArticlesTable.slug, slug),
+			with: {
+				author: true,
+				category: true,
+			},
+		});
+	}
+
+	/**
+	 * Find article by slug without the author/category joins — for uniqueness checks only
+	 * (e.g. the slug-collision loop when creating/updating an article), which just need the id.
+	 */
+	async findBySlugLite(slug: string): Promise<TSelectArticle | undefined> {
 		const [article] = await db.select().from(ArticlesTable).where(eq(ArticlesTable.slug, slug)).limit(1);
 
 		return article;

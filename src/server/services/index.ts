@@ -5,4 +5,5 @@ export * from './auth.service';
 export * from './email.service';
 export * from './notification.service';
 export * from './article.service';
+export * from './article-category.service';
 export * from './setting.service';
