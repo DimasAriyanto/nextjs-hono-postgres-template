@@ -11,6 +11,8 @@ export const articlesSeed = [
 <p>Explore the admin panel to manage articles, users, roles, and permissions, then start adapting the existing features to fit your own product.</p>
 `.trim(),
 		status: 'published' as const,
+		category: 'Tutorials',
+		tags: ['nextjs', 'hono', 'drizzle', 'getting-started'],
 	},
 	{
 		title: 'Why We Use Hono for the API Layer',
@@ -27,6 +29,8 @@ export const articlesSeed = [
 <p>Combined with Drizzle ORM, this gives you a predictable, type-safe path from HTTP request to database query and back.</p>
 `.trim(),
 		status: 'published' as const,
+		category: 'Backend',
+		tags: ['hono', 'api', 'backend'],
 	},
 	{
 		title: 'Understanding Authentication & Refresh Tokens',
@@ -40,5 +44,7 @@ export const articlesSeed = [
 <p>Access to admin features is controlled by roles and permissions, so you can define exactly what each type of user is allowed to see and do.</p>
 `.trim(),
 		status: 'published' as const,
+		category: 'Security',
+		tags: ['authentication', 'security', 'refresh-token'],
 	},
 ];

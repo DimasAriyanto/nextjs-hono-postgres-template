@@ -18,6 +18,7 @@ import {
 	privacyPolicyHtmlId,
 	bannersEn,
 	bannersId,
+	articleCategoriesSeed,
 	articlesSeed,
 } from './mock-data';
 
@@ -126,6 +127,17 @@ export async function seed() {
 
 	console.log('settings: ', insertedSettings);
 
+	await db
+		.insert(schema.ArticleCategoriesTable)
+		.values(articleCategoriesSeed.map((c) => ({ name: c.name, slug: slugify(c.name) })))
+		.onConflictDoNothing()
+		.returning();
+
+	const categories = await db.select().from(schema.ArticleCategoriesTable);
+	const categoryIdByName = new Map(categories.map((c) => [c.name, c.id]));
+
+	console.log('article categories: ', categories);
+
 	const [adminUser] = await db.select().from(schema.UsersTable).where(eq(schema.UsersTable.email, 'admin@gmail.com')).limit(1);
 
 	if (adminUser) {
@@ -141,6 +153,8 @@ export async function seed() {
 					status: article.status,
 					published_at: new Date().toISOString(),
 					author_id: adminUser.id,
+					category_id: categoryIdByName.get(article.category) ?? null,
+					tags: article.tags,
 				})),
 			)
 			.onConflictDoNothing()
