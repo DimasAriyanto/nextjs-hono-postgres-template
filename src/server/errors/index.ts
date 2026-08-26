@@ -4,6 +4,7 @@ export {
 	AuthError,
 	NotFoundError,
 	ConflictError,
+	RateLimitError,
 	InternalError,
 } from './app-error';
 

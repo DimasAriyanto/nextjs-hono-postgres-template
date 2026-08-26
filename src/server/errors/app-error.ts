@@ -66,6 +66,16 @@ export class AuthError extends AppError {
 }
 
 /**
+ * Rate limit error for throttled requests
+ */
+export class RateLimitError extends AppError {
+	constructor(message: string = 'Too many requests, please try again later') {
+		super('RATE_LIMIT_EXCEEDED', message);
+		this.name = 'RateLimitError';
+	}
+}
+
+/**
  * Not found error for missing resources
  */
 export class NotFoundError extends AppError {

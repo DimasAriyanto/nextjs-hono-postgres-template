@@ -1,4 +1,5 @@
 import { sign } from 'hono/jwt';
+import { OAuth2Client } from 'google-auth-library';
 import dayjs from 'dayjs';
 import { AuthError, NotFoundError, ConflictError, InternalError } from '@/server/errors';
 import { userRepository, roleRepository, permissionRepository, refreshTokenRepository } from '@/server/repositories';
@@ -6,9 +7,12 @@ import { emailService } from './email.service';
 import { generateVerificationToken, generateTokenExpiration, isTokenExpired, hashPassword, comparePassword, hashRefreshToken } from '@/server/utils';
 import type { TInsertUser, TSelectUser } from '@/server/databases/schemas/users.schema';
 import { MENU_PERMISSIONS } from '@/constants/permissions';
+import { env } from '@/server/env';
 
 const ACCESS_TOKEN_TTL_SECONDS = Number(process.env.ACCESS_TOKEN_TTL) || 60 * 15; // default: 15 minutes
 const REFRESH_TOKEN_TTL_SECONDS = Number(process.env.REFRESH_TOKEN_TTL) || 60 * 60 * 24 * 30; // default: 30 days
+
+const googleClient = env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? new OAuth2Client(env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) : null;
 
 async function resolvePermissions(userId: string, isAdmin: boolean): Promise<string[]> {
 	return isAdmin ? MENU_PERMISSIONS.map((p) => p.key) : permissionRepository.findKeysForUser(userId);
@@ -28,7 +32,7 @@ export class AuthService {
 			uenv: 'central',
 		};
 
-		const token = await sign(payload, process.env.APP_KEY as string);
+		const token = await sign(payload, env.APP_KEY);
 
 		const refreshToken = generateVerificationToken();
 		const refreshExpiresAt = generateTokenExpiration(REFRESH_TOKEN_TTL_SECONDS / 3600);
@@ -275,15 +279,34 @@ export class AuthService {
 	}
 
 	/**
-	 * Parse Google JWT token on the server side (uses Buffer, not atob)
+	 * Verify a Google ID token's signature/audience/issuer/expiry against Google's
+	 * published keys (JWKS) and return its payload. Never trust an unverified decode
+	 * of the token — it can be forged by anyone since it's just base64, not a proof.
 	 */
-	private parseGoogleToken(token: string): { sub: string; email: string; name: string; picture?: string } {
+	private async verifyGoogleToken(token: string): Promise<{ sub: string; email: string; name: string; picture?: string }> {
+		if (!googleClient) {
+			throw new InternalError('Google OAuth is not configured');
+		}
+
 		try {
-			const base64Url = token.split('.')[1];
-			const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-			const json = Buffer.from(base64, 'base64').toString('utf-8');
-			return JSON.parse(json);
-		} catch {
+			const ticket = await googleClient.verifyIdToken({
+				idToken: token,
+				audience: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+			});
+			const payload = ticket.getPayload();
+
+			if (!payload?.sub || !payload.email) {
+				throw AuthError.tokenInvalid();
+			}
+
+			return {
+				sub: payload.sub,
+				email: payload.email,
+				name: payload.name ?? '',
+				picture: payload.picture,
+			};
+		} catch (err) {
+			if (err instanceof AuthError) throw err;
 			throw AuthError.tokenInvalid();
 		}
 	}
@@ -292,7 +315,7 @@ export class AuthService {
 	 * Authenticate with Google OAuth
 	 */
 	async googleAuth(data: { token: string }) {
-		const googleUser = this.parseGoogleToken(data.token);
+		const googleUser = await this.verifyGoogleToken(data.token);
 
 		if (!googleUser.email || !googleUser.sub) {
 			throw AuthError.tokenInvalid();
@@ -443,7 +466,7 @@ export class AuthService {
 	getCookieConfig() {
 		return {
 			name: '__x',
-			secret: process.env.APP_COOKIE_KEY as string,
+			secret: env.APP_COOKIE_KEY,
 			options: {
 				path: '/',
 				secure: true,
@@ -461,7 +484,7 @@ export class AuthService {
 	getRefreshCookieConfig() {
 		return {
 			name: '__rx',
-			secret: process.env.APP_COOKIE_KEY as string,
+			secret: env.APP_COOKIE_KEY,
 			options: {
 				path: '/',
 				secure: true,

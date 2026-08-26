@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verify } from 'hono/jwt';
+import { env } from '@/server/env';
 
 interface TokenPayload {
 	auid: string;
@@ -26,7 +27,7 @@ async function getTokenPayload(cookieValue: string | undefined): Promise<TokenPa
 	if (!jwt) return null;
 
 	try {
-		const payload = await verify(jwt, process.env.APP_KEY as string, 'HS256');
+		const payload = await verify(jwt, env.APP_KEY, 'HS256');
 		return payload as unknown as TokenPayload;
 	} catch {
 		return null;
@@ -40,7 +41,7 @@ async function tryRefresh(request: NextRequest): Promise<Headers | null> {
 	if (!refreshCookie) return null;
 
 	try {
-		const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/v1/auths/refresh`, {
+		const res = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/v1/auths/refresh`, {
 			method: 'POST',
 			headers: { cookie: `__rx=${refreshCookie}` },
 		});

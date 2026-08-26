@@ -20,6 +20,9 @@ export const ERROR_HTTP_STATUS: Record<string, StatusCode> = {
 	RESOURCE_NOT_FOUND: 404,
 	RESOURCE_CONFLICT: 400,
 
+	// Rate limiting
+	RATE_LIMIT_EXCEEDED: 429,
+
 	// Internal errors (500)
 	INTERNAL_ERROR: 500,
 };
@@ -38,6 +41,7 @@ export const ERROR_TYPE_NAMES: Record<string, string> = {
 	AUTH_EMAIL_ALREADY_VERIFIED: 'AuthError',
 	RESOURCE_NOT_FOUND: 'NotFoundError',
 	RESOURCE_CONFLICT: 'ConflictError',
+	RATE_LIMIT_EXCEEDED: 'RateLimitError',
 	INTERNAL_ERROR: 'InternalError',
 };
 

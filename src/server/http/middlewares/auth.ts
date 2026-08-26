@@ -2,6 +2,7 @@ import { createMiddleware } from 'hono/factory';
 import { getSignedCookie, deleteCookie } from 'hono/cookie';
 import { verify } from 'hono/jwt';
 import { AuthError } from '@/server/errors';
+import { env } from '@/server/env';
 
 export const auth = createMiddleware(async (c, next) => {
 	try {
@@ -11,14 +12,14 @@ export const auth = createMiddleware(async (c, next) => {
 		if (device === 'mobile' || device === 'external') {
 			token = c.req.header('authorization')?.replace('Bearer ', '') as string;
 		} else {
-			token = await getSignedCookie(c, process.env.APP_COOKIE_KEY as string, '__x');
+			token = await getSignedCookie(c, env.APP_COOKIE_KEY, '__x');
 		}
 
 		if (!token) {
 			throw AuthError.unauthorized();
 		}
 
-		const decoded = await verify(token as string, process.env.APP_KEY as string, 'HS256');
+		const decoded = await verify(token as string, env.APP_KEY, 'HS256');
 
 		c.set('user', decoded);
 		c.set('role', decoded.aurl);

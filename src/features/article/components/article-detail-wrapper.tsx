@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { formatTZ } from '@/libs/dayjs';
+import { sanitizeHtml } from '@/libs/sanitize-html';
 import { ArticleCard } from '@/components/article-card';
 import { Badge } from '@/components/ui/badge';
 import { getPublicArticleBySlugSafe, getRelatedArticles } from '@/features/article/apis/article.api';
@@ -56,7 +57,7 @@ export async function ArticleDetailWrapper({ slug }: ArticleDetailWrapperProps) 
 
 			<div
 				className="prose-content mt-8 max-w-none [&_a]:text-primary [&_a]:underline [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-xl [&_h2]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-semibold [&_img]:my-4 [&_img]:rounded-md [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-5"
-				dangerouslySetInnerHTML={{ __html: article.content }}
+				dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.content) }}
 			/>
 
 			{relatedArticles.length > 0 && (

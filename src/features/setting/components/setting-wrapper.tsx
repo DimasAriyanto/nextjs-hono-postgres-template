@@ -567,7 +567,7 @@ export function SettingWrapper() {
 												</SelectContent>
 											</Select>
 											<p className="text-sm text-muted-foreground">
-												Carousel rotates through all banners below. Hero shows only the first banner as a static section.
+												Carousel rotates through all banners below. Hero shows only the first banner as a static section — set its Text Align to Left/Right for a split image-and-text layout, or Center for a full-width image with overlay text.
 											</p>
 											<FormMessage />
 										</FormItem>
