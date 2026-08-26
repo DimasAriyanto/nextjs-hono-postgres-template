@@ -69,12 +69,44 @@ function BannerCaption({ banner }: { banner: TBannerItem }) {
 	);
 }
 
+function SplitHeroBanner({ banner, imageOnLeft }: { banner: TBannerItem; imageOnLeft: boolean }) {
+	return (
+		<section className="grid w-full grid-cols-1 md:grid-cols-2 md:h-[560px]">
+			<div className={cn('relative h-[280px] md:h-full', imageOnLeft ? 'md:order-1' : 'md:order-2')}>
+				<BannerMedia banner={banner} priority />
+			</div>
+			<div className={cn('flex flex-col justify-center gap-4 px-6 py-10 md:px-16', imageOnLeft ? 'md:order-2' : 'md:order-1')}>
+				{banner.title && (
+					<h2 className="text-3xl font-bold tracking-tight sm:text-5xl">{banner.title}</h2>
+				)}
+				{banner.subtitle && (
+					<p className="text-base text-muted-foreground sm:text-lg">{banner.subtitle}</p>
+				)}
+				{banner.button_label && banner.button_link && (
+					<a
+						href={banner.button_link}
+						className="mt-2 inline-flex w-fit items-center justify-center rounded-md bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+					>
+						{banner.button_label}
+					</a>
+				)}
+			</div>
+		</section>
+	);
+}
+
 function HeroBanner({ banner }: { banner: TBannerItem }) {
+	const align = banner.text_align ?? 'center';
+
+	if (align === 'left' || align === 'right') {
+		return <SplitHeroBanner banner={banner} imageOnLeft={align === 'right'} />;
+	}
+
 	return (
 		<section className="relative h-[360px] w-full overflow-hidden sm:h-[480px] md:h-[600px] xl:h-[680px]">
 			<BannerMedia banner={banner} priority />
 			<div className="absolute inset-0 bg-black/20" />
-			<div className={cn('relative flex h-full flex-col justify-center px-6 md:px-16', ALIGN_CLASSES[banner.text_align ?? 'center'])}>
+			<div className={cn('relative flex h-full flex-col justify-center px-6 md:px-16', ALIGN_CLASSES[align])}>
 				<BannerCaption banner={banner} />
 			</div>
 		</section>
