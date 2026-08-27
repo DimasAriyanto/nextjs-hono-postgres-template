@@ -36,6 +36,14 @@ const getDatabaseUrl = (): string => {
 		return url;
 	}
 
+	if (provider === 'neon') {
+		const url = process.env.NEON_DATABASE_URL;
+		if (!url) {
+			throw new Error('NEON_DATABASE_URL is required when DB_PROVIDER=neon');
+		}
+		return url;
+	}
+
 	// Build local database URL from components
 	const { DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD } = process.env;
 

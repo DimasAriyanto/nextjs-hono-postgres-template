@@ -19,6 +19,14 @@ const getDatabaseUrl = (): string => {
 		return url;
 	}
 
+	if (provider === 'neon') {
+		const url = process.env.NEON_DATABASE_URL;
+		if (!url) {
+			throw new Error('NEON_DATABASE_URL is required when DB_PROVIDER=neon');
+		}
+		return url;
+	}
+
 	// Build local database URL from components
 	// This avoids issues with variable interpolation in .env files
 	const { DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD } = process.env;
@@ -44,6 +52,17 @@ const getConnectionConfig = () => {
 			prepare: false, // Required for transaction pooler (port 6543)
 			idle_timeout: 20,
 			max_lifetime: 60 * 30, // 30 minutes
+		};
+	}
+
+	if (provider === 'neon') {
+		// Neon-specific configuration
+		// prepare: false is required for Neon's pooled connection (pgbouncer)
+		return {
+			prepare: false,
+			idle_timeout: 20,
+			max_lifetime: 60 * 30, // 30 minutes
+			ssl: 'require' as const,
 		};
 	}
 

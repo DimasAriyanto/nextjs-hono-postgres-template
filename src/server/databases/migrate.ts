@@ -3,7 +3,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 // central
-import { createDatabase, isSupabase } from '@/server/databases/client';
+import { createDatabase } from '@/server/databases/client';
 
 loadEnvConfig(process.cwd());
 
@@ -11,25 +11,31 @@ loadEnvConfig(process.cwd());
 
 async function main() {
 	const provider = process.env.DB_PROVIDER || 'local';
+	const isManaged = provider === 'supabase' || provider === 'neon';
 
 	console.info(`🔧 Running migrations for: ${provider}`);
 
 	// Only create database for local development
-	// Supabase database already exists
-	if (!isSupabase()) {
+	// Managed providers (Supabase, Neon) already have the database created
+	if (!isManaged) {
 		console.info('📦 Creating database if not exists...');
 		await createDatabase({ database: process.env.DB_DATABASE as string });
 	} else {
-		console.info('☁️  Using Supabase - skipping database creation');
+		console.info(`☁️  Using ${provider} - skipping database creation`);
 	}
 
 	// Build connection URL based on provider
 	let dbUrl: string;
 
-	if (isSupabase()) {
+	if (provider === 'supabase') {
 		dbUrl = process.env.SUPABASE_DB_URL || '';
 		if (!dbUrl) {
 			throw new Error('SUPABASE_DB_URL is required when DB_PROVIDER=supabase');
+		}
+	} else if (provider === 'neon') {
+		dbUrl = process.env.NEON_DATABASE_URL || '';
+		if (!dbUrl) {
+			throw new Error('NEON_DATABASE_URL is required when DB_PROVIDER=neon');
 		}
 	} else {
 		// Build URL from components for local database
@@ -44,7 +50,7 @@ async function main() {
 		dbUrl = `postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}`;
 	}
 
-	const connectionConfig = isSupabase() ? { max: 1, prepare: false } : { max: 1 };
+	const connectionConfig = isManaged ? { max: 1, prepare: false } : { max: 1 };
 
 	const pool = postgres(dbUrl, connectionConfig);
 
