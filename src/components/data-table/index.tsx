@@ -198,9 +198,9 @@ export const DataTable = <TData extends RowData, TValue>({
 export function LoadingDataTable() {
 	return (
 		<div className="space-y-4">
-			<div className="flex items-center space-x-4 justify-between">
-				<Skeleton className="h-6 w-[400px]" />
-				<Skeleton className="h-6 w-[200px]" />
+			<div className="flex items-center justify-between gap-4">
+				<Skeleton className="h-6 w-full max-w-[400px]" />
+				<Skeleton className="h-6 w-full max-w-[200px]" />
 			</div>
 			<div className="rounded-md border-2 border-muted">
 				<Table>
@@ -209,7 +209,7 @@ export function LoadingDataTable() {
 							{[...Array(5)].map((_, i) => {
 								return (
 									<TableHead key={i.toString()} colSpan={1}>
-										<Skeleton className="h-4 w-[150px]" />
+										<Skeleton className="h-4 w-full max-w-[150px]" />
 									</TableHead>
 								);
 							})}
@@ -233,11 +233,11 @@ export function LoadingDataTable() {
 				</Table>
 			</div>
 
-			<div className="flex items-center space-x-4 justify-between">
-				<Skeleton className="h-6 w-[250px]" />
-				<div className="flex items-center space-x-8">
-					<Skeleton className="h-6 w-[200px]" />
-					<Skeleton className="h-6 w-[300px]" />
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+				<Skeleton className="h-6 w-full max-w-[250px]" />
+				<div className="flex flex-wrap items-center gap-4">
+					<Skeleton className="h-6 w-full max-w-[200px]" />
+					<Skeleton className="h-6 w-full max-w-[200px]" />
 				</div>
 			</div>
 		</div>

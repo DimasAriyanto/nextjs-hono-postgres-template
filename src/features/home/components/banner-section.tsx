@@ -72,12 +72,12 @@ function BannerCaption({ banner }: { banner: TBannerItem }) {
 function SplitHeroBanner({ banner, imageOnLeft }: { banner: TBannerItem; imageOnLeft: boolean }) {
 	return (
 		<section className="container mx-auto grid grid-cols-1 px-4 md:h-[560px] md:grid-cols-2 md:px-6">
-			<div className={cn('relative h-[280px] md:h-full', imageOnLeft ? 'md:order-1' : 'md:order-2')}>
+			<div className={cn('relative h-[240px] sm:h-[320px] md:h-full', imageOnLeft ? 'md:order-1' : 'md:order-2')}>
 				<BannerMedia banner={banner} priority />
 			</div>
-			<div className={cn('flex flex-col justify-center gap-4 py-10 md:px-12', imageOnLeft ? 'md:order-2' : 'md:order-1')}>
+			<div className={cn('flex flex-col justify-center gap-4 py-8 sm:py-10 md:px-12', imageOnLeft ? 'md:order-2' : 'md:order-1')}>
 				{banner.title && (
-					<h2 className="text-3xl font-bold tracking-tight sm:text-5xl">{banner.title}</h2>
+					<h2 className="text-2xl font-bold tracking-tight sm:text-4xl md:text-5xl">{banner.title}</h2>
 				)}
 				{banner.subtitle && (
 					<p className="text-base text-muted-foreground sm:text-lg">{banner.subtitle}</p>

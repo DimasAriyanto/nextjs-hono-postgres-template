@@ -262,17 +262,46 @@ export function SettingWrapper() {
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 					<Tabs defaultValue="general">
-						<TabsList>
-							<TabsTrigger value="general"><Building2 className="size-3.5 mr-1.5" />General</TabsTrigger>
-							<TabsTrigger value="about"><Info className="size-3.5 mr-1.5" />About</TabsTrigger>
-							<TabsTrigger value="contact"><Contact className="size-3.5 mr-1.5" />Contact</TabsTrigger>
-							<TabsTrigger value="regional"><Globe2 className="size-3.5 mr-1.5" />Regional</TabsTrigger>
-							<TabsTrigger value="appearance"><Palette className="size-3.5 mr-1.5" />Appearance</TabsTrigger>
-							<TabsTrigger value="banner"><GalleryHorizontal className="size-3.5 mr-1.5" />Banner</TabsTrigger>
-							<TabsTrigger value="faq"><HelpCircle className="size-3.5 mr-1.5" />FAQ</TabsTrigger>
-							<TabsTrigger value="legal"><Scale className="size-3.5 mr-1.5" />Legal</TabsTrigger>
-							<TabsTrigger value="seo"><Search className="size-3.5 mr-1.5" />SEO</TabsTrigger>
-						</TabsList>
+						<div className="overflow-x-auto pb-1 -mb-1">
+							<TabsList className="w-max min-w-full">
+								<TabsTrigger value="general" className="gap-1.5">
+									<Building2 className="size-3.5 shrink-0" />
+									<span className="hidden sm:inline">General</span>
+								</TabsTrigger>
+								<TabsTrigger value="about" className="gap-1.5">
+									<Info className="size-3.5 shrink-0" />
+									<span className="hidden sm:inline">About</span>
+								</TabsTrigger>
+								<TabsTrigger value="contact" className="gap-1.5">
+									<Contact className="size-3.5 shrink-0" />
+									<span className="hidden sm:inline">Contact</span>
+								</TabsTrigger>
+								<TabsTrigger value="regional" className="gap-1.5">
+									<Globe2 className="size-3.5 shrink-0" />
+									<span className="hidden sm:inline">Regional</span>
+								</TabsTrigger>
+								<TabsTrigger value="appearance" className="gap-1.5">
+									<Palette className="size-3.5 shrink-0" />
+									<span className="hidden sm:inline">Appearance</span>
+								</TabsTrigger>
+								<TabsTrigger value="banner" className="gap-1.5">
+									<GalleryHorizontal className="size-3.5 shrink-0" />
+									<span className="hidden sm:inline">Banner</span>
+								</TabsTrigger>
+								<TabsTrigger value="faq" className="gap-1.5">
+									<HelpCircle className="size-3.5 shrink-0" />
+									<span className="hidden sm:inline">FAQ</span>
+								</TabsTrigger>
+								<TabsTrigger value="legal" className="gap-1.5">
+									<Scale className="size-3.5 shrink-0" />
+									<span className="hidden sm:inline">Legal</span>
+								</TabsTrigger>
+								<TabsTrigger value="seo" className="gap-1.5">
+									<Search className="size-3.5 shrink-0" />
+									<span className="hidden sm:inline">SEO</span>
+								</TabsTrigger>
+							</TabsList>
+						</div>
 
 						{/* ── General ── */}
 						<TabsContent value="general">

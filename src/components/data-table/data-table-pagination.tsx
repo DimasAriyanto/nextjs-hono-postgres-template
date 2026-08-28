@@ -12,13 +12,16 @@ interface DataTablePaginationProps<TData extends RowData> {
 
 export const DataTablePagination = <TData extends RowData,>({ table }: DataTablePaginationProps<TData>) => {
 	return (
-		<div className="flex items-center justify-between px-2">
-			<div className="flex-1 text-sm text-muted-foreground">
+		<div className="flex flex-col gap-3 px-2 sm:flex-row sm:items-center sm:justify-between">
+			{/* Selected rows — hidden on mobile to save space */}
+			<div className="hidden flex-1 text-sm text-muted-foreground sm:block">
 				{table.getFilteredSelectedRowModel().rows?.length ?? 0} of {table.getRowCount()} row(s) selected.
 			</div>
-			<div className="flex items-center space-x-6 lg:space-x-8">
-				<div className="flex items-center space-x-2">
-					<p className="text-sm font-medium">Rows per page</p>
+
+			<div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end">
+				{/* Rows per page */}
+				<div className="flex items-center gap-2">
+					<p className="hidden text-sm font-medium sm:block">Rows per page</p>
 					<Select
 						value={`${table.getState().pagination.pageSize}`}
 						onValueChange={(value: '10' | '20' | '30' | '40' | '50' | '100' | 'All') => {
@@ -37,10 +40,14 @@ export const DataTablePagination = <TData extends RowData,>({ table }: DataTable
 						</SelectContent>
 					</Select>
 				</div>
+
+				{/* Page indicator */}
 				<div className="flex w-[100px] items-center justify-center text-sm font-medium">
 					Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount() === 0 ? 1 : table.getPageCount()}
 				</div>
-				<div className="flex items-center space-x-2">
+
+				{/* Nav buttons */}
+				<div className="flex items-center gap-1">
 					<Button
 						variant="outline"
 						className="hidden h-8 w-8 p-0 lg:flex"

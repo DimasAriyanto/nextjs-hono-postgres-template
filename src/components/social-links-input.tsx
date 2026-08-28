@@ -34,22 +34,31 @@ export function SocialLinksInput({ value, onChange, className }: SocialLinksInpu
 				{value.map((link, index) => {
 					const platform = getSocialPlatform(link.platform);
 					return (
-						<div key={index} className="grid grid-cols-[160px_1fr_auto] gap-2 items-center">
-							<Select value={link.platform} onValueChange={(platformValue) => updateLink(index, { platform: platformValue })}>
-								<SelectTrigger className="h-9">
-									<SelectValue placeholder="Select Platform" />
-								</SelectTrigger>
-								<SelectContent>
-									{SOCIAL_PLATFORMS.map((p) => (
-										<SelectItem key={p.value} value={p.value}>
-											<span className="flex items-center gap-2">
-												<Icon name={p.icon} className="w-3.5 h-3.5" />
-												{p.label}
-											</span>
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+						<div key={index} className="flex flex-col gap-2 rounded-md border p-3 sm:border-0 sm:p-0 sm:grid sm:grid-cols-[160px_1fr_auto] sm:items-center">
+							<div className="flex items-center justify-between gap-2 sm:contents">
+								<Select value={link.platform} onValueChange={(platformValue) => updateLink(index, { platform: platformValue })}>
+									<SelectTrigger className="h-9 w-full sm:w-auto">
+										<SelectValue placeholder="Select Platform" />
+									</SelectTrigger>
+									<SelectContent>
+										{SOCIAL_PLATFORMS.map((p) => (
+											<SelectItem key={p.value} value={p.value}>
+												<span className="flex items-center gap-2">
+													<Icon name={p.icon} className="w-3.5 h-3.5" />
+													{p.label}
+												</span>
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<button
+									type="button"
+									onClick={() => removeLink(index)}
+									className="p-1.5 rounded-md text-destructive hover:bg-destructive/10 transition-colors sm:hidden"
+								>
+									<Trash2 className="w-4 h-4" />
+								</button>
+							</div>
 							<Input
 								value={link.url}
 								onChange={(e) => updateLink(index, { url: e.target.value })}
@@ -58,11 +67,12 @@ export function SocialLinksInput({ value, onChange, className }: SocialLinksInpu
 							<button
 								type="button"
 								onClick={() => removeLink(index)}
-								className="p-1.5 rounded-md text-destructive hover:bg-destructive/10 transition-colors"
+								className="hidden p-1.5 rounded-md text-destructive hover:bg-destructive/10 transition-colors sm:block"
 							>
 								<Trash2 className="w-4 h-4" />
 							</button>
 						</div>
+
 					);
 				})}
 			</div>

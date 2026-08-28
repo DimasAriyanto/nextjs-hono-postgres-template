@@ -40,14 +40,14 @@ export const DataTableToolbar = <TData extends RowData,>({ table, FilterComp, Cr
 	const isFiltered = table && table.getState()?.columnFilters?.length > 0;
 
 	return (
-		<div className="flex items-center justify-between">
-			<div className="flex flex-1 items-center space-x-2">
-				<form onSubmit={onSubmit}>
+		<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+			<div className="flex flex-1 flex-wrap items-center gap-2">
+				<form onSubmit={onSubmit} className="flex-shrink-0">
 					<Input
 						placeholder="Filter keywords..."
 						value={searchInput ?? ''}
 						onChange={(e) => setSearchInput(e.target.value)}
-						className="h-8 w-[150px] lg:w-[260px]"
+						className="h-8 w-full sm:w-[150px] lg:w-[260px]"
 					/>
 				</form>
 
@@ -61,7 +61,7 @@ export const DataTableToolbar = <TData extends RowData,>({ table, FilterComp, Cr
 				)}
 			</div>
 
-			<div className="flex items-center space-x-2">
+			<div className="flex flex-shrink-0 items-center gap-2">
 				<DataTableViewOptions table={table} />
 
 				{ExportComp && <ExportComp />}

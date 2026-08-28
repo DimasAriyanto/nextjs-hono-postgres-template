@@ -38,19 +38,29 @@ export function BusinessHoursInput({ value, onChange, disabled, className }: Bus
 				{WEEKDAYS.map((day) => {
 					const row = rowFor(day);
 					return (
-						<div key={day} className="grid grid-cols-[110px_1fr_auto] items-center gap-3 sm:grid-cols-[110px_auto_1fr]">
-							<span className="text-sm font-medium">{DAY_LABELS[day]}</span>
+						<div key={day} className="flex flex-col gap-2 rounded-md border p-3 sm:border-0 sm:p-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+							<div className="flex items-center justify-between gap-2 sm:w-28 sm:shrink-0">
+								<span className="text-sm font-medium">{DAY_LABELS[day]}</span>
+								<label className="flex items-center gap-2 text-sm text-muted-foreground sm:hidden">
+									Closed
+									<Switch
+										checked={row.is_closed}
+										onCheckedChange={(checked) => updateDay(day, { is_closed: checked })}
+										disabled={disabled}
+									/>
+								</label>
+							</div>
 
 							{row.is_closed ? (
-								<span className="text-sm text-muted-foreground sm:col-span-1">Closed</span>
+								<span className="text-sm text-muted-foreground">Closed</span>
 							) : (
-								<div className="flex items-center gap-2">
+								<div className="flex flex-wrap items-center gap-2">
 									<Input
 										type="time"
 										value={row.open_time ?? ''}
 										onChange={(e) => updateDay(day, { open_time: e.target.value })}
 										disabled={disabled}
-										className="w-32"
+										className="h-8 w-28 text-xs sm:h-9 sm:w-32 sm:text-sm"
 									/>
 									<span className="text-sm text-muted-foreground">–</span>
 									<Input
@@ -58,12 +68,12 @@ export function BusinessHoursInput({ value, onChange, disabled, className }: Bus
 										value={row.close_time ?? ''}
 										onChange={(e) => updateDay(day, { close_time: e.target.value })}
 										disabled={disabled}
-										className="w-32"
+										className="h-8 w-28 text-xs sm:h-9 sm:w-32 sm:text-sm"
 									/>
 								</div>
 							)}
 
-							<label className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
+							<label className="hidden items-center justify-end gap-2 text-sm text-muted-foreground sm:flex">
 								Closed
 								<Switch
 									checked={row.is_closed}
@@ -72,6 +82,7 @@ export function BusinessHoursInput({ value, onChange, disabled, className }: Bus
 								/>
 							</label>
 						</div>
+
 					);
 				})}
 			</div>
