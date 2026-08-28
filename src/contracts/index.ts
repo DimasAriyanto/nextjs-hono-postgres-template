@@ -24,3 +24,6 @@ export * from './article-category';
 
 // Setting
 export * from './setting';
+
+// Currency
+export * from './currency';

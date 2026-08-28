@@ -25,6 +25,7 @@ import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { PageHeader } from '@/components/page-header';
 import { useSettings, useUpdateSettings } from '@/features/setting/hooks/use-setting';
 import { useUploadImage } from '@/features/upload/hooks/use-upload';
+import { useConvertCurrency } from '@/features/currency/hooks/use-currency';
 import { toastUploadError } from '@/libs/toast';
 import { LOCALE_OPTIONS, setAppCurrency, setAppLocale, setAppTimezone } from '@/libs/dayjs';
 import { BANNER_DISPLAY_MODES, CONTENT_LOCALES, DEFAULT_CONTENT_LOCALE, updateSettingSchema, type TBannerDisplayMode, type TContentLocale, type TUpdateSettingRequest } from '@/contracts';
@@ -55,23 +56,9 @@ const TIMEZONE_OPTIONS = [
 ];
 
 // ─── Currency options ───────────────────────────────────────────────────────────
-
 const CURRENCY_OPTIONS = [
 	{ value: 'IDR', label: 'IDR — Indonesian Rupiah' },
 	{ value: 'USD', label: 'USD — US Dollar' },
-	{ value: 'EUR', label: 'EUR — Euro' },
-	{ value: 'GBP', label: 'GBP — British Pound' },
-	{ value: 'JPY', label: 'JPY — Japanese Yen' },
-	{ value: 'SGD', label: 'SGD — Singapore Dollar' },
-	{ value: 'MYR', label: 'MYR — Malaysian Ringgit' },
-	{ value: 'AUD', label: 'AUD — Australian Dollar' },
-	{ value: 'CNY', label: 'CNY — Chinese Yuan' },
-	{ value: 'INR', label: 'INR — Indian Rupee' },
-	{ value: 'KRW', label: 'KRW — South Korean Won' },
-	{ value: 'THB', label: 'THB — Thai Baht' },
-	{ value: 'PHP', label: 'PHP — Philippine Peso' },
-	{ value: 'VND', label: 'VND — Vietnamese Dong' },
-	{ value: 'AED', label: 'AED — UAE Dirham' },
 ];
 
 // ─── Appearance ─────────────────────────────────────────────────────────────────
@@ -89,6 +76,21 @@ const BANNER_DISPLAY_MODE_LABELS: Record<TBannerDisplayMode, string> = {
 	carousel: 'Carousel',
 	hero: 'Hero',
 };
+
+function CurrencyRatePreview({ currency }: { currency: string | undefined }) {
+	const reference = currency === 'USD' ? 'IDR' : 'USD';
+	const { data, isLoading, isError } = useConvertCurrency({ from: currency ?? '', to: reference, amount: 1 });
+
+	if (!currency) return null;
+
+	return (
+		<p className="text-sm text-muted-foreground">
+			{isLoading && 'Fetching live exchange rate…'}
+			{isError && 'Live rate unavailable — set OPEN_EXCHANGE_RATES_APP_ID in .env to enable this preview.'}
+			{data && `1 ${currency} ≈ ${data.data.converted.toLocaleString(undefined, { maximumFractionDigits: 4 })} ${reference} (live rate)`}
+		</p>
+	);
+}
 
 function ContentLocaleSwitcher({ value, onChange }: { value: TContentLocale; onChange: (locale: TContentLocale) => void }) {
 	return (
@@ -466,6 +468,7 @@ export function SettingWrapper() {
 													))}
 												</SelectContent>
 											</Select>
+											<CurrencyRatePreview currency={field.value} />
 											<FormMessage />
 										</FormItem>
 									)} />

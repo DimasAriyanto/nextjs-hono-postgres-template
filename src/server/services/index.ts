@@ -7,3 +7,4 @@ export * from './notification.service';
 export * from './article.service';
 export * from './article-category.service';
 export * from './setting.service';
+export * from './currency.service';

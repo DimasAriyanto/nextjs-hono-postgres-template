@@ -87,10 +87,24 @@ export function getAppCurrency(): string {
 	return appCurrency;
 }
 
-/** Format a UTC-stored timestamp in the app's configured timezone and locale */
-export function formatTZ(value: string | null | undefined, format: string): string {
+/**
+ * Format a UTC-stored timestamp. Defaults to the app's configured timezone/locale
+ * (Settings > Regional) — used as-is for business-fixed info (receipts, admin
+ * tables) that must stay consistent regardless of who's viewing it.
+ *
+ * Pass `timezone`/`locale` to render a value in a viewer's own timezone/locale
+ * (e.g. "posted 2 hours ago" for a visitor abroad) without touching the app-wide
+ * default.
+ */
+export function formatTZ(
+	value: string | null | undefined,
+	format: string,
+	options?: { timezone?: string; locale?: string },
+): string {
 	if (!value) return '-';
-	return dayjs.utc(value).tz(appTimezone).locale(DAYJS_LOCALE_MAP[appLocale]).format(format);
+	const tz = options?.timezone ?? appTimezone;
+	const dayjsLocale = (options?.locale && DAYJS_LOCALE_MAP[options.locale]) || DAYJS_LOCALE_MAP[appLocale];
+	return dayjs.utc(value).tz(tz).locale(dayjsLocale).format(format);
 }
 
 /** Convert a local datetime string (YYYY-MM-DDTHH:mm:ss from form picker) in the app's timezone to UTC ISO string */
