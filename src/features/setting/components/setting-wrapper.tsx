@@ -22,6 +22,7 @@ import { PhoneInput } from '@/components/ui/phone-input';
 import { FaqInput } from '@/components/faq-input';
 import { BannerInput } from '@/components/banner-input';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
+import { TagsInput } from '@/components/ui/tags-input';
 import { PageHeader } from '@/components/page-header';
 import { useSettings, useUpdateSettings } from '@/features/setting/hooks/use-setting';
 import { useUploadImage } from '@/features/upload/hooks/use-upload';
@@ -153,12 +154,16 @@ export function SettingWrapper() {
 			gtm_id: '',
 			google_site_verification: '',
 			og_image_url: '',
+			whatsapp_enabled: true,
 			translations: {
 				about_content: { id: '', en: '' },
 				terms_of_service: { id: '', en: '' },
 				privacy_policy: { id: '', en: '' },
 				faqs: { id: [], en: [] },
 				banners: { id: [], en: [] },
+				whatsapp_welcome_message: { id: '', en: '' },
+				whatsapp_greetings: { id: [], en: [] },
+				whatsapp_quick_replies: { id: [], en: [] },
 			},
 		},
 		values: settings
@@ -183,6 +188,7 @@ export function SettingWrapper() {
 				gtm_id: settings.gtm_id ?? '',
 				google_site_verification: settings.google_site_verification ?? '',
 				og_image_url: settings.og_image_url ?? '',
+				whatsapp_enabled: settings.whatsapp_enabled ?? true,
 				translations: settings.translations,
 			}
 			: undefined,
@@ -263,42 +269,42 @@ export function SettingWrapper() {
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 					<Tabs defaultValue="general">
 						<div className="overflow-x-auto pb-1 -mb-1">
-							<TabsList className="w-max min-w-full">
+							<TabsList className="w-max min-w-full justify-start">
 								<TabsTrigger value="general" className="gap-1.5">
 									<Building2 className="size-3.5 shrink-0" />
-									<span className="hidden sm:inline">General</span>
+									<span>General</span>
 								</TabsTrigger>
 								<TabsTrigger value="about" className="gap-1.5">
 									<Info className="size-3.5 shrink-0" />
-									<span className="hidden sm:inline">About</span>
+									<span>About</span>
 								</TabsTrigger>
 								<TabsTrigger value="contact" className="gap-1.5">
 									<Contact className="size-3.5 shrink-0" />
-									<span className="hidden sm:inline">Contact</span>
+									<span>Contact</span>
 								</TabsTrigger>
 								<TabsTrigger value="regional" className="gap-1.5">
 									<Globe2 className="size-3.5 shrink-0" />
-									<span className="hidden sm:inline">Regional</span>
+									<span>Regional</span>
 								</TabsTrigger>
 								<TabsTrigger value="appearance" className="gap-1.5">
 									<Palette className="size-3.5 shrink-0" />
-									<span className="hidden sm:inline">Appearance</span>
+									<span>Appearance</span>
 								</TabsTrigger>
 								<TabsTrigger value="banner" className="gap-1.5">
 									<GalleryHorizontal className="size-3.5 shrink-0" />
-									<span className="hidden sm:inline">Banner</span>
+									<span>Banner</span>
 								</TabsTrigger>
 								<TabsTrigger value="faq" className="gap-1.5">
 									<HelpCircle className="size-3.5 shrink-0" />
-									<span className="hidden sm:inline">FAQ</span>
+									<span>FAQ</span>
 								</TabsTrigger>
 								<TabsTrigger value="legal" className="gap-1.5">
 									<Scale className="size-3.5 shrink-0" />
-									<span className="hidden sm:inline">Legal</span>
+									<span>Legal</span>
 								</TabsTrigger>
 								<TabsTrigger value="seo" className="gap-1.5">
 									<Search className="size-3.5 shrink-0" />
-									<span className="hidden sm:inline">SEO</span>
+									<span>SEO</span>
 								</TabsTrigger>
 							</TabsList>
 						</div>
@@ -433,6 +439,81 @@ export function SettingWrapper() {
 										<FormItem>
 											<FormLabel>Business Hours</FormLabel>
 											<BusinessHoursInput value={field.value ?? []} onChange={field.onChange} disabled={isSaving} />
+											<FormMessage />
+										</FormItem>
+									)} />
+								</CardContent>
+							</Card>
+
+							<Card className="mt-4">
+								<CardContent className="pt-6 space-y-4">
+									<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+										<div>
+											<FormLabel className="text-base font-semibold">WhatsApp Floating Widget</FormLabel>
+											<p className="text-sm text-muted-foreground">Configure floating chat widget visibility and localized response messages.</p>
+										</div>
+										<FormField control={form.control} name="whatsapp_enabled" render={({ field }) => (
+											<FormItem>
+												<div className="flex items-center gap-2">
+													<FormLabel className="text-sm text-muted-foreground">Enable Widget</FormLabel>
+													<FormControl>
+														<Switch checked={field.value ?? true} onCheckedChange={field.onChange} disabled={isSaving} />
+													</FormControl>
+												</div>
+												<FormMessage />
+											</FormItem>
+										)} />
+									</div>
+
+									<hr className="my-2 border-border" />
+
+									<ContentLocaleSwitcher value={contentLocale} onChange={setContentLocale} />
+
+									<FormField control={form.control} name={`translations.whatsapp_welcome_message.${contentLocale}`} render={({ field }) => (
+										<FormItem>
+											<FormLabel>Welcome Message</FormLabel>
+											<FormControl>
+												<Textarea
+													value={field.value ?? ''}
+													onChange={field.onChange}
+													placeholder="Hi! How can we help you today?"
+													rows={2}
+													disabled={isSaving}
+												/>
+											</FormControl>
+											<p className="text-sm text-muted-foreground">Main message shown inside the chat widget modal.</p>
+											<FormMessage />
+										</FormItem>
+									)} />
+
+									<FormField control={form.control} name={`translations.whatsapp_greetings.${contentLocale}`} render={({ field }) => (
+										<FormItem>
+											<FormLabel>Floating Bubble Greetings (Rotating)</FormLabel>
+											<FormControl>
+												<TagsInput
+													value={field.value ?? []}
+													onChange={field.onChange}
+													placeholder="Type greeting and press Enter..."
+													disabled={isSaving}
+												/>
+											</FormControl>
+											<p className="text-sm text-muted-foreground">Short messages that rotate automatically over the floating button.</p>
+											<FormMessage />
+										</FormItem>
+									)} />
+
+									<FormField control={form.control} name={`translations.whatsapp_quick_replies.${contentLocale}`} render={({ field }) => (
+										<FormItem>
+											<FormLabel>Quick Replies / Topic Suggestions</FormLabel>
+											<FormControl>
+												<TagsInput
+													value={field.value ?? []}
+													onChange={field.onChange}
+													placeholder="Type topic option and press Enter..."
+													disabled={isSaving}
+												/>
+											</FormControl>
+											<p className="text-sm text-muted-foreground">Suggested question chips visitors can click to auto-fill the chat input.</p>
 											<FormMessage />
 										</FormItem>
 									)} />

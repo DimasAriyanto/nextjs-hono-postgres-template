@@ -12,14 +12,16 @@ const DEFAULT_GREETINGS = [
 ];
 
 const DEFAULT_QUICK_REPLIES = [
-	'Hi, I would like to know more 👋',
-	'Is this still available? 📋',
-	'How do I place an order? 💰',
-	'How long is the estimated delivery time? 🔍',
-	'I would like to ask about my order 🔄',
+	'Hi, I would like to ask some questions 👋',
+	'Can you tell me more about your services? 📋',
+	'How can I contact your support team? 📞',
+	'Where are you located? 📍',
+	'I need help with a custom project 💡',
 ];
 
 export interface WhatsAppButtonProps {
+	/** Enable or disable the widget. If false, the button is hidden. Defaults to true. */
+	enabled?: boolean;
 	/** Destination WhatsApp number (any format, will be normalized automatically). If empty, the button is not shown. */
 	phone?: string | null;
 	/** Name shown in the chat header and welcome message. */
@@ -44,6 +46,7 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 );
 
 export const WhatsAppButton = ({
+	enabled = true,
 	phone,
 	name = 'Us',
 	subtitle = 'Support Team · Usually replies fast',
@@ -52,6 +55,9 @@ export const WhatsAppButton = ({
 	greetings = DEFAULT_GREETINGS,
 	quickReplies = DEFAULT_QUICK_REPLIES,
 }: WhatsAppButtonProps) => {
+	const activeGreetings = greetings.length ? greetings : DEFAULT_GREETINGS;
+	const activeQuickReplies = quickReplies.length ? quickReplies : DEFAULT_QUICK_REPLIES;
+
 	const [greetingIndex, setGreetingIndex] = useState(0);
 	const [greetingVisible, setGreetingVisible] = useState(true);
 	const [showBubble, setShowBubble] = useState(true);
@@ -66,14 +72,14 @@ export const WhatsAppButton = ({
 		const interval = setInterval(() => {
 			setGreetingVisible(false);
 			setTimeout(() => {
-				setGreetingIndex((prev) => (prev + 1) % greetings.length);
+				setGreetingIndex((prev) => (prev + 1) % activeGreetings.length);
 				setGreetingVisible(true);
 				setIsPulsing(true);
 				setTimeout(() => setIsPulsing(false), 700);
 			}, 400);
 		}, 4000);
 		return () => clearInterval(interval);
-	}, [showModal]);
+	}, [showModal, activeGreetings.length]);
 
 	useEffect(() => {
 		if (showModal) return;
@@ -121,8 +127,8 @@ export const WhatsAppButton = ({
 		}
 	};
 
-	// Hide if the WhatsApp number is not configured yet
-	if (!phone) return null;
+	// Hide if disabled or WhatsApp number is not configured yet
+	if (!enabled || !phone) return null;
 
 	return (
 		<>
@@ -179,7 +185,7 @@ export const WhatsAppButton = ({
 
 						<div className="space-y-1.5 pt-1">
 							<p className="text-[11px] text-muted-foreground text-center">Choose a question topic:</p>
-							{quickReplies.map((reply, i) => (
+							{activeQuickReplies.map((reply, i) => (
 								<button
 									key={i}
 									onClick={() => selectQuickReply(reply)}
@@ -235,7 +241,7 @@ export const WhatsAppButton = ({
 								×
 							</button>
 							<p className={`text-[13px] font-medium text-foreground leading-snug transition-all duration-300 ${greetingVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1'}`}>
-								{greetings[greetingIndex]}
+								{activeGreetings[greetingIndex]}
 							</p>
 							<div className="flex items-center gap-1 mt-2">
 								<span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-bounce [animation-delay:0ms]" />

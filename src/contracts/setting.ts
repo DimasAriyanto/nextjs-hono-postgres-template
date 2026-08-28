@@ -49,6 +49,10 @@ export const SETTING_KEYS = {
 	GTM_ID: 'gtm_id',
 	GOOGLE_SITE_VERIFICATION: 'google_site_verification',
 	OG_IMAGE_URL: 'og_image_url',
+	WHATSAPP_ENABLED: 'whatsapp_enabled',
+	WHATSAPP_WELCOME_MESSAGE: 'whatsapp_welcome_message',
+	WHATSAPP_GREETINGS: 'whatsapp_greetings',
+	WHATSAPP_QUICK_REPLIES: 'whatsapp_quick_replies',
 } as const;
 
 export type TSettingKey = (typeof SETTING_KEYS)[keyof typeof SETTING_KEYS];
@@ -80,6 +84,10 @@ export const SETTING_KEY_GROUP_MAP: Record<TSettingKey, TSettingGroup> = {
 	[SETTING_KEYS.GTM_ID]: SETTING_GROUPS.SEO,
 	[SETTING_KEYS.GOOGLE_SITE_VERIFICATION]: SETTING_GROUPS.SEO,
 	[SETTING_KEYS.OG_IMAGE_URL]: SETTING_GROUPS.SEO,
+	[SETTING_KEYS.WHATSAPP_ENABLED]: SETTING_GROUPS.CONTACT,
+	[SETTING_KEYS.WHATSAPP_WELCOME_MESSAGE]: SETTING_GROUPS.CONTACT,
+	[SETTING_KEYS.WHATSAPP_GREETINGS]: SETTING_GROUPS.CONTACT,
+	[SETTING_KEYS.WHATSAPP_QUICK_REPLIES]: SETTING_GROUPS.CONTACT,
 };
 
 /** Keys that are stored per content locale (see `AppSettingsTable.locale`) instead of a single global row. */
@@ -89,6 +97,9 @@ export const TRANSLATABLE_SETTING_KEYS = [
 	SETTING_KEYS.PRIVACY_POLICY,
 	SETTING_KEYS.FAQS,
 	SETTING_KEYS.BANNERS,
+	SETTING_KEYS.WHATSAPP_WELCOME_MESSAGE,
+	SETTING_KEYS.WHATSAPP_GREETINGS,
+	SETTING_KEYS.WHATSAPP_QUICK_REPLIES,
 ] as const satisfies readonly TSettingKey[];
 
 export type TTranslatableSettingKey = (typeof TRANSLATABLE_SETTING_KEYS)[number];
@@ -164,6 +175,9 @@ export const settingTranslationsSchema = z.object({
 	privacy_policy: z.record(z.enum(CONTENT_LOCALES), z.string().nullable()).optional(),
 	faqs: z.record(z.enum(CONTENT_LOCALES), z.array(faqItemSchema)).optional(),
 	banners: z.record(z.enum(CONTENT_LOCALES), z.array(bannerItemSchema)).optional(),
+	whatsapp_welcome_message: z.record(z.enum(CONTENT_LOCALES), z.string().nullable()).optional(),
+	whatsapp_greetings: z.record(z.enum(CONTENT_LOCALES), z.array(z.string())).optional(),
+	whatsapp_quick_replies: z.record(z.enum(CONTENT_LOCALES), z.array(z.string())).optional(),
 });
 
 export type TSettingTranslations = z.infer<typeof settingTranslationsSchema>;
@@ -194,6 +208,7 @@ export const updateSettingSchema = z.object({
 	gtm_id: z.string().regex(/^GTM-[A-Z0-9]+$/, 'Must be a valid GTM Container ID (e.g. GTM-XXXXXXX)').optional().or(z.literal('')),
 	google_site_verification: z.string().optional(),
 	og_image_url: z.string().optional(),
+	whatsapp_enabled: z.boolean().optional(),
 	translations: settingTranslationsSchema.optional(),
 });
 
@@ -229,6 +244,10 @@ export const settingSchema = z.object({
 	gtm_id: z.string().nullable(),
 	google_site_verification: z.string().nullable(),
 	og_image_url: z.string().nullable(),
+	whatsapp_enabled: z.boolean(),
+	whatsapp_welcome_message: z.string().nullable(),
+	whatsapp_greetings: z.array(z.string()),
+	whatsapp_quick_replies: z.array(z.string()),
 	translations: settingTranslationsSchema,
 });
 

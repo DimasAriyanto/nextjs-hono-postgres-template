@@ -5,3 +5,4 @@ export * from './privacy-policy';
 export * from './banners';
 export * from './article-categories';
 export * from './articles';
+export * from './whatsapp';

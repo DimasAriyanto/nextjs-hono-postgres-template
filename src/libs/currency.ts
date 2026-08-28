@@ -10,10 +10,13 @@ import { getAppCurrency, getAppLocale } from '@/libs/dayjs';
  * touching the app-wide default.
  */
 export const formatCurrency = (value: number, options?: { currency?: string; locale?: string }) => {
+    const currency = options?.currency ?? getAppCurrency();
+    const isIdr = currency === 'IDR';
     return new Intl.NumberFormat(options?.locale ?? getAppLocale(), {
         style: 'currency',
-        currency: options?.currency ?? getAppCurrency(),
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
+        currency,
+        minimumFractionDigits: isIdr ? 0 : (value % 1 === 0 ? 0 : 2),
+        maximumFractionDigits: isIdr ? 0 : 2,
     }).format(value);
 };
+

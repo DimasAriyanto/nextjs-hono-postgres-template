@@ -18,6 +18,12 @@ import {
 	privacyPolicyHtmlId,
 	bannersEn,
 	bannersId,
+	whatsappWelcomeMessageEn,
+	whatsappWelcomeMessageId,
+	whatsappGreetingsEn,
+	whatsappGreetingsId,
+	whatsappQuickRepliesEn,
+	whatsappQuickRepliesId,
 	articleCategoriesSeed,
 	articlesSeed,
 } from './mock-data';
@@ -120,6 +126,12 @@ export async function seed() {
 		{ key: SETTING_KEYS.PRIVACY_POLICY, locale: 'id', value: privacyPolicyHtmlId },
 		{ key: SETTING_KEYS.BANNERS, locale: 'en', value: bannersEn },
 		{ key: SETTING_KEYS.BANNERS, locale: 'id', value: bannersId },
+		{ key: SETTING_KEYS.WHATSAPP_WELCOME_MESSAGE, locale: 'en', value: whatsappWelcomeMessageEn },
+		{ key: SETTING_KEYS.WHATSAPP_WELCOME_MESSAGE, locale: 'id', value: whatsappWelcomeMessageId },
+		{ key: SETTING_KEYS.WHATSAPP_GREETINGS, locale: 'en', value: whatsappGreetingsEn },
+		{ key: SETTING_KEYS.WHATSAPP_GREETINGS, locale: 'id', value: whatsappGreetingsId },
+		{ key: SETTING_KEYS.WHATSAPP_QUICK_REPLIES, locale: 'en', value: whatsappQuickRepliesEn },
+		{ key: SETTING_KEYS.WHATSAPP_QUICK_REPLIES, locale: 'id', value: whatsappQuickRepliesId },
 	];
 
 	const insertedSettings = await db
@@ -134,6 +146,24 @@ export async function seed() {
 		.returning();
 
 	console.log('settings: ', insertedSettings);
+
+	// Global (non-translatable) settings
+	const globalSettingsSeed: { key: string; value: unknown }[] = [
+		{ key: SETTING_KEYS.WHATSAPP_ENABLED, value: true },
+	];
+
+	const insertedGlobalSettings = await db
+		.insert(schema.AppSettingsTable)
+		.values(globalSettingsSeed.map((s) => ({
+			key: s.key,
+			locale: '',
+			group: SETTING_KEY_GROUP_MAP[s.key as keyof typeof SETTING_KEY_GROUP_MAP],
+			value: s.value,
+		})))
+		.onConflictDoNothing()
+		.returning();
+
+	console.log('global settings: ', insertedGlobalSettings);
 
 	await db
 		.insert(schema.ArticleCategoriesTable)

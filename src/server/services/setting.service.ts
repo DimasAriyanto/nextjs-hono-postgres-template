@@ -54,12 +54,19 @@ const DEFAULTS: TSetting = {
 	gtm_id: null,
 	google_site_verification: null,
 	og_image_url: null,
+	whatsapp_enabled: true,
+	whatsapp_welcome_message: null,
+	whatsapp_greetings: [],
+	whatsapp_quick_replies: [],
 	translations: {
 		about_content: { id: null, en: null },
 		terms_of_service: { id: null, en: null },
 		privacy_policy: { id: null, en: null },
 		faqs: { id: [], en: [] },
 		banners: { id: [], en: [] },
+		whatsapp_welcome_message: { id: null, en: null },
+		whatsapp_greetings: { id: [], en: [] },
+		whatsapp_quick_replies: { id: [], en: [] },
 	},
 };
 
@@ -117,12 +124,19 @@ export class SettingService {
 			gtm_id: global(SETTING_KEYS.GTM_ID, DEFAULTS.gtm_id),
 			google_site_verification: global(SETTING_KEYS.GOOGLE_SITE_VERIFICATION, DEFAULTS.google_site_verification),
 			og_image_url: global(SETTING_KEYS.OG_IMAGE_URL, DEFAULTS.og_image_url),
+			whatsapp_enabled: global(SETTING_KEYS.WHATSAPP_ENABLED, DEFAULTS.whatsapp_enabled),
+			whatsapp_welcome_message: resolved(SETTING_KEYS.WHATSAPP_WELCOME_MESSAGE, DEFAULTS.whatsapp_welcome_message),
+			whatsapp_greetings: resolved(SETTING_KEYS.WHATSAPP_GREETINGS, DEFAULTS.whatsapp_greetings),
+			whatsapp_quick_replies: resolved(SETTING_KEYS.WHATSAPP_QUICK_REPLIES, DEFAULTS.whatsapp_quick_replies),
 			translations: {
 				about_content: allLocales(SETTING_KEYS.ABOUT_CONTENT, DEFAULTS.about_content),
 				terms_of_service: allLocales(SETTING_KEYS.TERMS_OF_SERVICE, DEFAULTS.terms_of_service),
 				privacy_policy: allLocales(SETTING_KEYS.PRIVACY_POLICY, DEFAULTS.privacy_policy),
 				faqs: allLocales(SETTING_KEYS.FAQS, DEFAULTS.faqs),
 				banners: allLocales(SETTING_KEYS.BANNERS, DEFAULTS.banners),
+				whatsapp_welcome_message: allLocales(SETTING_KEYS.WHATSAPP_WELCOME_MESSAGE, DEFAULTS.whatsapp_welcome_message),
+				whatsapp_greetings: allLocales(SETTING_KEYS.WHATSAPP_GREETINGS, DEFAULTS.whatsapp_greetings),
+				whatsapp_quick_replies: allLocales(SETTING_KEYS.WHATSAPP_QUICK_REPLIES, DEFAULTS.whatsapp_quick_replies),
 			},
 		};
 	}
