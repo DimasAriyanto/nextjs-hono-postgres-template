@@ -77,8 +77,8 @@ export const ResetPasswordWrapper = ({ token }: ResetPasswordWrapperProps) => {
 				{t('backToHome')}
 			</Link>
 			<Card className="overflow-hidden p-0">
-				<CardContent className="grid p-0 md:grid-cols-2">
-					<form className="p-6 md:p-8" onSubmit={handleSubmit(onSubmit)}>
+				<CardContent className="grid p-0 md:grid-cols-12">
+					<form className="p-6 md:p-8 lg:p-10 md:col-span-7" onSubmit={handleSubmit(onSubmit)}>
 						<FieldGroup>
 							<div className="flex flex-col items-center gap-2 text-center">
 								<h1 className="text-2xl font-bold">{tReset('heading')}</h1>
@@ -143,11 +143,11 @@ export const ResetPasswordWrapper = ({ token }: ResetPasswordWrapperProps) => {
 							</FieldDescription>
 						</FieldGroup>
 					</form>
-					<div className="bg-muted relative hidden md:block">
+					<div className="bg-muted relative hidden md:col-span-5 md:block overflow-hidden">
 						<img
-							src="/placeholder.svg"
-							alt="Image"
-							className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+							src="https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=1000&auto=format&fit=crop"
+							alt="Reset Password"
+							className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.7]"
 						/>
 					</div>
 				</CardContent>

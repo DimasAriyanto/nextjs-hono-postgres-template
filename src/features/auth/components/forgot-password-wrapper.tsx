@@ -72,8 +72,8 @@ export const ForgotPasswordWrapper = () => {
 				{t('backToHome')}
 			</Link>
 			<Card className="overflow-hidden p-0">
-				<CardContent className="grid p-0 md:grid-cols-2">
-					<div className="p-6 md:p-8">
+				<CardContent className="grid p-0 md:grid-cols-12">
+					<div className="p-6 md:p-8 lg:p-10 md:col-span-7">
 						{!isSuccess ? (
 							<form onSubmit={handleSubmit(onSubmit)}>
 								<FieldGroup>
@@ -133,11 +133,11 @@ export const ForgotPasswordWrapper = () => {
 							</FieldGroup>
 						)}
 					</div>
-					<div className="bg-muted relative hidden md:block">
+					<div className="bg-muted relative hidden md:col-span-5 md:block overflow-hidden">
 						<img
-							src="/placeholder.svg"
-							alt="Image"
-							className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+							src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=1000&auto=format&fit=crop"
+							alt="Forgot Password"
+							className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.7]"
 						/>
 					</div>
 				</CardContent>
