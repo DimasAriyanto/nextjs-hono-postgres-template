@@ -1,6 +1,7 @@
 {
 	"nav": {
 		"articles": "Artikel",
+		"gallery": "Galeri",
 		"login": "Masuk",
 		"register": "Daftar",
 		"dashboard": "Dasbor",
@@ -22,7 +23,8 @@
 		"privacy": "Kebijakan Privasi"
 	},
 	"home": {
-		"faqTitle": "Pertanyaan yang Sering Diajukan"
+		"faqTitle": "Pertanyaan yang Sering Diajukan",
+		"galleryTitle": "Galeri"
 	},
 	"banner": {
 		"goToSlide": "Ke slide {number}"

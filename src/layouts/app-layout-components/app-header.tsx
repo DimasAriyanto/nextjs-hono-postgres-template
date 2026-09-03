@@ -135,8 +135,9 @@ function UserMenu({ name, avatarUrl, onLogout }: { name: string; avatarUrl?: str
 // ── Nav ────────────────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-	{ href: '/articles', labelKey: 'articles' } as const,
-];
+	{ href: '/articles', labelKey: 'articles' },
+	{ href: '/#gallery', labelKey: 'gallery' },
+] as const;
 
 function isNavActive(pathname: string, href: string) {
 	return pathname === href || pathname.startsWith(`${href}/`);

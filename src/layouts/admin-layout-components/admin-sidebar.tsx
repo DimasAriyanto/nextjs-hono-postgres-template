@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import {
+  Images,
   LayoutDashboard,
   Newspaper,
   Settings,
@@ -63,6 +64,12 @@ const menuGroups: MenuGroup[] = [
         url: "/gundala-admin/d/article",
         icon: Newspaper,
         permission: "menu.article.view",
+      },
+      {
+        title: "Gallery",
+        url: "/gundala-admin/d/gallery",
+        icon: Images,
+        permission: "menu.gallery.view",
       },
     ],
   },

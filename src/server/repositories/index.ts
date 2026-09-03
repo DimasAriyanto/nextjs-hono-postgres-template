@@ -4,5 +4,6 @@ export * from './permission.repository';
 export * from './notification.repository';
 export * from './article.repository';
 export * from './article-category.repository';
+export * from './gallery.repository';
 export * from './setting.repository';
 export * from './refresh-token.repository';

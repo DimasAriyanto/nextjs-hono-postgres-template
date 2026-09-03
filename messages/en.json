@@ -1,6 +1,7 @@
 {
 	"nav": {
 		"articles": "Articles",
+		"gallery": "Gallery",
 		"login": "Login",
 		"register": "Register",
 		"dashboard": "Dashboard",
@@ -22,7 +23,8 @@
 		"privacy": "Privacy Policy"
 	},
 	"home": {
-		"faqTitle": "Frequently Asked Questions"
+		"faqTitle": "Frequently Asked Questions",
+		"galleryTitle": "Gallery"
 	},
 	"banner": {
 		"goToSlide": "Go to slide {number}"

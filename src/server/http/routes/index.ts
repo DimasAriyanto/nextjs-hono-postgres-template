@@ -7,6 +7,7 @@ import { notificationRoutes } from './notification.routes';
 import { uploadRoutes } from './upload.routes';
 import { articlesRoutes } from './articles.routes';
 import { articleCategoriesRoutes } from './article-categories.routes';
+import { galleriesRoutes } from './galleries.routes';
 import { settingsRoutes } from './settings.routes';
 import { currencyRoutes } from './currency.routes';
 
@@ -20,7 +21,8 @@ export const apiRoutes = new Hono()
 	.route('/uploads', uploadRoutes)
 	.route('/articles', articlesRoutes)
 	.route('/article-categories', articleCategoriesRoutes)
+	.route('/galleries', galleriesRoutes)
 	.route('/settings', settingsRoutes)
 	.route('/currency', currencyRoutes);
 
-export { authRoutes, usersRoutes, rolesRoutes, permissionsRoutes, notificationRoutes, uploadRoutes, articlesRoutes, articleCategoriesRoutes, settingsRoutes, currencyRoutes };
+export { authRoutes, usersRoutes, rolesRoutes, permissionsRoutes, notificationRoutes, uploadRoutes, articlesRoutes, articleCategoriesRoutes, galleriesRoutes, settingsRoutes, currencyRoutes };

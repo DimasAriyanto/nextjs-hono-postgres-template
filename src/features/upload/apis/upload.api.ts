@@ -10,9 +10,7 @@ interface UploadImageParams {
 
 interface UploadResponse {
 	url: string;
-	filename: string;
-	size: number;
-	mimetype: string;
+	path: string;
 }
 
 // ── Upload Image API ──────────────────────────────────────────────────────────

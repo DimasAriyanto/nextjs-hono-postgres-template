@@ -22,6 +22,9 @@ export * from './article';
 // Article Category
 export * from './article-category';
 
+// Gallery
+export * from './gallery';
+
 // Setting
 export * from './setting';
 

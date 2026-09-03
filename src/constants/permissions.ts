@@ -6,6 +6,8 @@ export const MENU_PERMISSIONS = [
 	{ key: 'menu.role.manage', menu: 'Role', action: 'manage' },
 	{ key: 'menu.article.view', menu: 'Article', action: 'view' },
 	{ key: 'menu.article.manage', menu: 'Article', action: 'manage' },
+	{ key: 'menu.gallery.view', menu: 'Gallery', action: 'view' },
+	{ key: 'menu.gallery.manage', menu: 'Gallery', action: 'manage' },
 	{ key: 'menu.settings.view', menu: 'Settings', action: 'view' },
 	{ key: 'menu.settings.manage', menu: 'Settings', action: 'manage' },
 ] as const;
