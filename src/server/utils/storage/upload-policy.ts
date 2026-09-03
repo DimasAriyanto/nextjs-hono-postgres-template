@@ -10,7 +10,7 @@
  *   verified MIME type via the maps below instead.
  */
 
-export const ALLOWED_UPLOAD_FOLDERS = ['avatars', 'articles', 'settings', 'uploads'] as const;
+export const ALLOWED_UPLOAD_FOLDERS = ['avatars', 'articles', 'settings', 'banners', 'uploads'] as const;
 
 export function isAllowedUploadFolder(folder: string): folder is (typeof ALLOWED_UPLOAD_FOLDERS)[number] {
 	return (ALLOWED_UPLOAD_FOLDERS as readonly string[]).includes(folder);
