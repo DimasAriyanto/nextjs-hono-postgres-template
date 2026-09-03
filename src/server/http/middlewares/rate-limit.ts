@@ -1,5 +1,6 @@
 import { createMiddleware } from 'hono/factory';
 import { RateLimitError } from '@/server/errors';
+import { getClientIp } from '@/server/utils/request';
 
 interface RateLimitOptions {
 	/** Size of the fixed window, in seconds */
@@ -19,6 +20,10 @@ interface Bucket {
  * In-memory (per server instance) — fine for this template's default single-instance/VPS
  * deployment. A multi-instance/serverless deployment would need a shared store
  * (e.g. Redis/Upstash) instead, since each instance would otherwise track its own count.
+ *
+ * The IP itself (see `getClientIp`) is only as trustworthy as the reverse proxy in
+ * front of this app — this is best-effort brute-force friction, not a hard guarantee,
+ * and is fully bypassable if the app is ever exposed directly to the internet.
  */
 const buckets = new Map<string, Bucket>();
 
@@ -33,18 +38,9 @@ setInterval(
 	5 * 60 * 1000,
 ).unref?.();
 
-function getClientIp(headerValue: string | undefined): string {
-	if (!headerValue) return 'unknown';
-	return headerValue.split(',')[0].trim();
-}
-
 export const rateLimit = ({ windowSeconds, max }: RateLimitOptions) =>
 	createMiddleware(async (c, next) => {
-		const ip = getClientIp(c.req.header('x-forwarded-for')) !== 'unknown'
-			? getClientIp(c.req.header('x-forwarded-for'))
-			: getClientIp(c.req.header('x-real-ip'));
-
-		const key = `${c.req.path}:${ip}`;
+		const key = `${c.req.path}:${getClientIp(c)}`;
 		const now = Date.now();
 
 		let bucket = buckets.get(key);

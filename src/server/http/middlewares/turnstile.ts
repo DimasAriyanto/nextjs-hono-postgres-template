@@ -1,5 +1,6 @@
 import { createMiddleware } from 'hono/factory';
 import { ValidationError } from '@/server/errors';
+import { getClientIp } from '@/server/utils/request';
 
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
@@ -44,11 +45,11 @@ export const turnstileVerify = createMiddleware(async (c, next) => {
 	formData.append('secret', secretKey);
 	formData.append('response', token);
 
-	// Forward client IP if available (improves Turnstile accuracy)
-	const clientIp =
-		c.req.header('x-forwarded-for')?.split(',')[0].trim() ??
-		c.req.header('x-real-ip');
-	if (clientIp) {
+	// Forward client IP if available (improves Turnstile accuracy) — best-effort only,
+	// see getClientIp's trust assumptions; a wrong/spoofed IP here just weakens
+	// Cloudflare's own risk scoring, it doesn't bypass the token check above.
+	const clientIp = getClientIp(c);
+	if (clientIp !== 'unknown') {
 		formData.append('remoteip', clientIp);
 	}
 

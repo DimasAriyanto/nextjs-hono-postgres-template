@@ -181,6 +181,7 @@ New backend resource checklist: add a schema in `databases/schemas`, a repositor
 -   `APP_KEY` / `APP_COOKIE_KEY` in `.env.example` are placeholders only — generate your own with `npm run secret:generate` and never ship the example values to a real environment.
 -   Protected routes require the `auth` middleware (`src/server/http/middlewares/auth.ts`); admin-only or permissioned routes additionally use `checkPermission(key)`.
 -   Credential-guessing endpoints (login, register, forgot-password) should use `turnstileVerify` + a strict `rateLimit(...)` — see `src/server/http/routes/auth.routes.ts` for the pattern.
+-   Rate limiting and the Turnstile IP hint trust the `X-Forwarded-For` header (`src/server/utils/request.ts`), which is only as trustworthy as the reverse proxy in front of this app. **Never deploy with the Node process exposed directly to the internet** — always put a reverse proxy or CDN (Nginx, Caddy, Cloudflare, Vercel's edge, ...) in front of it in production, or rate limiting becomes bypassable.
 
 ---
 
