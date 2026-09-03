@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import { getLocale } from 'next-intl/server';
 import { HomeWrapper } from '@/features/home';
 import { getSettings } from '@/features/setting/apis/setting.api';
 import { toJsonLdScript } from '@/libs/seo';
-import type { TFaqItem } from '@/contracts';
+import type { TContentLocale, TFaqItem } from '@/contracts';
 
 export const metadata: Metadata = {
 	alternates: { canonical: '/' },
@@ -26,7 +27,8 @@ function buildFaqJsonLd(faqs: TFaqItem[]) {
 }
 
 export default async function Page() {
-	const { data } = await getSettings();
+	const locale = await getLocale();
+	const { data } = await getSettings(locale as TContentLocale);
 
 	return (
 		<>
@@ -36,7 +38,7 @@ export default async function Page() {
 					dangerouslySetInnerHTML={{ __html: toJsonLdScript(buildFaqJsonLd(data.faqs)) }}
 				/>
 			)}
-			<HomeWrapper />
+			<HomeWrapper settings={data} />
 		</>
 	);
 }

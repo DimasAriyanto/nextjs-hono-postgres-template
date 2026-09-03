@@ -51,7 +51,7 @@ export async function ArticleDetailWrapper({ slug }: ArticleDetailWrapperProps) 
 
 			{article.thumbnail_url && (
 				<div className="relative mt-8 aspect-video w-full overflow-hidden rounded-lg bg-muted">
-					<Image src={article.thumbnail_url} alt={article.title} fill className="object-cover" priority />
+					<Image src={article.thumbnail_url} alt={article.title} fill sizes="(min-width: 768px) 768px, 100vw" className="object-cover" priority />
 				</div>
 			)}
 

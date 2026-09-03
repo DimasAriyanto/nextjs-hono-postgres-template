@@ -12,7 +12,6 @@ import {
 	CarouselPrevious,
 	type CarouselApi,
 } from '@/components/ui/carousel';
-import { Skeleton } from '@/components/ui/skeleton';
 import type { TBannerDisplayMode, TBannerItem } from '@/contracts';
 
 const ALIGN_CLASSES: Record<NonNullable<TBannerItem['text_align']>, string> = {
@@ -23,11 +22,10 @@ const ALIGN_CLASSES: Record<NonNullable<TBannerItem['text_align']>, string> = {
 
 interface BannerSectionProps {
 	banners: TBannerItem[];
-	isLoading?: boolean;
 	displayMode?: TBannerDisplayMode;
 }
 
-function BannerMedia({ banner, priority }: { banner: TBannerItem; priority?: boolean }) {
+function BannerMedia({ banner, priority, sizes }: { banner: TBannerItem; priority?: boolean; sizes: string }) {
 	return banner.media_type === 'video' ? (
 		<video
 			src={banner.image_url}
@@ -43,6 +41,7 @@ function BannerMedia({ banner, priority }: { banner: TBannerItem; priority?: boo
 			alt={banner.title || 'Banner'}
 			fill
 			priority={priority}
+			sizes={sizes}
 			className="object-cover"
 		/>
 	);
@@ -73,7 +72,7 @@ function SplitHeroBanner({ banner, imageOnLeft }: { banner: TBannerItem; imageOn
 	return (
 		<section className="container mx-auto grid grid-cols-1 px-4 md:h-[560px] md:grid-cols-2 md:px-6">
 			<div className={cn('relative h-[240px] sm:h-[320px] md:h-full', imageOnLeft ? 'md:order-1' : 'md:order-2')}>
-				<BannerMedia banner={banner} priority />
+				<BannerMedia banner={banner} priority sizes="(min-width: 768px) 50vw, 100vw" />
 			</div>
 			<div className={cn('flex flex-col justify-center gap-4 py-8 sm:py-10 md:px-12', imageOnLeft ? 'md:order-2' : 'md:order-1')}>
 				{banner.title && (
@@ -104,7 +103,7 @@ function HeroBanner({ banner }: { banner: TBannerItem }) {
 
 	return (
 		<section className="relative h-[360px] w-full overflow-hidden sm:h-[480px] md:h-[600px] xl:h-[680px]">
-			<BannerMedia banner={banner} priority />
+			<BannerMedia banner={banner} priority sizes="100vw" />
 			<div className="absolute inset-0 bg-black/20" />
 			<div className={cn('relative flex h-full flex-col justify-center px-6 md:px-16', ALIGN_CLASSES[align])}>
 				<BannerCaption banner={banner} />
@@ -139,7 +138,7 @@ function BannerCarousel({ banners }: { banners: TBannerItem[] }) {
 					{banners.map((banner, index) => (
 						<CarouselItem key={index} className="pl-0">
 							<div className="relative h-[320px] w-full overflow-hidden sm:h-[420px] md:h-[520px] xl:h-[600px]">
-								<BannerMedia banner={banner} priority={index === 0} />
+								<BannerMedia banner={banner} priority={index === 0} sizes="100vw" />
 								<div className="absolute inset-0 bg-black/10" />
 								<div className={cn('relative flex h-full flex-col justify-center px-6 md:px-16', ALIGN_CLASSES[banner.text_align ?? 'center'])}>
 									<BannerCaption banner={banner} />
@@ -174,11 +173,7 @@ function BannerCarousel({ banners }: { banners: TBannerItem[] }) {
 	);
 }
 
-export function BannerSection({ banners, isLoading, displayMode = 'carousel' }: BannerSectionProps) {
-	if (isLoading) {
-		return <Skeleton className="h-[320px] w-full rounded-none sm:h-[420px] md:h-[520px] xl:h-[600px]" />;
-	}
-
+export function BannerSection({ banners, displayMode = 'carousel' }: BannerSectionProps) {
 	if (banners.length === 0) return null;
 
 	if (displayMode === 'hero') {

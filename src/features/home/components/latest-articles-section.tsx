@@ -1,19 +1,17 @@
-'use client';
-
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { ArticleCard } from '@/components/article-card';
-import { usePublicArticles } from '@/features/article/hooks/use-article';
+import { getPublicArticles } from '@/features/article/apis/article.api';
 
-export function LatestArticlesSection() {
-	const { data, isLoading } = usePublicArticles({ page: 1, limit: 3 });
-	const t = useTranslations('articles');
-	const articles = data?.data ?? [];
+export async function LatestArticlesSection() {
+	const [t, { data: articles }] = await Promise.all([
+		getTranslations('articles'),
+		getPublicArticles({ page: 1, limit: 3 }),
+	]);
 
-	if (!isLoading && articles.length === 0) return null;
+	if (articles.length === 0) return null;
 
 	return (
 		<section className="container mx-auto px-4 md:px-6 py-16">
@@ -31,12 +29,7 @@ export function LatestArticlesSection() {
 			</div>
 
 			<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-				{isLoading
-					? Array.from({ length: 3 }).map((_, i) => (
-						<Skeleton key={i} className="aspect-square w-full rounded-lg" />
-					))
-					: articles.map((article) => <ArticleCard key={article.id} article={article} />)
-				}
+				{articles.map((article) => <ArticleCard key={article.id} article={article} />)}
 			</div>
 		</section>
 	);
