@@ -1,8 +1,19 @@
 import { Context } from 'hono';
 import { getStorage } from '@/server/utils/storage';
 import { isAllowedUploadFolder, IMAGE_MIME_EXT, VIDEO_MIME_EXT, documentExtFromMime } from '@/server/utils/storage/upload-policy';
+import { readFileHeader, matchesFileSignature } from '@/server/utils/storage/file-signature';
 import { response } from '@/server/http/response';
 import { ValidationError } from '@/server/errors';
+
+// Client-declared Content-Type is easy to spoof; this cross-checks it against the
+// file's actual leading bytes so an upload can't claim to be one format while
+// containing another (e.g. a script served back with a trusted-looking extension).
+async function assertFileSignature(file: File) {
+	const header = await readFileHeader(file);
+	if (!matchesFileSignature(header, file.type)) {
+		throw new ValidationError('Validation failed', { file: ['File content does not match its declared type'] });
+	}
+}
 
 const DEFAULT_MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
 const DEFAULT_MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50 MB
@@ -64,6 +75,8 @@ export const uploadController = {
 			throw new ValidationError('Validation failed', { file: [`File size must be less than ${formatMB(MAX_IMAGE_SIZE)}`] });
 		}
 
+		await assertFileSignature(file);
+
 		const storage = getStorage();
 		const result = await storage.upload(file, folder, ext);
 
@@ -92,6 +105,8 @@ export const uploadController = {
 			throw new ValidationError('Validation failed', { file: [`File size must be less than ${formatMB(MAX_VIDEO_SIZE)}`] });
 		}
 
+		await assertFileSignature(file);
+
 		const storage = getStorage();
 		const result = await storage.upload(file, folder, ext);
 
@@ -119,6 +134,8 @@ export const uploadController = {
 		if (file.size > MAX_DOCUMENT_SIZE) {
 			throw new ValidationError('Validation failed', { file: [`File size must be less than ${formatMB(MAX_DOCUMENT_SIZE)}`] });
 		}
+
+		await assertFileSignature(file);
 
 		const storage = getStorage();
 		const result = await storage.upload(file, folder, documentExtFromMime(file.type));

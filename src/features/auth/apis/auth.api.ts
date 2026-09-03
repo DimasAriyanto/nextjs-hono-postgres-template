@@ -46,12 +46,12 @@ export async function getProfile(): Promise<ApiSuccessResponse<TProfileResponse>
 }
 
 /**
- * GET /api/v1/auths/signout
+ * POST /api/v1/auths/signout
  * Sign out user and clear session
  */
 export async function logout(): Promise<ApiSuccessResponse<null>> {
 	return handleResponse<null>(
-		client.api.v1.auths.signout.$get()
+		client.api.v1.auths.signout.$post()
 	);
 }
 

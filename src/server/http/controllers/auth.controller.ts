@@ -208,8 +208,10 @@ export const authController = {
 	},
 
 	/**
-	 * GET /auths/signout
-	 * Sign out user
+	 * POST /auths/signout
+	 * Sign out user — revokes the refresh token and clears both auth cookies.
+	 * Must not be GET: this changes state (revokes the session), so a GET would be
+	 * triggerable via a plain link/prefetch/crawler (CSRF-able logout).
 	 */
 	async signout(c: Context) {
 		const refreshCookieConfig = authService.getRefreshCookieConfig();
