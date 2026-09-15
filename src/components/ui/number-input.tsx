@@ -26,9 +26,36 @@ export function NumberInput({
 }: NumberInputProps) {
 	const clamp = (val: number) => Math.min(max, Math.max(min, val));
 
+	// Mirrors `value` as text so the field can sit empty while the user is
+	// still typing (e.g. clearing a single digit to type a new one) instead of
+	// being forced back to the last committed number on every keystroke.
+	const [rawValue, setRawValue] = React.useState(String(value));
+	const [prevValue, setPrevValue] = React.useState(value);
+
+	if (value !== prevValue) {
+		setPrevValue(value);
+		setRawValue(String(value));
+	}
+
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const parsed = parseFloat(e.target.value);
+		const next = e.target.value;
+		setRawValue(next);
+
+		if (next === '' || next === '-') return;
+
+		const parsed = parseFloat(next);
 		if (!isNaN(parsed)) onChange?.(clamp(parsed));
+	};
+
+	const handleBlur = () => {
+		const parsed = parseFloat(rawValue);
+		if (isNaN(parsed)) {
+			setRawValue(String(value));
+			return;
+		}
+		const clamped = clamp(parsed);
+		setRawValue(String(clamped));
+		if (clamped !== value) onChange?.(clamped);
 	};
 
 	const decrement = () => onChange?.(clamp(value - step));
@@ -48,8 +75,9 @@ export function NumberInput({
 			</Button>
 			<input
 				type="number"
-				value={value}
+				value={rawValue}
 				onChange={handleChange}
+				onBlur={handleBlur}
 				disabled={disabled}
 				min={min}
 				max={max}

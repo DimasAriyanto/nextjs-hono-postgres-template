@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import { Download, Printer } from 'lucide-react';
 import {
   Dialog,
@@ -11,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Invoice, InvoiceProps } from './invoice';
+import { printInvoice } from '../receipt/print-utils';
 
 interface InvoiceDialogProps {
   open: boolean;
@@ -27,48 +27,14 @@ export function InvoiceDialog({
   onPrint,
   onDownload,
 }: InvoiceDialogProps) {
-  const invoiceRef = React.useRef<HTMLDivElement>(null);
-
-  const handlePrint = () => {
-    if (onPrint) {
-      onPrint();
-    } else {
-      window.print();
-    }
-  };
-
-  const handleDownload = () => {
-    if (onDownload) {
-      onDownload();
-    } else {
-      // Basic implementation - can be enhanced with html2canvas or similar
-      const printWindow = window.open('', '_blank');
-      if (printWindow && invoiceRef.current) {
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>Invoice - ${invoiceData.invoiceNumber}</title>
-              <style>
-                body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                .invoice { max-width: 800px; margin: 0 auto; }
-                @media print {
-                  body { padding: 0; }
-                  .invoice { max-width: none; }
-                }
-              </style>
-            </head>
-            <body>
-              <div class="invoice">
-                ${invoiceRef.current.innerHTML}
-              </div>
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-        printWindow.print();
-      }
-    }
-  };
+  // Both fall back to `printInvoice`, which opens a standalone, fully-styled
+  // (inline CSS, no Tailwind dependency) print window scoped to just the
+  // invoice — printing the dialog itself via `window.print()` used to also
+  // capture the dialog chrome/buttons and split across pages, and the old
+  // download fallback copied `innerHTML` into a window with no styles at all.
+  // The print dialog's own "Save as PDF" destination covers the download case.
+  const handlePrint = () => (onPrint ? onPrint() : printInvoice(invoiceData));
+  const handleDownload = () => (onDownload ? onDownload() : printInvoice(invoiceData));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -78,7 +44,7 @@ export function InvoiceDialog({
         </DialogHeader>
 
         <ScrollArea className="overflow-auto flex-1">
-          <div ref={invoiceRef} className="p-6">
+          <div className="p-6">
             <Invoice {...invoiceData} />
           </div>
         </ScrollArea>

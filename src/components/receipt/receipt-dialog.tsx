@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import { Download, Printer } from 'lucide-react';
 import {
   Dialog,
@@ -10,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Receipt, ReceiptProps } from './receipt';
+import { printReceipt } from './print-utils';
 
 interface ReceiptDialogProps {
   open: boolean;
@@ -26,48 +26,11 @@ export function ReceiptDialog({
   onPrint,
   onDownload,
 }: ReceiptDialogProps) {
-  const receiptRef = React.useRef<HTMLDivElement>(null);
-
-  const handlePrint = () => {
-    if (onPrint) {
-      onPrint();
-    } else {
-      window.print();
-    }
-  };
-
-  const handleDownload = () => {
-    if (onDownload) {
-      onDownload();
-    } else {
-      // Basic implementation - can be enhanced with html2canvas or similar
-      const printWindow = window.open('', '_blank');
-      if (printWindow && receiptRef.current) {
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>Receipt - ${receiptData.receiptNumber}</title>
-              <style>
-                body { font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
-                .receipt { max-width: 300px; margin: 0 auto; }
-                @media print {
-                  body { padding: 0; }
-                  .receipt { max-width: none; }
-                }
-              </style>
-            </head>
-            <body>
-              <div class="receipt">
-                ${receiptRef.current.innerHTML}
-              </div>
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-        printWindow.print();
-      }
-    }
-  };
+  // Both fall back to `printReceipt`, which opens a standalone, fully-styled (inline CSS, no
+  // Tailwind dependency) print window — copying the dialog's own rendered HTML here would carry
+  // Tailwind class names with no stylesheet to back them, rendering completely unstyled.
+  const handlePrint = () => (onPrint ? onPrint() : printReceipt(receiptData));
+  const handleDownload = () => (onDownload ? onDownload() : printReceipt(receiptData));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -77,9 +40,7 @@ export function ReceiptDialog({
         </DialogHeader>
 
         <div className="overflow-auto flex-1 px-5 py-5">
-          <div ref={receiptRef}>
-            <Receipt {...receiptData} />
-          </div>
+          <Receipt {...receiptData} />
         </div>
 
         <div className="border-t px-5 py-4 flex gap-2 shrink-0">

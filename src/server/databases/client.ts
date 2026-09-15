@@ -46,12 +46,21 @@ const getDatabaseUrl = (): string => {
 const getConnectionConfig = () => {
 	const provider = process.env.DB_PROVIDER || 'local';
 
+	// Every `timestamp` column's SQL-side `defaultNow()` (created_at/updated_at across all
+	// tables) is evaluated by Postgres in the session's timezone and stored as a naive
+	// wall-clock value — but `formatTZ()` (src/libs/dayjs.ts) assumes every stored timestamp
+	// is UTC. Forcing the session to UTC keeps that assumption true regardless of the server's
+	// own configured timezone (e.g. a host set to Asia/Jakarta), which otherwise silently
+	// double-shifts every "created at" style timestamp on display.
+	const connection = { timezone: 'UTC' };
+
 	if (provider === 'supabase') {
 		// Supabase-specific configuration
 		return {
 			prepare: false, // Required for transaction pooler (port 6543)
 			idle_timeout: 20,
 			max_lifetime: 60 * 30, // 30 minutes
+			connection,
 		};
 	}
 
@@ -63,12 +72,14 @@ const getConnectionConfig = () => {
 			idle_timeout: 20,
 			max_lifetime: 60 * 30, // 30 minutes
 			ssl: 'require' as const,
+			connection,
 		};
 	}
 
 	// Local PostgreSQL configuration
 	return {
 		idle_timeout: 20000,
+		connection,
 	};
 };
 
