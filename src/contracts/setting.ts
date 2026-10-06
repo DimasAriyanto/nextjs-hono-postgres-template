@@ -36,6 +36,7 @@ export const SETTING_KEYS = {
 	TIMEZONE: 'timezone',
 	LOCALE: 'locale',
 	CURRENCY: 'currency',
+	CURRENCY_DISPLAY: 'currency_display',
 	TERMS_OF_SERVICE: 'terms_of_service',
 	PRIVACY_POLICY: 'privacy_policy',
 	PRIMARY_COLOR: 'primary_color',
@@ -70,6 +71,7 @@ export const SETTING_KEY_GROUP_MAP: Record<TSettingKey, TSettingGroup> = {
 	[SETTING_KEYS.TIMEZONE]: SETTING_GROUPS.REGIONAL,
 	[SETTING_KEYS.LOCALE]: SETTING_GROUPS.REGIONAL,
 	[SETTING_KEYS.CURRENCY]: SETTING_GROUPS.REGIONAL,
+	[SETTING_KEYS.CURRENCY_DISPLAY]: SETTING_GROUPS.REGIONAL,
 	[SETTING_KEYS.TERMS_OF_SERVICE]: SETTING_GROUPS.LEGAL,
 	[SETTING_KEYS.PRIVACY_POLICY]: SETTING_GROUPS.LEGAL,
 	[SETTING_KEYS.PRIMARY_COLOR]: SETTING_GROUPS.APPEARANCE,
@@ -135,6 +137,11 @@ export const BANNER_DISPLAY_MODES = ['carousel', 'hero'] as const;
 
 export type TBannerDisplayMode = (typeof BANNER_DISPLAY_MODES)[number];
 
+/** How currency amounts are rendered: the ISO code (e.g. "IDR 1.000.000") or a symbol (e.g. "Rp 1.000.000"). */
+export const CURRENCY_DISPLAY_FORMATS = ['code', 'symbol'] as const;
+
+export type TCurrencyDisplayFormat = (typeof CURRENCY_DISPLAY_FORMATS)[number];
+
 export const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
 export type TWeekday = (typeof WEEKDAYS)[number];
@@ -188,6 +195,7 @@ export const updateSettingSchema = z.object({
 	timezone: z.string().optional(),
 	locale: z.string().optional(),
 	currency: z.string().optional(),
+	currency_display: z.enum(CURRENCY_DISPLAY_FORMATS).optional(),
 	primary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color (e.g. #171717)').optional().or(z.literal('')),
 	banner_display_mode: z.enum(BANNER_DISPLAY_MODES).optional(),
 	default_content_locale: z.enum(CONTENT_LOCALES).optional(),
@@ -220,6 +228,7 @@ export const settingSchema = z.object({
 	timezone: z.string(),
 	locale: z.string(),
 	currency: z.string(),
+	currency_display: z.enum(CURRENCY_DISPLAY_FORMATS),
 	terms_of_service: z.string().nullable(),
 	privacy_policy: z.string().nullable(),
 	primary_color: z.string().nullable(),

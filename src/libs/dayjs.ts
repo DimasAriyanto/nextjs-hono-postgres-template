@@ -30,6 +30,13 @@ export const TZ_WIB = 'Asia/Jakarta';
 /** Default locale/currency used until the app's Settings > Regional value is loaded */
 export const DEFAULT_LOCALE = 'en-US';
 export const DEFAULT_CURRENCY = 'IDR';
+export const DEFAULT_CURRENCY_DISPLAY = 'code';
+
+/** How currency amounts are rendered, supported by Settings > Regional */
+export const CURRENCY_DISPLAY_OPTIONS = [
+	{ value: 'code', label: 'Code (e.g. IDR 1.000.000)' },
+	{ value: 'symbol', label: 'Symbol (e.g. Rp 1.000.000)' },
+] as const;
 
 /** BCP-47 locale tags (used by Intl.*) supported by Settings > Regional, mapped to their dayjs locale key */
 export const LOCALE_OPTIONS = [
@@ -53,6 +60,7 @@ const DAYJS_LOCALE_MAP: Record<string, string> = Object.fromEntries(LOCALE_OPTIO
 let appTimezone: string = TZ_WIB;
 let appLocale: string = DEFAULT_LOCALE;
 let appCurrency: string = DEFAULT_CURRENCY;
+let appCurrencyDisplay: string = DEFAULT_CURRENCY_DISPLAY;
 
 dayjs.locale(DAYJS_LOCALE_MAP[appLocale]);
 
@@ -85,6 +93,16 @@ export function setAppCurrency(currency: string | null | undefined): void {
 /** Get the currently configured application currency */
 export function getAppCurrency(): string {
 	return appCurrency;
+}
+
+/** Set the application's configured currency display format ("code" or "symbol") */
+export function setAppCurrencyDisplay(display: string | null | undefined): void {
+	appCurrencyDisplay = display === 'symbol' ? 'symbol' : DEFAULT_CURRENCY_DISPLAY;
+}
+
+/** Get the currently configured application currency display format */
+export function getAppCurrencyDisplay(): string {
+	return appCurrencyDisplay;
 }
 
 /**

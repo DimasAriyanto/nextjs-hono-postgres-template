@@ -6,7 +6,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useConvertCurrency } from '@/features/currency/hooks/use-currency';
-import { LOCALE_OPTIONS } from '@/libs/dayjs';
+import { CURRENCY_DISPLAY_OPTIONS, LOCALE_OPTIONS } from '@/libs/dayjs';
+import { formatCurrency } from '@/libs/currency';
 import { CONTENT_LOCALES, type TUpdateSettingRequest } from '@/contracts';
 import { CONTENT_LOCALE_LABELS } from './content-locale-switcher';
 
@@ -59,6 +60,9 @@ interface RegionalTabProps {
 }
 
 export function RegionalTab({ form, isSaving }: RegionalTabProps) {
+	const watchedCurrency = form.watch('currency');
+	const watchedCurrencyDisplay = form.watch('currency_display');
+
 	return (
 		<Card>
 			<CardContent className="pt-6 space-y-4">
@@ -116,6 +120,30 @@ export function RegionalTab({ form, isSaving }: RegionalTabProps) {
 							</SelectContent>
 						</Select>
 						<CurrencyRatePreview currency={field.value} />
+						<FormMessage />
+					</FormItem>
+				)} />
+
+				<FormField control={form.control} name="currency_display" render={({ field }) => (
+					<FormItem>
+						<FormLabel>Currency Display</FormLabel>
+						<Select value={field.value} onValueChange={field.onChange} disabled={isSaving}>
+							<FormControl>
+								<SelectTrigger className="w-full sm:w-80">
+									<SelectValue placeholder="Select currency display" />
+								</SelectTrigger>
+							</FormControl>
+							<SelectContent>
+								{CURRENCY_DISPLAY_OPTIONS.map((option) => (
+									<SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						{watchedCurrency && (
+							<p className="text-sm text-muted-foreground">
+								Preview: {formatCurrency(1000000, { currency: watchedCurrency, display: watchedCurrencyDisplay })}
+							</p>
+						)}
 						<FormMessage />
 					</FormItem>
 				)} />

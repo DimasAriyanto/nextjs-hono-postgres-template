@@ -13,7 +13,7 @@ import { PageHeader } from '@/components/page-header';
 import { useSettings, useUpdateSettings } from '@/features/setting/hooks/use-setting';
 import { useUploadImage, useUploadVideo } from '@/features/upload/hooks/use-upload';
 import { toastUploadError } from '@/libs/toast';
-import { setAppCurrency, setAppLocale, setAppTimezone } from '@/libs/dayjs';
+import { setAppCurrency, setAppCurrencyDisplay, setAppLocale, setAppTimezone } from '@/libs/dayjs';
 import { CONTENT_LOCALES, DEFAULT_CONTENT_LOCALE, updateSettingSchema, type TBannerItem, type TContentLocale, type TUpdateSettingRequest } from '@/contracts';
 import type { PendingBannerFile } from '@/components/banner-input';
 import { AboutTab } from './tabs/about-tab';
@@ -59,6 +59,7 @@ export function SettingWrapper() {
 			timezone: '',
 			locale: '',
 			currency: '',
+			currency_display: 'code',
 			primary_color: '',
 			banner_display_mode: 'carousel',
 			default_content_locale: DEFAULT_CONTENT_LOCALE,
@@ -92,6 +93,7 @@ export function SettingWrapper() {
 				timezone: settings.timezone,
 				locale: settings.locale,
 				currency: settings.currency,
+				currency_display: settings.currency_display,
 				primary_color: settings.primary_color ?? '',
 				banner_display_mode: settings.banner_display_mode,
 				default_content_locale: settings.default_content_locale,
@@ -111,7 +113,8 @@ export function SettingWrapper() {
 		if (settings?.timezone) setAppTimezone(settings.timezone);
 		if (settings?.locale) setAppLocale(settings.locale);
 		if (settings?.currency) setAppCurrency(settings.currency);
-	}, [settings?.timezone, settings?.locale, settings?.currency]);
+		if (settings?.currency_display) setAppCurrencyDisplay(settings.currency_display);
+	}, [settings?.timezone, settings?.locale, settings?.currency, settings?.currency_display]);
 
 	const onSubmit = async (values: TUpdateSettingRequest) => {
 		let logoUrl = values.logo_url;
