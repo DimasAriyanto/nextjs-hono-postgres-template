@@ -2,6 +2,8 @@ import { eq, isNull, and } from 'drizzle-orm';
 import { db } from '@/server/databases/client';
 import { RefreshTokensTable, type TSelectRefreshToken } from '@/server/databases/schemas/refresh-tokens.schema';
 
+type RevokeReason = 'rotation' | 'logout' | 'security';
+
 export class RefreshTokenRepository {
 	/**
 	 * Create a new refresh token record
@@ -27,20 +29,24 @@ export class RefreshTokenRepository {
 	/**
 	 * Revoke a single refresh token by id
 	 */
-	async revoke(id: string): Promise<void> {
+	async revoke(id: string, reason: RevokeReason, graceUntil?: Date): Promise<void> {
 		await db
 			.update(RefreshTokensTable)
-			.set({ revoked_at: new Date().toISOString() })
+			.set({
+				revoked_at: new Date().toISOString(),
+				revoked_reason: reason,
+				rotation_grace_until: graceUntil?.toISOString() ?? null,
+			})
 			.where(and(eq(RefreshTokensTable.id, id), isNull(RefreshTokensTable.revoked_at)));
 	}
 
 	/**
 	 * Revoke all active refresh tokens for a user (used on reuse detection / logout)
 	 */
-	async revokeAllForUser(userId: string): Promise<void> {
+	async revokeAllForUser(userId: string, reason: RevokeReason = 'security'): Promise<void> {
 		await db
 			.update(RefreshTokensTable)
-			.set({ revoked_at: new Date().toISOString() })
+			.set({ revoked_at: new Date().toISOString(), revoked_reason: reason, rotation_grace_until: null })
 			.where(and(eq(RefreshTokensTable.user_id, userId), isNull(RefreshTokensTable.revoked_at)));
 	}
 }

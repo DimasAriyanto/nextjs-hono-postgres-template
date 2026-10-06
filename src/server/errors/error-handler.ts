@@ -47,6 +47,9 @@ function createErrorResponse(
  */
 export function errorHandler(err: Error, c: Context) {
 	console.error('[ERR]:', err);
+	if (process.env.NODE_ENV !== 'production' && err.stack) {
+		console.error(err.stack);
+	}
 
 	// Handle AppError and its subclasses
 	if (err instanceof AppError) {

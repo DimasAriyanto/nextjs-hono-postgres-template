@@ -12,6 +12,7 @@ import { env } from '@/server/env';
 // Without this, an unbounded request body (e.g. a giant JSON array) gets fully
 // buffered in memory before any route-level validation ever sees it.
 const MAX_BODY_SIZE = (Number(process.env.UPLOAD_MAX_VIDEO_SIZE) || 50 * 1024 * 1024) + 5 * 1024 * 1024;
+const enforceBodyLimit = bodyLimit({ maxSize: MAX_BODY_SIZE });
 
 const app = new Hono()
 	.basePath('/api')
@@ -25,7 +26,14 @@ const app = new Hono()
 	// Defense-in-depth alongside the SameSite=Strict auth cookies: rejects requests
 	// whose Origin/Sec-Fetch-Site header doesn't match our own origin.
 	.use(csrf({ origin: env.NEXT_PUBLIC_APP_URL }))
-	.use(bodyLimit({ maxSize: MAX_BODY_SIZE }))
+	// Refresh has no request body. Skipping bodyLimit here avoids reconstructing the
+	// platform Request object in Next's App Router runtime before auth can refresh.
+	.use(async (c, next) => {
+		if (c.req.method === 'POST' && c.req.path === '/api/v1/auths/refresh') {
+			return next();
+		}
+		return enforceBodyLimit(c, next);
+	})
 	.onError(errorHandler);
 
 // Main Routes v1.0

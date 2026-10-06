@@ -12,6 +12,8 @@ import { env } from '@/server/env';
 const ACCESS_TOKEN_TTL_SECONDS = Number(process.env.ACCESS_TOKEN_TTL) || 60 * 15; // default: 15 minutes
 const REFRESH_TOKEN_TTL_SECONDS = Number(process.env.REFRESH_TOKEN_TTL) || 60 * 60 * 24 * 30; // default: 30 days
 
+const REFRESH_REUSE_GRACE_SECONDS = 10;
+
 const googleClient = env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? new OAuth2Client(env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) : null;
 
 async function resolvePermissions(userId: string, isAdmin: boolean): Promise<string[]> {
@@ -365,8 +367,13 @@ export class AuthService {
 		}
 
 		if (row.revoked_at) {
-			// Reuse of an already-rotated/revoked token — treat as compromised
-			await refreshTokenRepository.revokeAllForUser(row.user_id);
+			const graceUntil = row.rotation_grace_until ? new Date(row.rotation_grace_until).getTime() : 0;
+			if (row.revoked_reason === 'rotation' && graceUntil > Date.now()) {
+				return this.issueRefreshTokens(row.user_id);
+			}
+
+			// Reuse outside the rotation grace window is treated as compromise.
+			await refreshTokenRepository.revokeAllForUser(row.user_id, 'security');
 			throw AuthError.tokenInvalid();
 		}
 
@@ -374,9 +381,13 @@ export class AuthService {
 			throw AuthError.tokenExpired();
 		}
 
-		await refreshTokenRepository.revoke(row.id);
+		await refreshTokenRepository.revoke(row.id, 'rotation', new Date(Date.now() + REFRESH_REUSE_GRACE_SECONDS * 1000));
 
-		const user = await userRepository.findByIdWithRoles(row.user_id);
+		return this.issueRefreshTokens(row.user_id);
+	}
+
+	private async issueRefreshTokens(userId: string) {
+		const user = await userRepository.findByIdWithRoles(userId);
 		if (!user) {
 			throw new NotFoundError('User');
 		}
@@ -404,7 +415,7 @@ export class AuthService {
 		const row = await refreshTokenRepository.findByHash(hash);
 
 		if (row && !row.revoked_at) {
-			await refreshTokenRepository.revoke(row.id);
+			await refreshTokenRepository.revoke(row.id, 'logout');
 		}
 	}
 
@@ -455,7 +466,7 @@ export class AuthService {
 		await userRepository.updateForgotPasswordToken(user.id, null, null);
 
 		// Force re-login everywhere — a password reset likely means the old password was compromised
-		await refreshTokenRepository.revokeAllForUser(user.id);
+		await refreshTokenRepository.revokeAllForUser(user.id, 'security');
 
 		return { message: 'Password has been reset successfully' };
 	}
@@ -469,7 +480,7 @@ export class AuthService {
 			secret: env.APP_COOKIE_KEY,
 			options: {
 				path: '/',
-				secure: true,
+				secure: process.env.NODE_ENV === 'production',
 				httpOnly: true,
 				maxAge: ACCESS_TOKEN_TTL_SECONDS,
 				sameSite: 'Strict' as const,
@@ -487,7 +498,7 @@ export class AuthService {
 			secret: env.APP_COOKIE_KEY,
 			options: {
 				path: '/',
-				secure: true,
+				secure: process.env.NODE_ENV === 'production',
 				httpOnly: true,
 				maxAge: REFRESH_TOKEN_TTL_SECONDS,
 				sameSite: 'Strict' as const,

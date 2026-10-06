@@ -11,6 +11,8 @@ export const RefreshTokensTable = pgTable('refresh_tokens', {
 	token_hash: t.varchar('token_hash', { length: 255 }).unique().notNull(),
 	expires_at: t.timestamp('expires_at', { mode: 'string' }).notNull(),
 	revoked_at: t.timestamp('revoked_at', { mode: 'string' }),
+	revoked_reason: t.varchar('revoked_reason', { length: 20 }),
+	rotation_grace_until: t.timestamp('rotation_grace_until', { mode: 'string' }),
 	created_at: t.timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
 });
 
