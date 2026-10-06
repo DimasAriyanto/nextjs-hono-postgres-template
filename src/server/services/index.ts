@@ -9,3 +9,4 @@ export * from './article-category.service';
 export * from './gallery.service';
 export * from './setting.service';
 export * from './currency.service';
+export * from './faq.service';

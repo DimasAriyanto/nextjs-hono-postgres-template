@@ -7,3 +7,4 @@ export * from './article-category.repository';
 export * from './gallery.repository';
 export * from './setting.repository';
 export * from './refresh-token.repository';
+export * from './faq.repository';

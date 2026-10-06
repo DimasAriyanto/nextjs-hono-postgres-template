@@ -17,7 +17,7 @@ export function HomeWrapper({ settings }: HomeWrapperProps) {
 
 			<GallerySection />
 
-			<FaqSection faqs={settings.faqs} />
+			<FaqSection />
 		</>
 	);
 }

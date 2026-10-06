@@ -25,6 +25,9 @@ export * from './article-category';
 // Gallery
 export * from './gallery';
 
+// Faq
+export * from './faq';
+
 // Setting
 export * from './setting';
 

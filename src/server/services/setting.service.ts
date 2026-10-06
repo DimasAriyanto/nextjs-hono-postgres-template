@@ -42,7 +42,6 @@ const DEFAULTS: TSetting = {
 	timezone: 'Asia/Jakarta',
 	locale: 'en-US',
 	currency: 'IDR',
-	faqs: [],
 	terms_of_service: null,
 	privacy_policy: null,
 	primary_color: null,
@@ -62,7 +61,6 @@ const DEFAULTS: TSetting = {
 		about_content: { id: null, en: null },
 		terms_of_service: { id: null, en: null },
 		privacy_policy: { id: null, en: null },
-		faqs: { id: [], en: [] },
 		banners: { id: [], en: [] },
 		whatsapp_welcome_message: { id: null, en: null },
 		whatsapp_greetings: { id: [], en: [] },
@@ -73,7 +71,7 @@ const DEFAULTS: TSetting = {
 export class SettingService {
 	/**
 	 * Get all settings, assembled from key/value rows with defaults for anything not yet set.
-	 * Translatable keys (about_content, terms_of_service, privacy_policy, faqs, banners) are
+	 * Translatable keys (about_content, terms_of_service, privacy_policy, banners) are
 	 * resolved for `contentLocale` — defaulting to the admin-configured default content locale
 	 * (Settings > Regional > Default Language, itself defaulting to `DEFAULT_CONTENT_LOCALE` env
 	 * var) when omitted — falling back to that same default locale, then to defaults. The full
@@ -112,7 +110,6 @@ export class SettingService {
 			timezone: global(SETTING_KEYS.TIMEZONE, DEFAULTS.timezone),
 			locale: global(SETTING_KEYS.LOCALE, DEFAULTS.locale),
 			currency: global(SETTING_KEYS.CURRENCY, DEFAULTS.currency),
-			faqs: resolved(SETTING_KEYS.FAQS, DEFAULTS.faqs),
 			terms_of_service: resolved(SETTING_KEYS.TERMS_OF_SERVICE, DEFAULTS.terms_of_service),
 			privacy_policy: resolved(SETTING_KEYS.PRIVACY_POLICY, DEFAULTS.privacy_policy),
 			primary_color: global(SETTING_KEYS.PRIMARY_COLOR, DEFAULTS.primary_color) || DEFAULTS.primary_color,
@@ -132,7 +129,6 @@ export class SettingService {
 				about_content: allLocales(SETTING_KEYS.ABOUT_CONTENT, DEFAULTS.about_content),
 				terms_of_service: allLocales(SETTING_KEYS.TERMS_OF_SERVICE, DEFAULTS.terms_of_service),
 				privacy_policy: allLocales(SETTING_KEYS.PRIVACY_POLICY, DEFAULTS.privacy_policy),
-				faqs: allLocales(SETTING_KEYS.FAQS, DEFAULTS.faqs),
 				banners: allLocales(SETTING_KEYS.BANNERS, DEFAULTS.banners),
 				whatsapp_welcome_message: allLocales(SETTING_KEYS.WHATSAPP_WELCOME_MESSAGE, DEFAULTS.whatsapp_welcome_message),
 				whatsapp_greetings: allLocales(SETTING_KEYS.WHATSAPP_GREETINGS, DEFAULTS.whatsapp_greetings),

@@ -1,6 +1,9 @@
-import type { TFaqItem } from '@/contracts/setting';
+interface TFaqSeedItem {
+	question: string;
+	answer: string;
+}
 
-export const faqsEn: TFaqItem[] = [
+export const faqsEn: TFaqSeedItem[] = [
 	{
 		question: 'What is this template built with?',
 		answer:
@@ -32,7 +35,7 @@ export const faqsEn: TFaqItem[] = [
 	},
 ];
 
-export const faqsId: TFaqItem[] = [
+export const faqsId: TFaqSeedItem[] = [
 	{
 		question: 'Template ini dibuat dengan apa?',
 		answer:

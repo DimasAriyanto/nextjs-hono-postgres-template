@@ -71,6 +71,13 @@
       "when": 1788403427828,
       "tag": "0009_refresh_rotation_grace",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788403427829,
+      "tag": "0010_faqs_entity",
+      "breakpoints": true
     }
   ]
 }

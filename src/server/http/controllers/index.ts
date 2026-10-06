@@ -10,3 +10,4 @@ export * from './article-categories.controller';
 export * from './galleries.controller';
 export * from './settings.controller';
 export * from './currency.controller';
+export * from './faqs.controller';

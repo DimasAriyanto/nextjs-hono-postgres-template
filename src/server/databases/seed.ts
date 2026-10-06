@@ -116,8 +116,6 @@ export async function seed() {
 	// Translatable keys get one row per content locale so switching the site language
 	// actually shows different content (see AppSettingsTable.locale / TRANSLATABLE_SETTING_KEYS).
 	const settingsSeed: { key: string; locale: 'id' | 'en'; value: unknown }[] = [
-		{ key: SETTING_KEYS.FAQS, locale: 'en', value: faqsEn },
-		{ key: SETTING_KEYS.FAQS, locale: 'id', value: faqsId },
 		{ key: SETTING_KEYS.ABOUT_CONTENT, locale: 'en', value: aboutContentHtmlEn },
 		{ key: SETTING_KEYS.ABOUT_CONTENT, locale: 'id', value: aboutContentHtmlId },
 		{ key: SETTING_KEYS.TERMS_OF_SERVICE, locale: 'en', value: termsOfServiceHtmlEn },
@@ -146,6 +144,17 @@ export async function seed() {
 		.returning();
 
 	console.log('settings: ', insertedSettings);
+
+	const insertedFaqs = await db
+		.insert(schema.FaqsTable)
+		.values([
+			...faqsEn.map((faq, index) => ({ ...faq, locale: 'en', sort_order: index })),
+			...faqsId.map((faq, index) => ({ ...faq, locale: 'id', sort_order: index })),
+		])
+		.onConflictDoNothing()
+		.returning();
+
+	console.log('faqs: ', insertedFaqs);
 
 	// Global (non-translatable) settings
 	const globalSettingsSeed: { key: string; value: unknown }[] = [

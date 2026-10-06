@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Building2, Contact, GalleryHorizontal, Globe2, HelpCircle, Info, Loader2, Palette, Scale, Search } from 'lucide-react';
+import { Building2, Contact, GalleryHorizontal, Globe2, Info, Loader2, Palette, Scale, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,7 +20,6 @@ import { AboutTab } from './tabs/about-tab';
 import { AppearanceTab } from './tabs/appearance-tab';
 import { BannerTab } from './tabs/banner-tab';
 import { ContactTab } from './tabs/contact-tab';
-import { FaqTab } from './tabs/faq-tab';
 import { GeneralTab } from './tabs/general-tab';
 import { LegalTab } from './tabs/legal-tab';
 import { RegionalTab } from './tabs/regional-tab';
@@ -73,7 +72,6 @@ export function SettingWrapper() {
 				about_content: { id: '', en: '' },
 				terms_of_service: { id: '', en: '' },
 				privacy_policy: { id: '', en: '' },
-				faqs: { id: [], en: [] },
 				banners: { id: [], en: [] },
 				whatsapp_welcome_message: { id: '', en: '' },
 				whatsapp_greetings: { id: [], en: [] },
@@ -250,10 +248,6 @@ export function SettingWrapper() {
 									<GalleryHorizontal className="size-3.5 shrink-0" />
 									<span>Banner</span>
 								</TabsTrigger>
-								<TabsTrigger value="faq" className="gap-1.5">
-									<HelpCircle className="size-3.5 shrink-0" />
-									<span>FAQ</span>
-								</TabsTrigger>
 								<TabsTrigger value="legal" className="gap-1.5">
 									<Scale className="size-3.5 shrink-0" />
 									<span>Legal</span>
@@ -302,10 +296,6 @@ export function SettingWrapper() {
 								pendingFiles={bannerPendingFiles[contentLocale]}
 								onPendingFilesChange={(files) => setBannerPendingFiles((prev) => ({ ...prev, [contentLocale]: files }))}
 							/>
-						</TabsContent>
-
-						<TabsContent value="faq">
-							<FaqTab form={form} contentLocale={contentLocale} onContentLocaleChange={setContentLocale} />
 						</TabsContent>
 
 						<TabsContent value="legal">

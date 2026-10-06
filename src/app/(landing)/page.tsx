@@ -2,8 +2,9 @@ import type { Metadata } from 'next';
 import { getLocale } from 'next-intl/server';
 import { HomeWrapper } from '@/features/home';
 import { getSettings } from '@/features/setting/apis/setting.api';
+import { getPublicFaqs } from '@/features/faq/apis/faq.api';
 import { toJsonLdScript } from '@/libs/seo';
-import type { TContentLocale, TFaqItem } from '@/contracts';
+import type { TContentLocale, TFaq } from '@/contracts';
 
 export const metadata: Metadata = {
 	alternates: { canonical: '/' },
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 /** `FAQPage` JSON-LD so Google can render each question directly in search results. */
-function buildFaqJsonLd(faqs: TFaqItem[]) {
+function buildFaqJsonLd(faqs: TFaq[]) {
 	return {
 		'@context': 'https://schema.org',
 		'@type': 'FAQPage',
@@ -28,14 +29,17 @@ function buildFaqJsonLd(faqs: TFaqItem[]) {
 
 export default async function Page() {
 	const locale = await getLocale();
-	const { data } = await getSettings(locale as TContentLocale);
+	const [{ data }, { data: faqs }] = await Promise.all([
+		getSettings(locale as TContentLocale),
+		getPublicFaqs(locale as TContentLocale),
+	]);
 
 	return (
 		<>
-			{data.faqs.length > 0 && (
+			{faqs.length > 0 && (
 				<script
 					type="application/ld+json"
-					dangerouslySetInnerHTML={{ __html: toJsonLdScript(buildFaqJsonLd(data.faqs)) }}
+					dangerouslySetInnerHTML={{ __html: toJsonLdScript(buildFaqJsonLd(faqs)) }}
 				/>
 			)}
 			<HomeWrapper settings={data} />

@@ -10,6 +10,7 @@ import { articleCategoriesRoutes } from './article-categories.routes';
 import { galleriesRoutes } from './galleries.routes';
 import { settingsRoutes } from './settings.routes';
 import { currencyRoutes } from './currency.routes';
+import { faqsRoutes } from './faqs.routes';
 
 // Mount routes (chained so the type accumulates for Hono RPC client inference)
 export const apiRoutes = new Hono()
@@ -23,6 +24,7 @@ export const apiRoutes = new Hono()
 	.route('/article-categories', articleCategoriesRoutes)
 	.route('/galleries', galleriesRoutes)
 	.route('/settings', settingsRoutes)
-	.route('/currency', currencyRoutes);
+	.route('/currency', currencyRoutes)
+	.route('/faqs', faqsRoutes);
 
-export { authRoutes, usersRoutes, rolesRoutes, permissionsRoutes, notificationRoutes, uploadRoutes, articlesRoutes, articleCategoriesRoutes, galleriesRoutes, settingsRoutes, currencyRoutes };
+export { authRoutes, usersRoutes, rolesRoutes, permissionsRoutes, notificationRoutes, uploadRoutes, articlesRoutes, articleCategoriesRoutes, galleriesRoutes, settingsRoutes, currencyRoutes, faqsRoutes };

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import {
+  HelpCircle,
   Images,
   LayoutDashboard,
   Newspaper,
@@ -70,6 +71,12 @@ const menuGroups: MenuGroup[] = [
         url: "/gundala-admin/d/gallery",
         icon: Images,
         permission: "menu.gallery.view",
+      },
+      {
+        title: "FAQ",
+        url: "/gundala-admin/d/faq",
+        icon: HelpCircle,
+        permission: "menu.faq.view",
       },
     ],
   },

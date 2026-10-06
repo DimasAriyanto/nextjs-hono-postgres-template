@@ -14,7 +14,6 @@ export const SETTING_GROUPS = {
 	GENERAL: 'general',
 	CONTACT: 'contact',
 	REGIONAL: 'regional',
-	FAQ: 'faq',
 	LEGAL: 'legal',
 	APPEARANCE: 'appearance',
 	BANNER: 'banner',
@@ -37,7 +36,6 @@ export const SETTING_KEYS = {
 	TIMEZONE: 'timezone',
 	LOCALE: 'locale',
 	CURRENCY: 'currency',
-	FAQS: 'faqs',
 	TERMS_OF_SERVICE: 'terms_of_service',
 	PRIVACY_POLICY: 'privacy_policy',
 	PRIMARY_COLOR: 'primary_color',
@@ -72,7 +70,6 @@ export const SETTING_KEY_GROUP_MAP: Record<TSettingKey, TSettingGroup> = {
 	[SETTING_KEYS.TIMEZONE]: SETTING_GROUPS.REGIONAL,
 	[SETTING_KEYS.LOCALE]: SETTING_GROUPS.REGIONAL,
 	[SETTING_KEYS.CURRENCY]: SETTING_GROUPS.REGIONAL,
-	[SETTING_KEYS.FAQS]: SETTING_GROUPS.FAQ,
 	[SETTING_KEYS.TERMS_OF_SERVICE]: SETTING_GROUPS.LEGAL,
 	[SETTING_KEYS.PRIVACY_POLICY]: SETTING_GROUPS.LEGAL,
 	[SETTING_KEYS.PRIMARY_COLOR]: SETTING_GROUPS.APPEARANCE,
@@ -95,7 +92,6 @@ export const TRANSLATABLE_SETTING_KEYS = [
 	SETTING_KEYS.ABOUT_CONTENT,
 	SETTING_KEYS.TERMS_OF_SERVICE,
 	SETTING_KEYS.PRIVACY_POLICY,
-	SETTING_KEYS.FAQS,
 	SETTING_KEYS.BANNERS,
 	SETTING_KEYS.WHATSAPP_WELCOME_MESSAGE,
 	SETTING_KEYS.WHATSAPP_GREETINGS,
@@ -114,13 +110,6 @@ export const socialLinkSchema = z.object({
 });
 
 export type TSocialLink = z.infer<typeof socialLinkSchema>;
-
-export const faqItemSchema = z.object({
-	question: z.string().min(1, 'Question is required'),
-	answer: z.string().min(1, 'Answer is required'),
-});
-
-export type TFaqItem = z.infer<typeof faqItemSchema>;
 
 export const BANNER_TEXT_ALIGNS = ['left', 'center', 'right'] as const;
 
@@ -173,7 +162,6 @@ export const settingTranslationsSchema = z.object({
 	about_content: z.record(z.enum(CONTENT_LOCALES), z.string().nullable()).optional(),
 	terms_of_service: z.record(z.enum(CONTENT_LOCALES), z.string().nullable()).optional(),
 	privacy_policy: z.record(z.enum(CONTENT_LOCALES), z.string().nullable()).optional(),
-	faqs: z.record(z.enum(CONTENT_LOCALES), z.array(faqItemSchema)).optional(),
 	banners: z.record(z.enum(CONTENT_LOCALES), z.array(bannerItemSchema)).optional(),
 	whatsapp_welcome_message: z.record(z.enum(CONTENT_LOCALES), z.string().nullable()).optional(),
 	whatsapp_greetings: z.record(z.enum(CONTENT_LOCALES), z.array(z.string())).optional(),
@@ -184,7 +172,7 @@ export type TSettingTranslations = z.infer<typeof settingTranslationsSchema>;
 
 /**
  * Update settings request schema — a partial patch over the known setting keys.
- * Translatable keys (about_content, terms_of_service, privacy_policy, faqs,
+ * Translatable keys (about_content, terms_of_service, privacy_policy,
  * banners) are sent via `translations`, not as flat fields.
  */
 export const updateSettingSchema = z.object({
@@ -232,7 +220,6 @@ export const settingSchema = z.object({
 	timezone: z.string(),
 	locale: z.string(),
 	currency: z.string(),
-	faqs: z.array(faqItemSchema),
 	terms_of_service: z.string().nullable(),
 	privacy_policy: z.string().nullable(),
 	primary_color: z.string().nullable(),

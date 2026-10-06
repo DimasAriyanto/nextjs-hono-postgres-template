@@ -5,3 +5,4 @@ export * from './articles.schema';
 export * from './galleries.schema';
 export * from './settings.schema';
 export * from './refresh-tokens.schema';
+export * from './faqs.schema';
