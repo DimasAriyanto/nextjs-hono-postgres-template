@@ -3,12 +3,15 @@ import { NextResponse } from 'next/server';
 import { generateSignedCookie } from 'hono/cookie';
 import { parseSigned } from 'hono/utils/cookie';
 import { authService } from '@/server/services/auth.service';
+import { env } from '@/server/env';
 
 function getReturnUrl(request: Request) {
+	// Anchor to the known app origin rather than `request.url` — behind Hostinger's
+	// reverse proxy the Host header isn't always the public domain.
+	const origin = env.NEXT_PUBLIC_APP_URL;
 	const requested = new URL(request.url).searchParams.get('returnTo') || '/';
-	const url = new URL(request.url);
-	const returnUrl = new URL(requested, url.origin);
-	return returnUrl.origin === url.origin ? returnUrl : new URL('/', url.origin);
+	const returnUrl = new URL(requested, origin);
+	return returnUrl.origin === new URL(origin).origin ? returnUrl : new URL('/', origin);
 }
 
 export async function GET(request: Request) {

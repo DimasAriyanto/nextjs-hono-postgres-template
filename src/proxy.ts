@@ -36,12 +36,15 @@ async function getTokenPayload(cookieValue: string | undefined): Promise<TokenPa
 
 export async function proxy(request: NextRequest) {
 	const pathname = request.nextUrl.pathname;
+	// Behind Hostinger's reverse proxy the Host header seen by `request.url` isn't always
+	// the public domain, so redirects must be anchored to the known app origin instead.
+	const origin = env.NEXT_PUBLIC_APP_URL;
 
 	const payload = await getTokenPayload(request.cookies.get('__x')?.value);
 
 	// Proxy stays a lightweight guard. The Route Handler owns refresh and cookie writes.
 	if (!payload && request.cookies.get('__rx')?.value) {
-		const refreshUrl = new URL('/auth/refresh', request.url);
+		const refreshUrl = new URL('/auth/refresh', origin);
 		refreshUrl.searchParams.set('returnTo', `${pathname}${request.nextUrl.search}`);
 		return NextResponse.redirect(refreshUrl);
 	}
@@ -55,20 +58,20 @@ export async function proxy(request: NextRequest) {
 
 	// Not logged in → trying to access admin area
 	if (!isAuthenticated && isAdminRoute) {
-		const response = NextResponse.redirect(new URL('/login', request.url));
+		const response = NextResponse.redirect(new URL('/login', origin));
 		response.cookies.delete('__x');
 		return response;
 	}
 
 	// Logged in but no admin panel access → trying to access admin area
 	if (isAuthenticated && !hasAdminAccess && isAdminRoute) {
-		return NextResponse.redirect(new URL('/', request.url));
+		return NextResponse.redirect(new URL('/', origin));
 	}
 
 	// Already logged in → trying to access auth pages
 	if (isAuthenticated && isAuthPage) {
 		const destination = hasAdminAccess ? '/gundala-admin/d' : '/';
-		return NextResponse.redirect(new URL(destination, request.url));
+		return NextResponse.redirect(new URL(destination, origin));
 	}
 
 	return NextResponse.next({ request });
